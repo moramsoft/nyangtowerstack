@@ -103,6 +103,8 @@
   }
 
   function initGame() {
+    initAudio();
+    updateBgmPlayback();
     fallingPieces = [];
     floatingTexts.length = 0;
     expandRings.length = 0;
@@ -1391,6 +1393,8 @@
     playCatSad,
     playNormalTap,
     SCALE_FREQS,
+    initAudio: (typeof initAudio === 'function' ? initAudio : () => {}),
+    updateBgmPlayback: (typeof updateBgmPlayback === 'function' ? updateBgmPlayback : () => {}),
     getMusicalStep: () => musicalStep,
     getAudioContext: () => (typeof audioCtx !== 'undefined' ? audioCtx : null),
     isBgmPlaying: () => (typeof bgmTimer !== 'undefined' ? !!bgmTimer : false),

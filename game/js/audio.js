@@ -47,9 +47,10 @@
     [196.00, 293.66, 392.00, 523.25]  // G3, D4, G4, C5 (G sus4)
   ];
 
-  function playBgmNote(freq, time, dur = 0.45) {
+  function playBgmNote(freq, time, dur = 0.45, isRoot = false) {
     if (!audioCtx) return;
     try {
+      // 1. Primary Marimba Note (warm triangle tone)
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       const filter = audioCtx.createBiquadFilter();
@@ -58,10 +59,10 @@
       osc.frequency.setValueAtTime(freq, time);
 
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(750, time);
+      filter.frequency.setValueAtTime(1150, time);
 
       gain.gain.setValueAtTime(0.0001, time);
-      gain.gain.linearRampToValueAtTime(0.04, time + 0.04);
+      gain.gain.linearRampToValueAtTime(0.16, time + 0.035);
       gain.gain.exponentialRampToValueAtTime(0.0001, time + dur);
 
       osc.connect(filter);
@@ -70,6 +71,36 @@
 
       osc.start(time);
       osc.stop(time + dur);
+
+      // 2. Wooden Bar Overtone Resonance (authentic marimba clink)
+      const oscHarm = audioCtx.createOscillator();
+      const gainHarm = audioCtx.createGain();
+      oscHarm.type = 'sine';
+      oscHarm.frequency.setValueAtTime(freq * 2.76, time);
+      gainHarm.gain.setValueAtTime(0.0001, time);
+      gainHarm.gain.linearRampToValueAtTime(0.045, time + 0.02);
+      gainHarm.gain.exponentialRampToValueAtTime(0.0001, time + 0.16);
+
+      oscHarm.connect(gainHarm);
+      gainHarm.connect(audioCtx.destination);
+      oscHarm.start(time);
+      oscHarm.stop(time + 0.17);
+
+      // 3. Gentle Root Bass Pad on Chord Downbeat (creates cozy musical depth)
+      if (isRoot) {
+        const bassOsc = audioCtx.createOscillator();
+        const bassGain = audioCtx.createGain();
+        bassOsc.type = 'sine';
+        bassOsc.frequency.setValueAtTime(freq * 0.5, time);
+        bassGain.gain.setValueAtTime(0.0001, time);
+        bassGain.gain.linearRampToValueAtTime(0.09, time + 0.08);
+        bassGain.gain.exponentialRampToValueAtTime(0.0001, time + 1.2);
+
+        bassOsc.connect(bassGain);
+        bassGain.connect(audioCtx.destination);
+        bassOsc.start(time);
+        bassOsc.stop(time + 1.25);
+      }
     } catch (e) { /* ignore */ }
   }
 
@@ -92,7 +123,7 @@
       const noteIdx = bgmStep % 4;
       const chord = BGM_CHORDS[chordIdx];
       const freq = chord[noteIdx];
-      playBgmNote(freq, now + 0.05, 0.42);
+      playBgmNote(freq, now + 0.04, 0.44, noteIdx === 0);
       bgmStep = (bgmStep + 1) % 16;
     }
 
@@ -109,7 +140,19 @@
 
   function updateBgmPlayback() {
     if (isBgmEnabled() && !(typeof document !== 'undefined' && document.hidden)) {
-      if (audioCtx && audioCtx.state === 'running') startBgm();
+      if (audioCtx) {
+        if (audioCtx.state === 'running') {
+          startBgm();
+        } else if (audioCtx.state === 'suspended') {
+          try {
+            audioCtx.resume().then(() => {
+              if (isBgmEnabled() && !(typeof document !== 'undefined' && document.hidden)) {
+                startBgm();
+              }
+            }).catch(() => {});
+          } catch (e) {}
+        }
+      }
     } else {
       stopBgm();
     }
@@ -131,7 +174,7 @@
       }
     } else {
       // User returned to game tab -> Resume AudioContext & BGM
-      if (audioCtx && audioCtx.state === 'suspended' && wasAudioSuspendedByVisibility) {
+      if (audioCtx && (audioCtx.state === 'suspended' || wasAudioSuspendedByVisibility)) {
         wasAudioSuspendedByVisibility = false;
         try {
           audioCtx.resume().then(() => {
@@ -165,6 +208,13 @@
         updateBgmPlayback();
       }
     });
+
+    // Ensure first user interaction resumes AudioContext and starts ambient BGM
+    ['pointerdown', 'touchstart', 'keydown'].forEach((evt) => {
+      window.addEventListener(evt, () => {
+        initAudio();
+      }, { capture: true, passive: true });
+    });
   }
 
   const mascotAreaEl = document.getElementById('mascot-area');
@@ -183,12 +233,17 @@
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (AudioContextClass) audioCtx = new AudioContextClass();
     }
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
     if (audioCtx) {
       preloadRealCatAudio();
-      updateBgmPlayback();
+      if (audioCtx.state === 'suspended') {
+        try {
+          audioCtx.resume().then(() => {
+            updateBgmPlayback();
+          }).catch(() => {});
+        } catch (e) {}
+      } else {
+        updateBgmPlayback();
+      }
     }
   }
 

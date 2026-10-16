@@ -34,6 +34,7 @@ async function runTestSuite() {
   const chromeProc = spawn(chromePath, [
     '--headless=new',
     '--disable-gpu',
+    '--autoplay-policy=no-user-gesture-required',
     `--remote-debugging-port=${port}`,
     '--no-first-run',
     '--no-default-browser-check',
@@ -130,7 +131,15 @@ async function runTestSuite() {
 
     console.log(`Navigating to http://127.0.0.1:8088/index.html ...\n`);
     await send('Page.navigate', { url: 'http://127.0.0.1:8088/index.html' });
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(r => setTimeout(r, 1500));
+    await evaluate(() => {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch (e) {}
+    });
+    await send('Page.navigate', { url: 'http://127.0.0.1:8088/index.html' });
+    await new Promise(r => setTimeout(r, 1500));
 
     console.log(`${BOLD}[PHASE 3] Executing Scenario Test Cases...${RESET}`);
 
@@ -167,6 +176,12 @@ async function runTestSuite() {
         if (!btn) return { error: 'No continue button' };
         btn.click();
         await new Promise(r => setTimeout(r, 150));
+        const readyModal = document.getElementById('ready-modal');
+        if (readyModal && window.getComputedStyle(readyModal).display !== 'none') {
+          const btnReadyStart = document.getElementById('btn-ready-start');
+          if (btnReadyStart) btnReadyStart.click();
+          await new Promise(r => setTimeout(r, 150));
+        }
         const start = document.getElementById('start-screen');
         return {
           gameState: window.__game.getGameState(),
@@ -566,10 +581,15 @@ async function runTestSuite() {
     try {
       const res = await evaluate(async () => {
         window.__game.startStage(0);
-        await new Promise(r => setTimeout(r, 200));
+        window.__gameAudio.initAudio();
+        const ctx = window.__gameAudio.getAudioContext();
+        if (ctx && ctx.state === 'suspended') {
+          await ctx.resume().catch(() => {});
+        }
+        window.__gameAudio.updateBgmPlayback();
+        await new Promise(r => setTimeout(r, 250));
 
         const bgmBefore = window.__gameAudio.isBgmPlaying();
-        const ctx = window.__gameAudio.getAudioContext();
         const ctxStateBefore = ctx ? ctx.state : null;
 
         // Simulate switching away from the tab
@@ -582,7 +602,7 @@ async function runTestSuite() {
         // Simulate returning to the tab
         Object.defineProperty(document, 'hidden', { value: false, configurable: true });
         window.__gameAudio.handleVisibilityChange();
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 250));
 
         const bgmRestored = window.__gameAudio.isBgmPlaying();
         const ctxStateRestored = ctx ? ctx.state : null;
@@ -597,9 +617,9 @@ async function runTestSuite() {
         };
       });
 
-      const passed = res.bgmHidden === false;
+      const passed = res.bgmBefore === true && res.bgmHidden === false && res.bgmRestored === true;
       recordResult('Scenario 14: Tab Visibility Background Audio Pause & Resume', passed,
-        `Hidden(Bgm:${res.bgmHidden}, Ctx:${res.ctxStateHidden}) | Restored(Bgm:${res.bgmRestored}, Ctx:${res.ctxStateRestored})`);
+        `Before(Bgm:${res.bgmBefore}) | Hidden(Bgm:${res.bgmHidden}, Ctx:${res.ctxStateHidden}) | Restored(Bgm:${res.bgmRestored}, Ctx:${res.ctxStateRestored})`);
     } catch (e) {
       recordResult('Scenario 14: Tab Visibility Background Audio Pause & Resume', false, e.message);
     }
