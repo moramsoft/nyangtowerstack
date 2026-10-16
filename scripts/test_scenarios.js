@@ -29,6 +29,7 @@ async function runTestSuite() {
 
   // Step 2: Launch Headless Chrome
   console.log(`${BOLD}[PHASE 2] Launching Chrome Headless & Connecting CDP...${RESET}`);
+  try { fs.rmSync('/tmp/stacktower-chrome-test', { recursive: true, force: true }); } catch (e) {}
   const chromePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   const port = 9232;
   const chromeProc = spawn(chromePath, [
@@ -122,6 +123,8 @@ async function runTestSuite() {
 
     await send('Page.enable');
     await send('Runtime.enable');
+    await send('Network.enable');
+    await send('Network.setCacheDisabled', { cacheDisabled: true });
     await send('Emulation.setDeviceMetricsOverride', {
       width: 430,
       height: 932,
@@ -457,17 +460,30 @@ async function runTestSuite() {
     try {
       await new Promise(r => setTimeout(r, 400));
       const initRes = await evaluate(async () => {
-        // Reset stage 20 played status for clean test
         const save = window.__game.getSave();
-        if (save.bonusPlayed) delete save.bonusPlayed[20];
-        if (save.bonusChuruEarned) delete save.bonusChuruEarned[20];
+        save.bonusPlayed = save.bonusPlayed || {};
+        save.bonusChuruEarned = save.bonusChuruEarned || {};
+        delete save.bonusPlayed[16];
+        delete save.bonusPlayed['16'];
+        delete save.bonusPlayed[20];
+        delete save.bonusPlayed['20'];
+        delete save.bonusChuruEarned[16];
+        delete save.bonusChuruEarned['16'];
+        delete save.bonusChuruEarned[20];
+        delete save.bonusChuruEarned['20'];
+        delete save.stars[16];
+        delete save.stars['16'];
         delete save.stars[20];
+        delete save.stars['20'];
+        for (let s = 0; s < 16; s++) {
+          save.stars[s] = Math.max(1, save.stars[s] || 2);
+        }
         window.__game.persist();
 
         const baseChuru = save.churu || 0;
 
-        // 1. Start Churu Fever stage (Stage 20 = 3-9)
-        window.__game.startStage(20);
+        // 1. Start Churu Fever stage (Stage 16 = 3-5 midpoint bonus)
+        window.__game.startStage(16);
         return {
           isBonus: window.__game.getCfg().stageType === 'bonus',
           initialHearts: window.__game.getBonusHearts()
@@ -498,7 +514,7 @@ async function runTestSuite() {
         const stateAfter3rdHit = window.__game.getGameState();
 
         const churuAfterFirstClear = window.__game.getSave().churu;
-        const playedAfterClear = window.__game.isBonusStageAlreadyPlayed(20);
+        const playedAfterClear = window.__game.isBonusStageAlreadyPlayed(16);
 
         // 3. Clear screen replay button must be hidden for bonus stages
         const replayBtn = document.getElementById('btn-retry-clear');
@@ -508,8 +524,8 @@ async function runTestSuite() {
         window.__game.retryCurrent();
         const stateAfterRetryAttempt = window.__game.getGameState();
 
-        // 5. Try starting stage 20 again via startStage: should be blocked & auto-skip
-        window.__game.startStage(20);
+        // 5. Try starting stage 16 again via startStage: should be blocked & auto-skip
+        window.__game.startStage(16);
         const currentCfgAfterSkip = window.__game.getCfg();
 
         // 6. Fail-safe check: If completeStage is called on a bonus stage with past record, 0 Churu added
@@ -518,8 +534,8 @@ async function runTestSuite() {
         window.__game.completeStage();
         const churuAfterGlitch = window.__game.getSave().churu;
 
-        // 7. Progression skip check: getNextPlayableStage from 20 skips to 21
-        const nextPlayable = window.__game.getNextPlayableStage(20);
+        // 7. Progression skip check: getNextPlayableStage from 16 skips to 17
+        const nextPlayable = window.__game.getNextPlayableStage(16);
 
         return {
           isBonus: cfg.stageType === 'bonus',
@@ -545,8 +561,8 @@ async function runTestSuite() {
         res.churuGained === 120 &&
         res.playedAfterClear === true &&
         res.replayHidden === true &&
-        res.nextPlayable === 21 &&
-        res.skippedStageId !== 20 &&
+        res.nextPlayable === 17 &&
+        res.skippedStageId !== 16 &&
         res.churuUnchangedOnGlitch === true;
 
       recordResult('Scenario 12: Churu Fever Once-Only Rule, Mouse Hazard Hearts & Auto-Skip', passed,

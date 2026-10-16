@@ -30,8 +30,13 @@
     const count = info.count;
     const def = WORLD_DEFS[w];
     const boss = (idx === count - 1);
-    const bonus = (count === 10 && idx === count - 2); // 9th stage in 10-stage worlds!
-    const m = (boss ? 1.2 : 0.5 + 0.5 * (idx / Math.max(1, count - 2))) * 0.75;
+    // Spread Bonus stages across the world to maintain engagement and avoid clustering with Boss stages:
+    // - 5-stage worlds (W1): Stage 3 (idx 2) is Bonus, Stage 5 (idx 4) is Boss
+    // - 7-stage worlds (W2): Stage 4 (idx 3) is Bonus, Stage 7 (idx 6) is Boss
+    // - 10-stage worlds (W3+): Midpoint stage 5 (idx 4) or stage 6 (idx 5) is Bonus, Stage 10 (idx 9) is Boss
+    const bonusIdx = (count <= 5) ? 2 : (count <= 7 ? 3 : (w % 2 === 0 ? 4 : 5));
+    const bonus = (idx === bonusIdx);
+    const m = (boss ? 1.2 : 0.5 + 0.5 * (idx / Math.max(1, count - 1))) * 0.75;
     const mods = Object.assign({}, def.mods);
 
     // Determine Stage Archetype (4-beat rhythm + Bonus + Boss)
