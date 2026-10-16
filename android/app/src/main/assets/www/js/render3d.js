@@ -770,7 +770,8 @@
   }
 
   function drawClimbingKitten(camY) {
-    if (typeof climbingKitten === 'undefined') return;
+    // Disabled per user request: 블럭 가운데 고양이 제거
+    return;
     if (cfg && cfg.stageType === 'boss') return; // Excluded in boss battles!
     if (typeof bonusActive !== 'undefined' && bonusActive) return;
     if (!tower || tower.length < 1) return;

@@ -32,9 +32,12 @@ async function runTestSuite() {
   const chromePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   const port = 9232;
   const chromeProc = spawn(chromePath, [
-    '--headless',
+    '--headless=new',
     '--disable-gpu',
     `--remote-debugging-port=${port}`,
+    '--no-first-run',
+    '--no-default-browser-check',
+    '--user-data-dir=/tmp/stacktower-chrome-test',
     'about:blank'
   ]);
 
@@ -54,11 +57,23 @@ async function runTestSuite() {
   }
 
   try {
-    const listRes = await fetch(`http://127.0.0.1:${port}/json`);
-    const pages = await listRes.json();
-    const targetPage = pages.find(p => p.type === 'page') || pages[0];
+    let pages = null;
+  for (let attempt = 0; attempt < 15; attempt++) {
+    try {
+      const listRes = await fetch(`http://127.0.0.1:${port}/json`);
+      pages = await listRes.json();
+      if (pages && pages.length > 0) break;
+    } catch (e) {
+      // wait for Chrome to listen
+    }
+    await new Promise(r => setTimeout(r, 400));
+  }
+  if (!pages || pages.length === 0) {
+    throw new Error(`Failed to connect to Chrome CDP on port ${port} after multiple attempts`);
+  }
+  const targetPage = pages.find(p => p.type === 'page') || pages[0];
 
-    const ws = new WebSocket(targetPage.webSocketDebuggerUrl);
+  const ws = new WebSocket(targetPage.webSocketDebuggerUrl);
     let msgId = 1;
     const pending = new Map();
     const uncaughtErrors = [];

@@ -1232,8 +1232,8 @@
       }
     }
 
-    // Climbing Kitten (draws on top face of current apex)
-    if (typeof drawClimbingKitten === 'function') drawClimbingKitten(cameraY);
+    // Climbing Kitten (disabled per user request)
+    // if (typeof drawClimbingKitten === 'function') drawClimbingKitten(cameraY);
 
     // 3D sparkles
     updateParticles(dt);
