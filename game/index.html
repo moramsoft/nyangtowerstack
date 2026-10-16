@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Meow Stack Tower 3D</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Meow Stack">
+  <meta name="theme-color" content="#151124">
+  <link rel="apple-touch-icon" href="assets/icon.png">
+  <link rel="manifest" href="manifest.json">
+  <!-- Modular Stylesheets -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/hud.css">
+  <link rel="stylesheet" href="css/modals.css">
+  <link rel="stylesheet" href="css/companions.css">
+  <link rel="stylesheet" href="css/gacha.css">
+  <link rel="stylesheet" href="css/boss.css">
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Boss Cat Dynamic Character (배경 가운데 거대 보스) -->
+    <div id="boss-container" style="display:none;">
+      <div id="boss-wrapper">
+        <div id="boss-actor" class="boss-actor boss-state-idle" title="Big Chonk 😾">
+          <svg id="boss-svg" viewBox="0 0 160 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bossFurGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop id="furStop1" offset="0%" stop-color="#ffa726"/>
+              <stop id="furStop2" offset="60%" stop-color="#fb8c00"/>
+              <stop id="furStop3" offset="100%" stop-color="#f57c00"/>
+            </linearGradient>
+            <linearGradient id="bossBellyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#fffde7"/>
+              <stop offset="100%" stop-color="#fff9c4"/>
+            </linearGradient>
+            <linearGradient id="bossCrownGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffe082"/>
+              <stop offset="40%" stop-color="#ffd54f"/>
+              <stop offset="100%" stop-color="#ffb300"/>
+            </linearGradient>
+            <linearGradient id="bossCloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#f3e5f5"/>
+              <stop offset="60%" stop-color="#e1bee7"/>
+              <stop offset="100%" stop-color="#ce93d8"/>
+            </linearGradient>
+            <radialGradient id="frenzyFlameGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffeb3b" stop-opacity="0.95"/>
+              <stop offset="50%" stop-color="#ff5722" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#d50000" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="bossShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity="0.35"/>
+            </filter>
+          </defs>
+
+          <!-- Frenzy Aura -->
+          <g id="boss-frenzy-aura" class="aura-layer" opacity="0">
+            <ellipse cx="80" cy="85" rx="66" ry="60" fill="url(#frenzyFlameGrad)"/>
+            <path class="flame-sparks" d="M 30 70 Q 25 45 35 30 Q 45 45 42 70 M 120 70 Q 135 45 125 30 Q 115 45 118 70 M 75 30 Q 80 10 85 30" fill="none" stroke="#ffeb3b" stroke-width="3" stroke-linecap="round"/>
+          </g>
+
+          <!-- Royal Magic Cloud Throne -->
+          <g id="boss-throne" class="cloud-layer">
+            <ellipse cx="80" cy="140" rx="56" ry="15" fill="url(#bossCloudGrad)" filter="url(#bossShadow)"/>
+            <ellipse cx="44" cy="136" rx="22" ry="12" fill="#ede7f6"/>
+            <ellipse cx="116" cy="136" rx="22" ry="12" fill="#ede7f6"/>
+            <ellipse cx="80" cy="135" rx="36" ry="12" fill="#ffffff" opacity="0.9"/>
+            <text x="36" y="142" font-size="10" fill="#ffd54f">★</text>
+            <text x="114" y="142" font-size="10" fill="#ffd54f">★</text>
+          </g>
+
+          <!-- Royal Red Cape -->
+          <g id="boss-cape" class="cape-layer">
+            <path d="M 40 78 C 22 95, 18 128, 32 135 C 44 126, 42 105, 48 88 Z" fill="#c62828" stroke="#8e0000" stroke-width="1.5"/>
+            <path d="M 120 78 C 138 95, 142 128, 128 135 C 116 126, 118 105, 112 88 Z" fill="#c62828" stroke="#8e0000" stroke-width="1.5"/>
+            <path d="M 24 120 Q 30 134 36 130" fill="none" stroke="#ffd700" stroke-width="2"/>
+            <path d="M 136 120 Q 130 134 124 130" fill="none" stroke="#ffd700" stroke-width="2"/>
+          </g>
+
+          <!-- Chunky Tabby Tail -->
+          <g id="boss-tail" class="tail-layer">
+            <path d="M 120 108 C 146 112, 158 92, 150 74 C 144 62, 134 68, 138 80 C 142 90, 134 100, 118 102 Z" fill="url(#bossFurGrad)" stroke="#e65100" stroke-width="1.5"/>
+            <path d="M 144 76 Q 148 80 146 84" stroke="#bf360c" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 138 86 Q 144 92 140 96" stroke="#bf360c" stroke-width="3" stroke-linecap="round"/>
+            <ellipse cx="147" cy="71" rx="6" ry="6" fill="#fff" opacity="0.8"/>
+          </g>
+
+          <!-- Chunky Cat Body -->
+          <g id="boss-body" class="body-layer">
+            <ellipse cx="80" cy="98" rx="48" ry="42" fill="url(#bossFurGrad)" stroke="#e65100" stroke-width="2"/>
+            <path d="M 34 88 Q 44 92 35 98" fill="#d84315"/>
+            <path d="M 33 104 Q 45 106 36 112" fill="#d84315"/>
+            <path d="M 126 88 Q 116 92 125 98" fill="#d84315"/>
+            <path d="M 127 104 Q 115 106 124 112" fill="#d84315"/>
+            <ellipse cx="80" cy="106" rx="34" ry="28" fill="url(#bossBellyGrad)"/>
+            <g transform="translate(71, 74) scale(0.9)">
+              <path d="M 2 8 C 6 4, 14 4, 18 8 C 14 12, 6 12, 2 8 Z M 18 8 L 22 4 L 22 12 Z" fill="#ffd700" stroke="#ff8f00" stroke-width="1.2"/>
+              <circle cx="6" cy="7.5" r="1" fill="#3e2723"/>
+            </g>
+            <ellipse cx="50" cy="108" rx="9" ry="8" fill="#fff" stroke="#ffa726" stroke-width="1.5"/>
+            <ellipse cx="110" cy="108" rx="9" ry="8" fill="#fff" stroke="#ffa726" stroke-width="1.5"/>
+            <circle cx="48" cy="109" r="1.5" fill="#ffab91"/>
+            <circle cx="52" cy="109" r="1.5" fill="#ffab91"/>
+            <circle cx="108" cy="109" r="1.5" fill="#ffab91"/>
+            <circle cx="112" cy="109" r="1.5" fill="#ffab91"/>
+          </g>
+
+          <!-- Big Round Head & Chubby Cheeks -->
+          <g id="boss-head" class="head-layer">
+            <g class="ears-group">
+              <polygon points="42,46 48,16 66,38" fill="#fb8c00" stroke="#e65100" stroke-width="2"/>
+              <polygon points="46,42 51,24 62,37" fill="#ffab91"/>
+              <polygon points="118,46 112,16 94,38" fill="#fb8c00" stroke="#e65100" stroke-width="2"/>
+              <polygon points="114,42 109,24 98,37" fill="#ffab91"/>
+            </g>
+            <ellipse cx="80" cy="58" rx="44" ry="34" fill="url(#bossFurGrad)" stroke="#e65100" stroke-width="2"/>
+            <ellipse cx="40" cy="64" rx="10" ry="12" fill="#ffa726"/>
+            <ellipse cx="120" cy="64" rx="10" ry="12" fill="#ffa726"/>
+            <ellipse cx="80" cy="68" rx="20" ry="14" fill="#fff"/>
+            <path d="M 72 32 L 80 44 L 88 32 M 76 28 L 80 36 L 84 28" fill="none" stroke="#d84315" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 32 64 L 56 66 M 30 70 L 56 70 M 34 76 L 56 73" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M 128 64 L 104 66 M 130 70 L 104 70 M 126 76 L 104 73" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+            <polygon points="76,64 84,64 80,68" fill="#ff7043"/>
+            <ellipse cx="56" cy="68" rx="6" ry="3.5" fill="#ff8a80" opacity="0.6"/>
+            <ellipse cx="104" cy="68" rx="6" ry="3.5" fill="#ff8a80" opacity="0.6"/>
+          </g>
+
+          <!-- Royal Golden Crown on Head -->
+          <g id="boss-crown" class="crown-layer">
+            <path d="M 64 26 L 68 10 L 75 20 L 80 6 L 85 20 L 92 10 L 96 26 Z" fill="url(#bossCrownGrad)" stroke="#ff8f00" stroke-width="1.8"/>
+            <circle cx="80" cy="16" r="3.2" fill="#e53935" stroke="#b71c1c" stroke-width="0.8"/>
+            <circle cx="70" cy="18" r="2" fill="#00e676"/>
+            <circle cx="90" cy="18" r="2" fill="#00e676"/>
+            <g class="crown-sparks" opacity="0">
+              <path d="M 80 0 L 80 4 M 94 4 L 91 7 M 66 4 L 69 7" stroke="#ffd700" stroke-width="2" stroke-linecap="round"/>
+            </g>
+          </g>
+
+          <!-- ==================== FACIAL EXPRESSIONS ==================== -->
+
+          <!-- 1. IDLE FACE (Confident / Smug observation) -->
+          <g id="face-idle">
+            <ellipse cx="64" cy="54" rx="6.5" ry="7.5" fill="#ffb300" stroke="#e65100" stroke-width="1"/>
+            <ellipse cx="64" cy="54" rx="2.5" ry="6.5" fill="#212121"/>
+            <circle cx="62" cy="51" r="2" fill="#fff"/>
+            <ellipse cx="96" cy="54" rx="6.5" ry="7.5" fill="#ffb300" stroke="#e65100" stroke-width="1"/>
+            <ellipse cx="96" cy="54" rx="2.5" ry="6.5" fill="#212121"/>
+            <circle cx="94" cy="51" r="2" fill="#fff"/>
+            <path d="M 73 70 Q 77 75 80 71 Q 83 75 87 70" fill="none" stroke="#3e2723" stroke-width="2.5" stroke-linecap="round"/>
+          </g>
+
+          <!-- 2. SMUG FACE (Laughing mockingly at player's mistake) -->
+          <g id="face-smug" style="display:none;">
+            <path d="M 58 56 Q 64 47 70 56" fill="none" stroke="#3e2723" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M 90 56 Q 96 47 102 56" fill="none" stroke="#3e2723" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M 57 47 Q 64 43 71 47" fill="none" stroke="#d84315" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M 89 47 Q 96 43 103 47" fill="none" stroke="#d84315" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M 103 56 C 107 56 109 59 107 63 C 105 66 102 63 103 56 Z" fill="#00e5ff"/>
+            <path d="M 71 70 Q 80 85 89 70 Z" fill="#c2185b" stroke="#3e2723" stroke-width="2"/>
+            <ellipse cx="80" cy="76" rx="5" ry="3" fill="#ff80ab"/>
+          </g>
+
+          <!-- 3. HURT FACE (Shocked/in pain from Critical / Perfect hit) -->
+          <g id="face-hurt" style="display:none;">
+            <path d="M 57 50 L 67 55 L 57 60" fill="none" stroke="#b71c1c" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M 103 50 L 93 55 L 103 60" fill="none" stroke="#b71c1c" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <ellipse cx="40" cy="46" rx="4" ry="7" fill="#00b0ff" transform="rotate(-20 40 46)"/>
+            <ellipse cx="120" cy="46" rx="4" ry="7" fill="#00b0ff" transform="rotate(20 120 46)"/>
+            <ellipse cx="80" cy="74" rx="8" ry="10" fill="#b71c1c" stroke="#3e2723" stroke-width="2"/>
+            <ellipse cx="80" cy="75" rx="5" ry="6" fill="#3e2723"/>
+            <text x="70" y="24" font-size="16">💥</text>
+          </g>
+
+          <!-- 4. FRENZY FACE (HP <= 50% Fiery rage) -->
+          <g id="face-frenzy" style="display:none;">
+            <ellipse cx="64" cy="54" rx="7" ry="7" fill="#d50000"/>
+            <ellipse cx="64" cy="54" rx="2" ry="7" fill="#ffeb3b"/>
+            <ellipse cx="96" cy="54" rx="7" ry="7" fill="#d50000"/>
+            <ellipse cx="96" cy="54" rx="2" ry="7" fill="#ffeb3b"/>
+            <path d="M 74 38 L 78 38 M 76 36 L 76 40 M 74 36 L 78 40 M 78 36 L 74 40" stroke="#d50000" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 71 70 Q 80 66 89 70" fill="none" stroke="#3e2723" stroke-width="2.5"/>
+            <polygon points="74,70 76,77 78,70" fill="#fff"/>
+            <polygon points="82,70 84,77 86,70" fill="#fff"/>
+            <text x="32" y="22" font-size="12">♨️</text>
+            <text x="114" y="22" font-size="12">♨️</text>
+          </g>
+
+          <!-- 5. DEFEAT FACE (Completely knocked out / White flag) -->
+          <g id="face-defeat" style="display:none;">
+            <path d="M 64 54 m -6,0 a 6,6 0 1,0 12,0 a 4,4 0 1,0 -8,0 a 2,2 0 1,0 4,0" fill="none" stroke="#212121" stroke-width="2" stroke-linecap="round"/>
+            <path d="M 96 54 m -6,0 a 6,6 0 1,0 12,0 a 4,4 0 1,0 -8,0 a 2,2 0 1,0 4,0" fill="none" stroke="#212121" stroke-width="2" stroke-linecap="round"/>
+            <path d="M 61 60 L 61 88" stroke="#00b0ff" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+            <path d="M 99 60 L 99 88" stroke="#00b0ff" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+            <path d="M 73 75 Q 77 71 80 75 Q 83 79 87 75" fill="none" stroke="#3e2723" stroke-width="3" stroke-linecap="round"/>
+            <g class="surrender-flag">
+              <line x1="44" y1="108" x2="22" y2="34" stroke="#ffffff" stroke-width="2.5"/>
+              <polygon points="22,34 2,46 22,58" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
+              <text x="6" y="50" font-size="10">🏳️</text>
+            </g>
+            <text x="74" y="10" font-size="15" class="dizzy-star">💫</text>
+          </g>
+
+          <!-- 6. VICTORY FACE (Boss wins / Player Game Over) -->
+          <g id="face-victory" style="display:none;">
+            <text x="56" y="58" font-size="16" fill="#ffd700">★</text>
+            <text x="88" y="58" font-size="16" fill="#ffd700">★</text>
+            <path d="M 70 69 Q 80 86 90 69 Z" fill="#d81b60" stroke="#3e2723" stroke-width="2"/>
+            <ellipse cx="80" cy="77" rx="6" ry="3.5" fill="#ff4081"/>
+            <g transform="translate(108, 68) scale(1.1)">
+              <text x="0" y="0" font-size="22">🐟</text>
+              <text x="14" y="-8" font-size="14">✨</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="game-canvas"></canvas>
+
+  <!-- Foreground Boss Speech Bubble & Screen Flash -->
+  <div id="boss-speech"></div>
+  <div id="flash-overlay"></div>
+
+  
+  <!-- Cinematic Boss Intro Overlay -->
+  <div id="boss-intro-overlay" style="display:none;">
+    <div class="boss-intro-vignette"></div>
+    <div class="boss-intro-warning" id="boss-intro-warning">⚠️ WARNING: BOSS APPROACHING ⚠️</div>
+    <div class="boss-intro-card" id="boss-intro-card">
+      <div class="boss-intro-avatar" id="boss-intro-avatar">😾</div>
+      <div class="boss-intro-info">
+        <div class="boss-intro-title" id="boss-intro-title">King of Churu 👑</div>
+        <div class="boss-intro-name" id="boss-intro-name">Big Chonk</div>
+        <div class="boss-intro-hp-wrap">
+          <span class="boss-intro-hp-tag">HP</span>
+          <div class="boss-intro-hp-bar">
+            <div class="boss-intro-hp-fill" id="boss-intro-hp-fill"></div>
+          </div>
+          <span class="boss-intro-hp-num" id="boss-intro-hp-num">16 / 16</span>
+        </div>
+      </div>
+    </div>
+    <div class="boss-intro-quote-box" id="boss-intro-quote-box">
+      <div class="boss-intro-quote" id="boss-intro-quote">"All Churu belongs to me, meow!"</div>
+    </div>
+    <div class="boss-intro-fight" id="boss-intro-fight">⚔️ READY... FIGHT!</div>
+    <button id="boss-intro-skip" class="boss-intro-skip-btn" data-ui>SKIP ⏩</button>
+  </div>
+
+  <div id="hud-layer">
+      <div class="top-bar">
+        <button id="menu-btn" aria-label="Menu" data-ui>☰</button>
+        <div class="score-box">
+          <div id="score-text">0</div>
+          <div id="combo-tag">🐾 PERFECT ×1</div>
+          <div id="stage-info">
+            <div class="stage-row">
+              <span id="stage-badge" class="stage-badge">🧱 STANDARD</span>
+              <span id="stage-label"></span>
+              <span id="stage-progress"></span>
+            </div>
+            <div id="goal-bar"><div id="goal-fill"></div></div>
+
+            <!-- Boss Battle Sub-HUD -->
+            <div id="boss-hud" class="type-hud-row" style="display:none;">
+              <div class="boss-head-row">
+                <span id="boss-name">😾 Boss</span>
+                <span id="boss-hp-val">HP 16/16</span>
+              </div>
+              <div id="boss-bar"><div id="boss-fill"></div></div>
+            </div>
+
+            <!-- Speed Rush Sub-HUD -->
+            <div id="timer-hud" class="type-hud-row" style="display:none;">
+              <div class="timer-head-row">
+                <span>⏱️ TIME LEFT</span>
+                <span id="timer-val">25.0s</span>
+              </div>
+              <div id="timer-bar"><div id="timer-fill"></div></div>
+            </div>
+
+            <!-- Precision Sub-HUD -->
+            <div id="precision-hud" class="type-hud-row" style="display:none;">
+              🎯 STREAK GOAL: 0 / 3 ⭐
+            </div>
+
+            <!-- Bonus Churu Fever Sub-HUD -->
+            <div id="bonus-hud" class="type-hud-row" style="display:none;">
+              <div class="bonus-head-row">
+                <span id="bonus-hearts-val" class="bonus-hearts-val">❤️❤️❤️</span>
+                <span id="bonus-timer-val">⏱️ 15.0s</span>
+                <span id="bonus-fever-badge" class="bonus-fever-badge" style="display:none;">🔥 FEVER 2×</span>
+                <span id="bonus-churu-val"><img src="assets/churu_icon.jpg" class="churu-icon" alt="츄르"> 0</span>
+              </div>
+              <div id="bonus-bar"><div id="bonus-fill"></div></div>
+            </div>
+
+            <!-- Active Skill Sub-HUD (Luna: Magnetic Snap) -->
+            <div id="skill-hud" class="type-hud-row" style="display:none;">
+              <span id="skill-badge" class="skill-badge">🧲 자석 솜방망이 준비완료!</span>
+            </div>
+
+            <!-- Tilt Balance Sub-HUD -->
+            <div id="tilt-hud" class="type-hud-row" style="display:none;">
+              <span id="tilt-badge" class="tilt-badge">⚖️ 밸런스: 안전</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="top-bar-right">
+          <button id="in-game-settings-btn" class="top-circle-btn" aria-label="Settings" data-ui>⚙️</button>
+        </div>
+
+      </div>
+
+      <div id="stage-banner">
+        <div id="banner-badge"></div>
+        <div id="banner-title"></div>
+        <div id="banner-desc"></div>
+      </div>
+
+      <div id="mascot-area">
+        <div id="speech-bubble">Hooman! Stack me a tower, meow! 🐾</div>
+        <div id="mascot-wrapper">
+          <img id="mascot-img" src="assets/chara_smile.png" alt="Cat Mascot">
+        </div>
+      </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen-overlay">
+      <button id="start-settings-btn" class="start-settings-btn" aria-label="Settings" data-ui>⚙️</button>
+      <img id="start-bg-img" src="assets/keyvisual.png?v=meow" alt="Meow Stack Tower Key Visual">
+      <div class="start-content">
+        <div class="badge-3d" id="badge-3d" style="display:none;">🐾 3D MEOW TOWER STACK 🐾</div>
+        <h1 class="title-main" style="display:none;">Meow Stack Tower</h1>
+        <div class="title-sub" style="display:none;">3D CAT STACK TOWER</div>
+
+        <!-- Top Section: Logo spacing + Prominent Primary Play Action -->
+        <div class="start-top-section">
+          <div class="title-logo-spacer"></div>
+          <div class="start-main-action">
+            <div id="start-progress" class="start-progress-pill">⭐ 0 / 726 · Cleared 0 / 242</div>
+            <button id="btn-continue" class="primary-play-btn" data-ui>
+              <span class="play-icon">▶</span>
+              <span id="btn-play-text" class="play-text">Start Adventure · 1-1</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bottom Quick Dock -->
+        <nav class="start-dock" aria-label="Quick Menu">
+          <button id="btn-select" class="dock-btn" data-ui title="Stage Select">
+            <span class="dock-icon">🗺️</span>
+            <span class="dock-label" id="dock-label-select">스테이지</span>
+          </button>
+          <button id="btn-endless" class="dock-btn" data-ui title="Endless Mode">
+            <span class="dock-badge" id="start-best-badge">BEST <span id="start-best-score">0</span></span>
+            <span class="dock-icon">♾️</span>
+            <span class="dock-label" id="dock-label-endless">무한 모드</span>
+          </button>
+          <button id="btn-gacha" class="dock-btn dock-gacha-btn" data-ui title="Cat Gacha">
+            <span class="dock-icon">🎁</span>
+            <span class="dock-label" id="dock-label-gacha">냥이 가챠</span>
+          </button>
+          <button id="btn-cats" class="dock-btn" data-ui title="Cat Companions">
+            <span class="dock-icon">🐱</span>
+            <span class="dock-label" id="dock-label-cats">동료 고양이</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameover-screen" class="screen-overlay">
+      <div class="gameover-box">
+        <div id="gameover-title" class="gameover-title">GAME OVER</div>
+        <div id="gameover-stage" class="gameover-stage"></div>
+        <div class="score-label" id="score-label">SCORE</div>
+        <div id="gameover-score" class="score-val">0</div>
+        <div id="best-row" class="best-row">
+          <span id="best-label">BEST: </span><span id="gameover-best">0</span>
+          <span id="new-best-pill" class="new-best-pill" style="display:none;">NEW!</span>
+        </div>
+        <div class="restart-text" id="restart-text">Tap anywhere to retry, meow! 🐾</div>
+        <div class="box-btns">
+          <button id="btn-retry-over" class="menu-btn" data-ui>🔁 Try Again</button>
+          <button id="btn-menu-over" class="menu-btn sub" data-ui>Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage Clear Screen -->
+    <div id="clear-screen" class="screen-overlay">
+      <div class="gameover-box">
+        <div id="clear-title" class="gameover-title">STAGE CLEAR!</div>
+        <div id="clear-stage" class="gameover-stage"></div>
+        
+        <div id="clear-stars" class="clear-stars-row">
+          <div class="cstar" id="cstar-1"><span class="cstar-char">★</span></div>
+          <div class="cstar" id="cstar-2"><span class="cstar-char">★</span></div>
+          <div class="cstar" id="cstar-3"><span class="cstar-char">★</span></div>
+        </div>
+        <div id="clear-purrfect-banner" class="clear-purrfect-banner" style="display:none;">PURR-FECT! 👑</div>
+
+        <div id="clear-stats"></div>
+        <div id="clear-note"></div>
+        <div class="box-btns">
+          <button id="btn-next" class="menu-btn" data-ui>Next Stage ▶</button>
+          <button id="btn-retry-clear" class="menu-btn sub" data-ui>🔁 Replay (Star Challenge)</button>
+          <button id="btn-menu-clear" class="menu-btn sub" data-ui>🗺️ Stage Select</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage Select Screen -->
+    <div id="select-screen" class="screen-overlay" data-ui>
+      <div class="select-header">
+        <div class="select-header-left">
+          <button id="select-back" class="small-btn" data-ui>←</button>
+          <div class="select-title" id="select-title">🗺️ Stages</div>
+        </div>
+        <div class="select-header-right">
+          <button id="btn-select-gacha" class="small-btn gacha-btn" data-ui title="Gacha">🎁 <span class="header-btn-label">가챠</span></button>
+          <button id="btn-select-cats" class="small-btn cat-btn" data-ui title="Companions">🐱 <span class="header-btn-label">동료</span></button>
+          <button id="select-settings-btn" class="small-btn" data-ui title="Settings">⚙️</button>
+          <div id="select-stars"></div>
+        </div>
+      </div>
+      <div class="select-legend">
+        <span class="legend-item" id="legend-climb">🧱 Climb</span>
+        <span class="legend-item" id="legend-speed">⏱️ Speed</span>
+        <span class="legend-item" id="legend-precision">🎯 Precision</span>
+        <span class="legend-item" id="legend-hazard">🌪️ Hazard</span>
+        <span class="legend-item" id="legend-bonus"><img src="assets/churu_icon.jpg" class="churu-icon" alt="츄르"> Bonus</span>
+        <span class="legend-item" id="legend-boss">👑 Boss</span>
+      </div>
+      <div id="select-list"></div>
+    </div>
+
+    <!-- Cat Companions Modal -->
+    <div id="companion-modal" class="screen-overlay" data-ui>
+      <div class="companion-box">
+        <div class="companion-header">
+          <div class="companion-title" id="companion-title">🐱 Cat Companions</div>
+          <button id="companion-close" class="close-icon-btn" data-ui>✕</button>
+        </div>
+        <div class="companion-subtitle" id="companion-subtitle">Defeat World Bosses and pull from Gacha to adopt adorable cat companions! Each friend brings unique passive buffs!</div>
+        <div class="gacha-currency-bar" style="margin-bottom: 8px;">
+          <div class="gacha-currency-pill">🎟️ <span id="comp-ticket-count">2</span></div>
+          <div class="gacha-currency-pill"><img src="assets/churu_icon.jpg" class="churu-icon" alt="츄르"> <span id="comp-churu-count">100</span></div>
+        </div>
+        <button id="btn-comp-to-gacha" class="menu-btn sub gacha-btn" style="width: 100%; min-width: 0; padding: 10px 16px; margin-bottom: 10px; font-size: 14px;" data-ui>🎁 Open Cat Gacha (가챠)</button>
+        <div id="companion-list" class="companion-grid"></div>
+      </div>
+    </div>
+
+    <!-- Companion Unlock Celebration Modal -->
+    <div id="unlock-modal" class="screen-overlay" data-ui>
+      <div class="unlock-card-box">
+        <div class="unlock-ribbon">🎉 NEW COMPANION UNLOCKED!</div>
+        <div id="unlock-cat-avatar" class="unlock-avatar-wrap"></div>
+        <div id="unlock-cat-name" class="unlock-cat-name">Miko</div>
+        <div id="unlock-cat-title" class="unlock-cat-title">Lucky Calico 🐾</div>
+        <div id="unlock-cat-perk" class="unlock-cat-perk">⏱️ Time Attack limit +3s bonus!</div>
+        <div id="unlock-cat-quote" class="unlock-cat-quote">"Let's stack it high like my tri-color coat, meow! 🍀"</div>
+        <button id="btn-equip-unlocked" class="menu-btn" data-ui>🐾 Equip Companion</button>
+        <button id="btn-close-unlock" class="menu-btn sub" data-ui style="margin-top: 8px;">Later</button>
+      </div>
+    </div>
+
+    <!-- Stage Ready & Companion Selection Modal (출격 준비) -->
+    <div id="ready-modal" class="screen-overlay" data-ui>
+      <div class="ready-card-box">
+        <button id="ready-close" class="close-icon-btn ready-close-btn" data-ui>✕</button>
+        <div class="ready-header">
+          <div class="ready-ribbon" id="ready-ribbon">⚔️ EXPEDITION PREP</div>
+          <div id="ready-stage-badge" class="stage-badge type-boss">👑 Boss Battle 1-16</div>
+        </div>
+        <div id="ready-stage-title" class="ready-stage-title">World 1 · Fluffy Village</div>
+        <div id="ready-stage-target" class="ready-stage-target">🎯 Target: Reach Floor 16 / Defeat Big Chonk</div>
+        <div id="ready-stage-tip" class="ready-stage-tip">💡 Tip: Battle with Big Chonk! 3× crit or rapid size recovery is effective!</div>
+
+        <div class="ready-section-header">
+          <div class="ready-section-label" id="ready-section-label">🐾 Choose Cat Companion:</div>
+          <button id="btn-ready-gacha-shortcut" class="ready-gacha-link-btn" data-ui>🎁 Cat Gacha</button>
+        </div>
+
+        <!-- Selected Companion Card -->
+        <div class="ready-cat-card" id="ready-selected-card">
+          <div class="ready-cat-avatar-wrap" id="ready-cat-avatar-wrap"></div>
+          <div class="ready-cat-info">
+            <div class="ready-cat-name-row">
+              <span id="ready-cat-name" class="cat-card-name">Miko</span>
+              <span id="ready-cat-title" class="cat-card-title">Lucky Calico 🐾</span>
+            </div>
+            <div id="ready-cat-perk" class="cat-card-perk">⚡ ⏱️ Time Attack limit +3s bonus!</div>
+            <div id="ready-cat-quote" class="cat-card-desc">"Let's stack it high like my tri-color coat, meow! 🍀"</div>
+          </div>
+        </div>
+
+        <!-- Quick Switch Chips Row -->
+        <div id="ready-companion-chips" class="ready-chips-row"></div>
+
+        <button id="btn-ready-start" class="menu-btn ready-start-btn" data-ui>▶ Start Adventure</button>
+      </div>
+    </div>
+
+    <!-- Cat Gacha Modal -->
+    <div id="gacha-modal" class="screen-overlay" data-ui style="display:none;">
+      <div class="gacha-box">
+        <div class="gacha-header">
+          <div class="gacha-title" id="gacha-title">🎁 Lucky Cat Gacha</div>
+          <button id="gacha-close" class="close-icon-btn" data-ui>✕</button>
+        </div>
+        
+        <!-- Currency Bar -->
+        <div class="gacha-currency-bar">
+          <div class="gacha-currency-pill">🎟️ <span id="gacha-ticket-count">2</span></div>
+          <div class="gacha-currency-pill"><img src="assets/churu_icon.jpg" class="churu-icon" alt="츄르"> <span id="gacha-churu-count">100</span></div>
+        </div>
+
+        <!-- Capsule Machine Showcase -->
+        <div class="gacha-machine-wrap">
+          <img src="assets/gacha_machine.jpg" class="gacha-showcase-art" alt="Lucky Cat Gacha Machine">
+        </div>
+
+        <div class="gacha-subtitle" id="gacha-subtitle">Collect adorable cat companions! Each world role brings unique perks.</div>
+
+        <!-- Pull Action Buttons -->
+        <div class="gacha-btn-row">
+          <button id="btn-gacha-1" class="menu-btn gacha-action-btn" data-ui>
+            <span class="btn-primary-text" id="btn-gacha-1-text">🎟️ Pull 1x</span>
+            <span class="btn-cost-sub" id="btn-gacha-1-cost">1 Ticket or 50 <img src="assets/churu_icon.jpg" class="churu-icon" alt="츄르"></span>
+          </button>
+          <button id="btn-gacha-10" class="menu-btn gacha-action-btn special-10" data-ui>
+            <span class="btn-primary-text" id="btn-gacha-10-text">🌟 Pull 10x</span>
+            <span class="btn-cost-sub" id="btn-gacha-10-cost">10 Tickets or 450 <img src="assets/churu_icon.jpg" class="churu-icon" alt="츄르"></span>
+          </button>
+        </div>
+
+        <div class="gacha-roster-link-wrap">
+          <button id="btn-toggle-roster" class="text-link-btn" data-ui>📋 View 18 Companions & Rates</button>
+        </div>
+
+        <!-- Collapsible Roster View -->
+        <div id="gacha-roster-view" class="gacha-roster-view" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Gacha Animation Cutscene Overlay -->
+    <div id="gacha-anim-overlay" class="gacha-anim-overlay" data-ui style="display:none;">
+      <button id="btn-gacha-anim-skip" class="gacha-anim-skip-btn" data-ui>⏩ SKIP</button>
+      <div class="gacha-anim-scene">
+        <!-- Machine Phase -->
+        <div id="gacha-anim-machine" class="gacha-anim-machine">
+          <div class="gacha-machine-card" id="gacha-machine-card">
+            <img src="assets/gacha_machine.jpg" id="gacha-cutscene-machine-img" class="gacha-cutscene-machine-art" alt="Lucky Cat Gacha Machine">
+            <div id="gacha-anim-crank" class="gacha-paw-crank">🐾</div>
+          </div>
+          <div id="gacha-anim-status" class="gacha-anim-status">✨ TURNING THE CRANK... ✨</div>
+        </div>
+
+        <!-- Big Capsule Phase -->
+        <div id="gacha-anim-capsule-wrap" class="gacha-anim-capsule-wrap" style="display:none;">
+          <div id="gacha-big-capsule" class="gacha-big-capsule">
+            <div class="capsule-half-top"></div>
+            <div class="capsule-seam"></div>
+            <div class="capsule-half-bottom"></div>
+            <img src="assets/gacha_capsule_open.jpg" id="gacha-burst-art" class="gacha-burst-art-img" style="display:none;" alt="Capsule Burst">
+          </div>
+          <div id="gacha-anim-tap-prompt" class="gacha-anim-tap-prompt">✨ TAP TO OPEN! ✨</div>
+        </div>
+
+        <!-- Burst Light Phase -->
+        <div id="gacha-anim-burst" class="gacha-anim-burst" style="display:none;">
+          <div class="gacha-burst-flash"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gacha Reveal Results Overlay -->
+    <div id="gacha-reveal-modal" class="screen-overlay" data-ui style="display:none;">
+      <div class="gacha-reveal-box">
+        <div class="gacha-reveal-ribbon" id="gacha-reveal-ribbon">✨ GACHA RESULTS ✨</div>
+        <div id="gacha-reveal-cards" class="gacha-reveal-cards-container"></div>
+        <div class="gacha-reveal-footer" style="width: 100%; margin-top: 6px;">
+          <button id="btn-gacha-reveal-ok" class="menu-btn" style="width: 100%; min-width: 0;" data-ui>OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Settings Modal -->
+    <div id="settings-modal" class="screen-overlay" data-ui style="display:none;">
+      <div class="settings-box">
+        <div class="settings-header">
+          <div class="settings-title" id="settings-title">⚙️ 게임 설정</div>
+          <button id="settings-close" class="close-icon-btn" data-ui>✕</button>
+        </div>
+
+        <div class="settings-content">
+          <!-- Section 1: Language -->
+          <div class="settings-section">
+            <div class="settings-section-title" id="setting-lbl-lang">🌐 언어 (Language)</div>
+            <div class="settings-lang-group">
+              <button id="btn-set-lang-ko" class="settings-lang-btn" data-ui>🇰🇷 한국어</button>
+              <button id="btn-set-lang-en" class="settings-lang-btn" data-ui>🇺🇸 English</button>
+            </div>
+          </div>
+
+          <!-- Section 2: Audio -->
+          <div class="settings-section">
+            <div class="settings-section-title" id="setting-lbl-audio">🔊 사운드 & 음악 (Audio)</div>
+            
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <span class="settings-row-icon">🎵</span>
+                <div>
+                  <div class="settings-row-label" id="setting-lbl-bgm">배경음악 (BGM)</div>
+                  <div class="settings-row-desc" id="setting-desc-bgm">따뜻하고 편안한 마림바 앰비언트 BGM</div>
+                </div>
+              </div>
+              <button id="toggle-bgm" class="settings-toggle-btn active" data-ui>ON</button>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <span class="settings-row-icon">🔔</span>
+                <div>
+                  <div class="settings-row-label" id="setting-lbl-sfx">효과음 (SFX)</div>
+                  <div class="settings-row-desc" id="setting-desc-sfx">블록 착지, 콤보, 보스 타격, 가챠 효과음</div>
+                </div>
+              </div>
+              <button id="toggle-sfx" class="settings-toggle-btn active" data-ui>ON</button>
+            </div>
+          </div>
+
+          <!-- Section 3: Gameplay & Feedback -->
+          <div class="settings-section">
+            <div class="settings-section-title" id="setting-lbl-feel">✨ 조작 & 연출 (Feel & FX)</div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <span class="settings-row-icon">📳</span>
+                <div>
+                  <div class="settings-row-label" id="setting-lbl-haptics">진동 피드백 (Haptics)</div>
+                  <div class="settings-row-desc" id="setting-desc-haptics">블록 적재 및 퍼펙트 시 미세 진동</div>
+                </div>
+              </div>
+              <button id="toggle-haptics" class="settings-toggle-btn active" data-ui>ON</button>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <span class="settings-row-icon">💥</span>
+                <div>
+                  <div class="settings-row-label" id="setting-lbl-shake">화면 흔들림 (Screen Shake)</div>
+                  <div class="settings-row-desc" id="setting-desc-shake">강력한 콤보 및 타격 시 화면 흔들림</div>
+                </div>
+              </div>
+              <button id="toggle-shake" class="settings-toggle-btn active" data-ui>ON</button>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <span class="settings-row-icon">✨</span>
+                <div>
+                  <div class="settings-row-label" id="setting-lbl-particles">파티클 이펙트 (Particles)</div>
+                  <div class="settings-row-desc" id="setting-desc-particles">스파클 및 폭죽 파티클 (저사양 배터리 절약)</div>
+                </div>
+              </div>
+              <button id="toggle-particles" class="settings-toggle-btn active" data-ui>ON</button>
+            </div>
+          </div>
+
+          <!-- Section 4: Game Data & Stats -->
+          <div class="settings-section">
+            <div class="settings-section-title" id="setting-lbl-data">💾 데이터 관리 & 통계</div>
+            <div class="settings-stats-pill">
+              <span id="setting-stat-stars">⭐ 별 수집: 0 / 726</span>
+              <span id="setting-stat-cleared">🏆 클리어: 0 / 242</span>
+            </div>
+            <button id="btn-reset-data" class="settings-reset-btn" data-ui>🔄 게임 데이터 초기화</button>
+            <div class="settings-version-tag" id="setting-version-tag">Meow Stack Tower v1.2.0 · Designed with 💖</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+  </div>
+
+
+  <!-- Audio Base Data -->
+  <script src="assets/audio/cat_audio_data.js"></script>
+
+  <!-- Modular JavaScript Engine -->
+  <script src="js/telemetry.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/save.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/avatar.js"></script>
+  <script src="js/render3d.js"></script>
+  <script src="js/bonus.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+    /* ------------------------------------------------------------- */
+    /* BOSS CAT DYNAMIC ACTOR (가운데 배경 거대 보스)                  */
+    /* ------------------------------------------------------------- */
+    #boss-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2; /* Background layer behind #game-canvas (z-index: 5) */
+    }
+    #boss-container.boss-ontop {
+      z-index: 20; /* Moves in front of tower during victory dance or sequence */
+    }
+    #boss-wrapper {
+      position: absolute;
+      top: 19vh;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+    #boss-actor {
+      width: min(76vw, 300px);
+      height: min(76vw, 300px);
+      pointer-events: none;
+      filter: drop-shadow(0 14px 34px rgba(0, 0, 0, 0.68));
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+      transform-origin: center center;
+    }
+
+    /* Boss speech bubble (Floating centrally right above boss head) */
+    #boss-speech {
+      position: absolute;
+      top: 122px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-6px) scale(0.95);
+      background: rgba(18, 14, 28, 0.96);
+      border: 1.5px solid #ffd54f;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 12px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.75);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      line-height: 1.35;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      word-break: keep-all;
+      max-width: 82vw;
+      text-align: center;
+      z-index: 25;
+    }
+    #boss-speech::before {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 6px solid #ffd54f;
+    }
+
+    /* Idle: Calmly floating on throne */
+    .boss-state-idle {
+      animation: bossFloat 2.6s infinite ease-in-out;
+    }
+    @keyframes bossFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-7px) rotate(-1.5deg); }
+    }
+
+    /* Smug: Mocking laughing wobble */
+    .boss-state-smug {
+      animation: bossSmugLaugh 0.8s infinite ease-in-out;
+    }
+    @keyframes bossSmugLaugh {
+      0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+      25% { transform: translateY(-8px) scale(1.08, 0.94) rotate(4deg); }
+      50% { transform: translateY(2px) scale(0.95, 1.06) rotate(-3deg); }
+      75% { transform: translateY(-5px) scale(1.06, 0.96) rotate(3deg); }
+    }
+
+    /* Hurt: Shocked knockback tremor and flash */
+    .boss-state-hurt {
+      animation: bossHurtTremor 0.6s ease-out;
+    }
+    @keyframes bossHurtTremor {
+      0% { transform: translate(0, 0) scale(1); filter: brightness(1) drop-shadow(0 0 0 transparent); }
+      15% { transform: translate(-14px, 6px) scale(0.86, 1.14) rotate(-9deg); filter: brightness(2.2) drop-shadow(0 0 18px #ff1744); }
+      30% { transform: translate(12px, -4px) scale(1.14, 0.88) rotate(7deg); filter: brightness(1.7) drop-shadow(0 0 12px #ff1744); }
+      45% { transform: translate(-8px, 4px) scale(0.92, 1.08) rotate(-4deg); filter: brightness(1.3); }
+      60% { transform: translate(6px, -2px) scale(1.04, 0.96) rotate(2deg); filter: brightness(1.1); }
+      100% { transform: translate(0, 0) scale(1); filter: brightness(1); }
+    }
+
+    /* Frenzy: Burning rage aura */
+    .boss-state-frenzy {
+      animation: bossFrenzyPulse 0.9s infinite ease-in-out;
+    }
+    @keyframes bossFrenzyPulse {
+      0%, 100% { transform: translateY(0) scale(1.06); filter: drop-shadow(0 0 14px #ff3d00); }
+      50% { transform: translateY(-5px) scale(1.12); filter: drop-shadow(0 0 22px #ff1744); }
+    }
+
+    /* Defeat: Spiraling tumble into the clouds */
+    .boss-state-defeat {
+      animation: bossDefeatTumble 2.4s forwards cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    @keyframes bossDefeatTumble {
+      0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+      12% { transform: translate(-10px, -6px) rotate(-8deg) scale(1.08); opacity: 1; }
+      24% { transform: translate(10px, 4px) rotate(8deg) scale(1.08); opacity: 1; }
+      36% { transform: translate(-8px, -4px) rotate(-6deg) scale(1.05); opacity: 1; }
+      48% { transform: translate(6px, 2px) rotate(4deg) scale(1.02); opacity: 1; }
+      60% { transform: translateY(-15px) rotate(-15deg) scale(1.08); opacity: 1; }
+      75% { transform: translateY(60px) rotate(180deg) scale(0.9); opacity: 0.9; }
+      88% { transform: translateY(220px) rotate(540deg) scale(0.65); opacity: 0.65; }
+      100% { transform: translateY(480px) rotate(900deg) scale(0.2); opacity: 0; }
+    }
+
+    /* Victory: Joyful victory dance */
+    .boss-state-victory {
+      animation: bossVictoryDance 0.9s infinite ease-in-out;
+      transform-origin: center center;
+    }
+    @keyframes bossVictoryDance {
+      0%, 100% { transform: translateY(0) scale(1.15) rotate(-3deg); filter: drop-shadow(0 0 16px #ffd700); }
+      25% { transform: translateY(-12px) scale(1.24) rotate(4deg); }
+      50% { transform: translateY(0) scale(1.15) rotate(-4deg); }
+      75% { transform: translateY(-10px) scale(1.22) rotate(3deg); }
+    }
+  
+
+    /* Boss Intro Cinematic Overlay */
+    #boss-intro-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: auto;
+      z-index: 70;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: rgba(10, 8, 20, 0.65);
+    }
+    .boss-intro-vignette {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle, transparent 40%, rgba(255, 23, 68, 0.45) 90%);
+      animation: introVignettePulse 0.8s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes introVignettePulse {
+      0% { opacity: 0.35; }
+      100% { opacity: 0.85; }
+    }
+    .boss-intro-warning {
+      position: absolute;
+      top: 14%;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #ff1744;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1.5px solid #ff1744;
+      padding: 8px 18px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(255, 23, 68, 0.6);
+      animation: warningFlash 0.35s steps(2, start) infinite;
+      z-index: 2;
+    }
+    @keyframes warningFlash {
+      0% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.05); filter: brightness(1.4); }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+    .boss-intro-card {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, rgba(26, 22, 43, 0.95), rgba(42, 27, 61, 0.95));
+      border: 2px solid #ffd54f;
+      border-radius: 22px;
+      padding: 14px 22px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 213, 79, 0.3);
+      transform: translateY(-80px) scale(0.6);
+      opacity: 0;
+      transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.35s ease;
+      max-width: 88vw;
+    }
+    .boss-intro-card.slam {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    .boss-intro-avatar {
+      font-size: 38px;
+      width: 58px; height: 58px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid rgba(255, 213, 79, 0.6);
+      flex-shrink: 0;
+    }
+    .boss-intro-info {
+      display: flex; flex-direction: column; gap: 3px;
+      text-align: left;
+    }
+    .boss-intro-title {
+      font-size: 11px; font-weight: 700; color: #ffd54f; letter-spacing: 0.8px; text-transform: uppercase;
+    }
+    .boss-intro-name {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 22px; font-weight: 800; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    .boss-intro-hp-wrap {
+      display: flex; align-items: center; gap: 8px; margin-top: 4px;
+    }
+    .boss-intro-hp-tag {
+      font-size: 10px; font-weight: 800; color: #ff5252;
+    }
+    .boss-intro-hp-bar {
+      width: 130px; height: 9px; background: rgba(255,255,255,0.15); border-radius: 5px; overflow: hidden;
+    }
+    .boss-intro-hp-fill {
+      width: 0%; height: 100%; background: linear-gradient(90deg, #ff1744, #ff5252, #ffd54f); border-radius: 5px;
+      transition: width 0.5s ease-out;
+    }
+    .boss-intro-hp-num {
+      font-size: 11px; font-weight: 700; color: #ffd54f;
+    }
+    .boss-intro-quote-box {
+      margin-top: 20px;
+      max-width: 84vw;
+      background: rgba(0, 0, 0, 0.82);
+      border: 1.5px solid rgba(255, 213, 79, 0.65);
+      border-radius: 16px;
+      padding: 10px 18px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+      transform: scale(0.7); opacity: 0;
+      transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+      z-index: 3;
+    }
+    .boss-intro-quote-box.show {
+      transform: scale(1); opacity: 1;
+    }
+    .boss-intro-quote {
+      font-size: 13.5px; font-weight: 700; color: #fff; line-height: 1.45; text-align: center;
+    }
+    .boss-intro-fight {
+      position: absolute;
+      bottom: 18%;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #ffd54f;
+      text-shadow: 0 0 15px rgba(255, 213, 79, 0.8), 0 4px 10px rgba(0,0,0,0.8);
+      transform: scale(0.2); opacity: 0;
+      transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.3), opacity 0.25s ease;
+      z-index: 4;
+    }
+    .boss-intro-fight.show {
+      transform: scale(1.15); opacity: 1;
+    }
+    .boss-intro-skip-btn {
+      position: absolute;
+      top: 24px; right: 20px;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #fff;
+      font-size: 12px; font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 16px;
+      cursor: pointer;
+      z-index: 10;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: background 0.2s, transform 0.15s;
+    }
+    .boss-intro-skip-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.25);
+    }

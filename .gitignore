@@ -1,0 +1,28 @@
+# OS files
+.DS_Store
+*/.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# Android & Gradle Build Artifacts
+.gradle/
+**/build/
+build/
+android/.gradle/
+android/build/
+android/app/build/
+build-artifacts/
+local.properties
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+
+# Keystores & Secrets
+*.keystore
+*.jks
+
+# Temporary debug logs & root-level test captures
+*.log
+/*.png
+tmp_audio/

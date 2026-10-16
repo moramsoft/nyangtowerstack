@@ -1,0 +1,16 @@
+{
+  "name": "Meow Stack Tower 3D",
+  "short_name": "Meow Stack",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#151124",
+  "theme_color": "#151124",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

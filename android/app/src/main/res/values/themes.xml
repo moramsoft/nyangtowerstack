@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.BishoujoStackTower" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#1a162b</item>
+        <item name="android:navigationBarColor">#1a162b</item>
+    </style>
+    <style name="Theme.BishoujoStackTower.Fullscreen" parent="Theme.BishoujoStackTower">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>

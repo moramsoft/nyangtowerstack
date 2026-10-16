@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "539002626732",
+    "project_id": "meow-stack-tower",
+    "storage_bucket": "meow-stack-tower.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:539002626732:android:537efaa31df1243a70f509",
+        "android_client_info": {
+          "package_name": "com.meow.stacktower"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAatdT2TTMNKGv9QITc7S13nmyPJcDhT50"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
