@@ -15,7 +15,7 @@
   let baseTileS = 18;
   let currentZoom = 1.0;
   let targetZoom = 1.0;
-  const BLOCK_HEIGHT_PX = 20;
+  var BLOCK_HEIGHT_PX = 20;
 
   // Screen shake
   let screenShakeTime = 0;
@@ -51,6 +51,8 @@
     // Responsive scale: dynamically scales on tablets/iPads while maintaining optimal phone baseline
     const referenceDimension = Math.min(viewW, viewH * 0.58);
     baseTileS = Math.max(18, Math.min(referenceDimension / 18, 36));
+    BLOCK_HEIGHT_PX = baseTileS * 1.05;
+    window.BLOCK_HEIGHT_PX = BLOCK_HEIGHT_PX;
   }
   window.handleResize = handleResize;
   window.addEventListener('resize', handleResize);
@@ -71,7 +73,7 @@
     const cyAnchor = isTablet ? 0.68 : 0.65;
     const cy = viewH * cyAnchor + camY * zoom;
     const effTileS = baseTileS * zoom;
-    const effH = (baseTileS * 1.05) * zoom;
+    const effH = BLOCK_HEIGHT_PX * zoom;
     return {
       x: cx + (rx - rz) * cos30 * effTileS,
       y: cy + (rx + rz) * sin30 * effTileS - ry * effH
