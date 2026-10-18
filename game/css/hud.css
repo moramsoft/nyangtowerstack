@@ -225,7 +225,7 @@
       flex-direction: column;
       gap: 2px;
     }
-    .boss-head-row, .timer-head-row {
+    .boss-head-row, .timer-head-row, .bonus-head-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -233,6 +233,25 @@
       font-weight: 800;
       color: #ffd54f;
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    }
+    .hud-heart-icon {
+      width: 17px;
+      height: 17px;
+      object-fit: contain;
+      vertical-align: middle;
+      transition: transform 0.2s, opacity 0.2s;
+      filter: drop-shadow(0 2px 4px rgba(233, 30, 99, 0.4));
+    }
+    .hud-heart-icon.lost {
+      opacity: 0.22;
+      filter: grayscale(1);
+      transform: scale(0.8);
+    }
+    .churu-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      vertical-align: middle;
     }
     #boss-bar, #timer-bar {
       width: 100%;

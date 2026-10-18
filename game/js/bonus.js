@@ -22,7 +22,10 @@
   };
 
   const churuTreatImg = new Image();
-  churuTreatImg.src = 'assets/churu_icon.jpg';
+  churuTreatImg.src = 'assets/reward_churu.png';
+
+  const mouseHazardImg = new Image();
+  mouseHazardImg.src = 'assets/item_mouse.png';
 
   const BONUS_ITEM_TYPES = [
     { type: 'churu', emoji: '🥢', points: 10, weight: 40, size: 28 },
@@ -75,8 +78,8 @@
 
     const comp = getSelectedCat();
     setMascot('excited', (getLang() === 'ko')
-      ? '떨어지는 츄르를 담고 쥐(🐭)는 피하자냥! (하트 3개) ✨'
-      : 'Catch Churu and dodge mice (🐭), meow! (3 Hearts) ✨', 3500);
+      ? '츄르를 잡자냥! 🐾'
+      : 'Catch treats! 🐾', 2000);
   }
 
   function spawnBonusItem() {
@@ -190,8 +193,8 @@
             bonusActive = false;
             playCatSad();
             setMascot('sad', (getLang() === 'ko')
-              ? '으앙! 쥐한테 세 번이나 부딪혀서 끝났다냥... 😿🐭'
-              : 'Meow! Hit by mice 3 times... 😿🐭', 3500);
+              ? '피버 종료! 😿'
+              : 'Finish! 😿', 2000);
             setTimeout(() => {
               completeStage();
             }, 400);
@@ -199,8 +202,8 @@
           } else {
             playMarimbaNote(196, false);
             setMascot('scared', (getLang() === 'ko')
-              ? `앗! 쥐 조심해라냥! (남은 하트 ${bonusHearts}개) 🙀`
-              : `Watch out for mice! (${bonusHearts} hearts left) 🙀`, 1500);
+              ? '쥐 조심! 🐭'
+              : 'DODGE 🐭!', 1000);
           }
           continue;
         }
@@ -209,7 +212,7 @@
         if (bonusStreak >= 3 && bonusFeverTimer <= 0) {
           bonusFeverTimer = 4.0;
           playSizeExpandChime();
-          showToast((getLang() === 'ko') ? '🔥 츄르 피버 모드 발동! 2배 보너스!' : '🔥 CHURU FEVER ACTIVATED! 2× BONUS!');
+          showToast((getLang() === 'ko') ? '🔥 츄르 피버 2×!' : '🔥 FEVER 2×!');
         }
 
         const multi = (bonusFeverTimer > 0) ? 2 : 1;
@@ -274,8 +277,8 @@
       bonusActive = false;
       playCatSad();
       setMascot('sad', (getLang() === 'ko')
-        ? '시간이 다 됐다냥! 아쉽다냥~ 😿'
-        : 'Time is up, meow! 😿', 2500);
+        ? '타임 오버! ⏱️'
+        : 'Time Up! ⏱️', 2000);
       completeStage();
     }
   }
@@ -297,14 +300,12 @@
         c.shadowBlur = 6;
       }
 
-      if ((it.type === 'churu' || it.type === 'gold') && churuTreatImg.complete && churuTreatImg.naturalWidth > 0) {
+      if (it.type === 'mouse' && mouseHazardImg.complete && mouseHazardImg.naturalWidth > 0) {
         const sz = it.size * 1.35;
-        c.save();
-        c.beginPath();
-        c.arc(0, 0, sz / 2, 0, Math.PI * 2);
-        c.clip();
+        c.drawImage(mouseHazardImg, -sz / 2, -sz / 2, sz, sz);
+      } else if ((it.type === 'churu' || it.type === 'gold') && churuTreatImg.complete && churuTreatImg.naturalWidth > 0) {
+        const sz = it.size * 1.35;
         c.drawImage(churuTreatImg, -sz / 2, -sz / 2, sz, sz);
-        c.restore();
 
         if (it.type === 'gold') {
           c.strokeStyle = '#ffd700';

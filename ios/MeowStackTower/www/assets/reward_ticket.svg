@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="ticketGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff59d"/>
+      <stop offset="35%" stop-color="#fdd835"/>
+      <stop offset="80%" stop-color="#f57f17"/>
+      <stop offset="100%" stop-color="#e65100"/>
+    </linearGradient>
+    <linearGradient id="pawPink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff80ab"/>
+      <stop offset="100%" stop-color="#f50057"/>
+    </linearGradient>
+    <filter id="ticketGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#f57f17" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Sparkles -->
+  <g fill="#fff59d">
+    <path d="M 30 50 Q 40 50 40 40 Q 40 50 50 50 Q 40 50 40 60 Q 40 50 30 50 Z"/>
+    <path d="M 165 140 Q 173 140 173 132 Q 173 140 181 140 Q 173 140 173 148 Q 173 140 165 140 Z"/>
+    <circle cx="168" cy="45" r="4" fill="#ffffff"/>
+    <circle cx="28" cy="145" r="3.5" fill="#ffffff"/>
+  </g>
+
+  <!-- Rotated Ticket -->
+  <g transform="translate(100, 100) rotate(-12) translate(-100, -100)" filter="url(#ticketGlow)">
+    <!-- Ticket Body with cutouts -->
+    <path d="M 36 60 C 36 50 46 50 56 50 L 144 50 C 154 50 164 50 164 60 L 164 86 C 154 86 154 114 164 114 L 164 140 C 164 150 154 150 144 150 L 56 150 C 46 150 36 150 36 140 L 36 114 C 46 114 46 86 36 86 Z"
+          fill="url(#ticketGold)" stroke="#ffffff" stroke-width="3.5"/>
+
+    <!-- Inner Dashed Border -->
+    <path d="M 44 60 L 156 60 L 156 86 L 156 114 L 156 140 L 44 140 Z"
+          fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-dasharray="5,4"/>
+
+    <!-- Perforation Stub Line -->
+    <line x1="72" y1="52" x2="72" y2="148" stroke="#f57f17" stroke-width="2.5" stroke-dasharray="4,4" opacity="0.8"/>
+
+    <!-- Left Stub Star -->
+    <g transform="translate(54, 100)" fill="#ffffff">
+      <path d="M 0 -11 L 3 -3 L 11 0 L 3 3 L 0 11 L -3 3 L -11 0 L -3 -3 Z"/>
+    </g>
+
+    <!-- Main Emblem: Paw Badge -->
+    <circle cx="118" cy="95" r="26" fill="#ffffff" opacity="0.95"/>
+    <g transform="translate(118, 97)" fill="url(#pawPink)">
+      <ellipse cx="0" cy="3.5" rx="10" ry="8"/>
+      <ellipse cx="-9.5" cy="-7.5" rx="4.5" ry="5.5" transform="rotate(-15, -9.5, -7.5)"/>
+      <ellipse cx="-3.2" cy="-10.5" rx="4.5" ry="5.5"/>
+      <ellipse cx="4.2" cy="-10.5" rx="4.5" ry="5.5"/>
+      <ellipse cx="10" cy="-7.5" rx="4.5" ry="5.5" transform="rotate(15, 10, -7.5)"/>
+    </g>
+
+    <!-- Ribbon Label "LUCKY" -->
+    <g transform="translate(118, 130)">
+      <rect x="-30" y="-8" width="60" height="15" rx="7.5" fill="#d81b60" stroke="#ffffff" stroke-width="1.5"/>
+      <text x="0" y="3" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="9" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">GACHA</text>
+    </g>
+
+    <!-- Gloss Highlight Sweep -->
+    <path d="M 46 54 L 120 54 L 80 146 L 46 146 Z" fill="url(#ticketGold)" opacity="0.25"/>
+  </g>
+</svg>

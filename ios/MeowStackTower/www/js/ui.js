@@ -296,10 +296,12 @@
       if (cfg.stageType === 'bonus') {
         if (bonusHud) bonusHud.style.display = 'flex';
         if ($('bonus-timer-val')) $('bonus-timer-val').textContent = `⏱️ ${Math.max(0, bonusTimer).toFixed(1)}s`;
-        if ($('bonus-churu-val')) $('bonus-churu-val').innerHTML = `<img src="assets/churu_icon.jpg" class="churu-icon" alt="츄르"> ${bonusChuru}`;
+        if ($('bonus-churu-val')) $('bonus-churu-val').innerHTML = `<img src="assets/reward_churu.png" class="churu-icon" alt="츄르"> ${bonusChuru}`;
         if ($('bonus-hearts-val')) {
           const h = Math.max(0, Math.min(3, bonusHearts));
-          $('bonus-hearts-val').textContent = '❤️'.repeat(h) + '🖤'.repeat(3 - h);
+          $('bonus-hearts-val').innerHTML = Array.from({ length: 3 }, (_, i) =>
+            `<img src="assets/cat_paw_heart.png" class="hud-heart-icon ${i < h ? 'active' : 'lost'}" alt="heart">`
+          ).join('');
         }
         if ($('bonus-fill')) $('bonus-fill').style.width = Math.min(100, (bonusScore / cfg.target) * 100) + '%';
         const feverBadge = $('bonus-fever-badge');
@@ -544,37 +546,25 @@
     $('ready-stage-badge').className = 'stage-badge ' + (typeInfo.badgeCls || '');
     $('ready-stage-title').textContent = `${c.emoji} World ${c.world + 1} · ${c.worldName}`;
 
-    let targetTxt = t('targetLabel', { target: c.target });
+    let targetTxt = (getLang() === 'ko' ? `🎯 목표: ${c.target}층` : `🎯 Goal: Floor ${c.target}`);
     if (c.stageType === 'boss') {
-      targetTxt = t('targetBoss', { boss: c.bossInfo.name, target: c.target });
+      targetTxt = (getLang() === 'ko' ? `⚔️ 보스 격파 (HP ${c.bossInfo.hp})` : `⚔️ Defeat ${c.bossInfo.name}`);
     } else if (c.stageType === 'bonus') {
-      targetTxt = t('targetBonus');
+      targetTxt = (getLang() === 'ko' ? `🍣 츄르 잡기` : `🍣 Catch Treats`);
     } else if (c.stageType === 'speed') {
-      targetTxt = t('targetSpeed', { time: c.timeLimit, target: c.target });
+      targetTxt = (getLang() === 'ko' ? `⏱️ ${c.target}층 (${c.timeLimit}초)` : `⏱️ Floor ${c.target} (${c.timeLimit}s)`);
     } else if (c.stageType === 'precision') {
-      targetTxt = t('targetPrecision', { target: c.target, streak: c.streakTarget });
+      targetTxt = (getLang() === 'ko' ? `🎯 연속 퍼펙트 ${c.streakTarget}회` : `🎯 ${c.streakTarget}x Streak`);
     }
-    $('ready-stage-target').textContent = targetTxt;
+    if ($('ready-stage-target')) $('ready-stage-target').textContent = targetTxt;
 
-    let tipTxt = t('tipDefault');
-    if (c.stageType === 'bonus') {
-      tipTxt = t('tipBonus');
-    } else if (c.stageType === 'speed') {
-      tipTxt = t('tipSpeed');
-    } else if (c.stageType === 'precision') {
-      tipTxt = t('tipPrecision');
-    } else if (c.stageType === 'hazard') {
-      tipTxt = t('tipHazard');
-    } else if (c.stageType === 'boss') {
-      tipTxt = t('tipBoss', { boss: c.bossInfo.name, title: getBossField(c.bossInfo, 'title') });
-    }
-    $('ready-stage-tip').textContent = tipTxt;
+    if ($('ready-stage-tip')) $('ready-stage-tip').textContent = '';
 
     // Selected Cat Card preview
-    $('ready-cat-name').textContent = getCompanionField(curCat, 'name');
-    $('ready-cat-title').textContent = getCompanionField(curCat, 'title');
-    $('ready-cat-perk').textContent = `⚡ ${getCompanionField(curCat, 'perk')}`;
-    $('ready-cat-quote').textContent = `"${getCompanionField(curCat, 'quote')}"`;
+    if ($('ready-cat-name')) $('ready-cat-name').textContent = getCompanionField(curCat, 'name');
+    if ($('ready-cat-title')) $('ready-cat-title').textContent = getCompanionField(curCat, 'title');
+    if ($('ready-cat-perk')) $('ready-cat-perk').textContent = `⚡ ${getCompanionField(curCat, 'perk')}`;
+    if ($('ready-cat-quote')) $('ready-cat-quote').textContent = `"${getCompanionField(curCat, 'quote')}"`;
     const readyAvatarWrap = $('ready-cat-avatar-wrap');
     if (readyAvatarWrap) {
       readyAvatarWrap.innerHTML = `<img class="ready-cat-img" src="${curCat.image || 'assets/chara_smile.png'}" style="filter:${curCat.filterStyle || 'none'}; width: 100%; height: 100%; object-fit: contain;" alt="${getCompanionField(curCat, 'name')}">`;

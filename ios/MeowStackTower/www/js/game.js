@@ -484,7 +484,7 @@
           spawnExpandRing(block.x, block.z, block.y, block.w, block.d);
           playSizeExpandChime();
           spawnFloatingText(block.x, block.y + 0.8, block.z, `SIZE UP! ✨`, '#ff80ab', true);
-          setMascot('happy', `Size up, meow! 💖🐾 (${perfectCombo} streak)`, 800);
+          setMascot('happy', `SIZE UP! 💖 (+${perfectCombo})`, 800);
           FirebaseTracker.logEvent('expand_ring_triggered', {
             streak_count: perfectCombo,
             stage_id: (typeof cfg !== 'undefined' && cfg) ? cfg.id : 0,
@@ -493,10 +493,10 @@
             new_depth: Number(block.d.toFixed(2))
           });
         } else {
-          setMascot('happy', `Genius hooman! (${perfectCombo} streak) 🔥`, 800);
+          setMascot('happy', `COMBO ×${perfectCombo}! 🔥`, 800);
         }
       } else {
-        const msg = perfectCombo > 2 ? `Pawsome streak! (${perfectCombo} in a row) ✨` : `MEOWFECT!! ✨🐾`;
+        const msg = perfectCombo > 2 ? `COMBO ×${perfectCombo}! ✨` : `MEOWFECT! ✨`;
         setMascot('happy', msg, 700);
       }
 
@@ -782,19 +782,60 @@
     while (next < TOTAL_STAGES && isBonusStageAlreadyPlayed(next)) {
       next++;
     }
-    $('clear-title').textContent = isLast ? t('clearAllTitle') : (cfg.boss ? t('clearBossTitle') : (cfg.stageType === 'bonus' ? t('bonusClearTitle') : t('clearTitle')));
-    $('clear-stage').textContent = `${cfg.emoji} ${cfg.label} · ${cfg.worldName}`;
-    $('clear-stats').innerHTML = (cfg.stageType === 'bonus')
-      ? (bonusStageHadPastRecord
-          ? (getLang() === 'ko' ? '이미 완료된 보너스 스테이지입니다 🔒' : 'Already completed bonus stage 🔒')
-          : (t('bonusRewardSummary', { churu: bonusScore }) + (stars === 3 && prev < 3 ? ' ' + t('bonusTicketEarned') : '')))
-      : (t('clearStats', { n: perfectTotal, target: cfg.target }) + (improved && prev > 0 ? t('newRecord') : ''));
+    const isKo = getLang() === 'ko';
+    $('clear-title').textContent = isLast
+      ? (isKo ? '올 클리어!' : 'ALL CLEAR!')
+      : (cfg.boss
+          ? (isKo ? '보스 격파!' : 'BOSS CLEAR!')
+          : (cfg.stageType === 'bonus'
+              ? (isKo ? '피버 클리어!' : 'FEVER CLEAR!')
+              : (isKo ? '스테이지 클리어!' : 'STAGE CLEAR!')));
+    $('clear-stage').textContent = `${cfg.label} · ${cfg.worldName}`;
+
+    if (cfg.stageType === 'bonus') {
+      if (bonusStageHadPastRecord) {
+        $('clear-stats').innerHTML = `<div class="clear-stat-pill">${isKo ? '🔒 이미 완료된 보너스' : '🔒 Already Completed'}</div>`;
+      } else {
+        $('clear-stats').innerHTML = `
+          <div class="reward-chips-row">
+            <div class="reward-chip-card churu-card">
+              <img src="assets/reward_churu.png" class="reward-chip-img" alt="Churu">
+              <div class="reward-chip-text">
+                <span class="reward-chip-val">+${bonusScore}</span>
+                <span class="reward-chip-lbl">${isKo ? '츄르' : 'Churu'}</span>
+              </div>
+            </div>
+            ${(stars === 3 && prev < 3) ? `
+            <div class="reward-chip-card ticket-card">
+              <img src="assets/reward_ticket.png" class="reward-chip-img" alt="Ticket">
+              <div class="reward-chip-text">
+                <span class="reward-chip-val">+1</span>
+                <span class="reward-chip-lbl">${isKo ? '가챠 티켓' : 'Ticket'}</span>
+              </div>
+            </div>` : ''}
+          </div>
+        `;
+      }
+    } else {
+      $('clear-stats').innerHTML = `
+        <div class="clear-stat-pill">
+          🐾 ${perfectTotal} / ${cfg.target}
+          ${improved && prev > 0 ? `<span style="color:#69f0ae; margin-left:4px;">★ NEW</span>` : ''}
+        </div>
+      `;
+    }
+
     let note = '';
     const nextBtn = $('btn-next');
     const replayBtn = $('btn-retry-clear');
+    const menuBtn = $('btn-menu-clear');
+    if (nextBtn) nextBtn.textContent = isKo ? '다음 ▶' : 'Next ▶';
     if (replayBtn) {
       replayBtn.style.display = (cfg.stageType === 'bonus') ? 'none' : 'block';
+      replayBtn.textContent = isKo ? '🔁 다시하기' : '🔁 Replay';
     }
+    if (menuBtn) menuBtn.textContent = isKo ? '🗺️ 스테이지' : '🗺️ Stages';
+
     if (next >= TOTAL_STAGES) {
       note = t('clearAllNote');
       nextBtn.style.display = 'none';
