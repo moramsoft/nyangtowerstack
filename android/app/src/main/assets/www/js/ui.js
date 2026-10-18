@@ -807,11 +807,13 @@
 
       if (delayMs > 0) {
         el.classList.add('btn-pressing');
+        triggerHaptic(18);
         setTimeout(() => {
           el.classList.remove('btn-pressing');
           fn();
         }, delayMs);
       } else {
+        triggerHaptic(15);
         fn();
       }
     };

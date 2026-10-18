@@ -875,12 +875,12 @@
     const nextBtn = $('btn-next');
     const replayBtn = $('btn-retry-clear');
     const menuBtn = $('btn-menu-clear');
-    if (nextBtn) nextBtn.textContent = isKo ? '다음 ▶' : 'Next ▶';
+    if (nextBtn) nextBtn.setAttribute('aria-label', isKo ? '다음 ▶' : 'Next ▶');
     if (replayBtn) {
-      replayBtn.style.display = (cfg.stageType === 'bonus') ? 'none' : 'block';
-      replayBtn.textContent = isKo ? '🔁 다시하기' : '🔁 Replay';
+      replayBtn.style.display = (cfg.stageType === 'bonus') ? 'none' : 'inline-flex';
+      replayBtn.setAttribute('aria-label', isKo ? '다시하기' : 'Replay');
     }
-    if (menuBtn) menuBtn.textContent = isKo ? '🗺️ 스테이지' : '🗺️ Stages';
+    if (menuBtn) menuBtn.setAttribute('aria-label', isKo ? '스테이지' : 'Stages');
 
     if (next >= TOTAL_STAGES) {
       note = t('clearAllNote');
@@ -891,7 +891,7 @@
     } else {
       const nextInfo = getStageWorldInfo(next);
       if (nextInfo.idx === 0) note = t('newWorldUnlocked', { name: WORLD_DEFS[nextInfo.world].name });
-      nextBtn.style.display = 'block';
+      nextBtn.style.display = 'inline-flex';
     }
     $('clear-note').textContent = note;
 

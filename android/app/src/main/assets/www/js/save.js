@@ -96,10 +96,10 @@
     if ($('btn-retry-over')) $('btn-retry-over').textContent = t('btnRetry');
     if ($('btn-menu-over')) $('btn-menu-over').textContent = t('btnMenu');
 
-    // Clear screen
-    if ($('btn-next')) $('btn-next').textContent = t('btnNext');
-    if ($('btn-retry-clear')) $('btn-retry-clear').textContent = t('btnReplay');
-    if ($('btn-menu-clear')) $('btn-menu-clear').textContent = t('btnMenuClear');
+    // Clear screen (jelly buttons preserve img child and update aria-label)
+    if ($('btn-next')) $('btn-next').setAttribute('aria-label', t('btnNext'));
+    if ($('btn-retry-clear')) $('btn-retry-clear').setAttribute('aria-label', t('btnReplay'));
+    if ($('btn-menu-clear')) $('btn-menu-clear').setAttribute('aria-label', t('btnMenuClear'));
 
     // Companions modal
     if ($('companion-title')) $('companion-title').textContent = t('companionsTitle');
