@@ -138,7 +138,7 @@ echo -e "${GREEN}✓ Application bundle compiled and signed.${RESET}\n"
 # 4. Install & Launch on Device
 echo -e "${BOLD}[4/4] Installing & launching on iPad via devicectl...${RESET}"
 xcrun devicectl device install app --device "$DEVICE_ID" /tmp/MeowStackTower_build/MeowStackTower.app
-xcrun devicectl device process launch --device "$DEVICE_ID" --activate com.moramtest.mornigporch
+xcrun devicectl device process launch --device "$DEVICE_ID" --activate com.moramtest.mornigporch || echo -e "${YELLOW}ℹ Device is locked; please unlock your iPad to open the app.${RESET}"
 
 echo -e "\n${BOLD}${GREEN}============================================================${RESET}"
 echo -e "${BOLD}${GREEN}  🎉 MEOW STACK TOWER SUCCESSFULLY INSTALLED ON IPAD!       ${RESET}"

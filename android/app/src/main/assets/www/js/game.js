@@ -377,54 +377,55 @@
       scoreTextEl.classList.add('score-pop');
 
       // Impactful Streak Tier Handling
-      comboTagEl.classList.remove('combo-pop');
-      void comboTagEl.offsetWidth;
-      comboTagEl.classList.add('combo-pop', 'show');
-
       let streakShake = 2.5;
       let particleCount = 20;
       let isStreakCombo = perfectCombo >= 2;
 
       if (perfectCombo === 1) {
-        comboTagEl.textContent = `✨ MEOWFECT! ✨`;
-        comboTagEl.classList.remove('combo-fire', 'combo-ultra');
+        comboTagEl.classList.remove('combo-pop', 'show', 'combo-fire', 'combo-ultra');
         spawnFloatingText(block.x, block.y, block.z, `MEOWFECT! +1`, '#ffe082', true, { isStreak: false });
         spawnExpandRing(block.x, block.z, block.y, block.w * 1.06, block.d * 1.06);
-      } else if (perfectCombo === 2) {
-        comboTagEl.textContent = `⚡ 2 STREAK!`;
-        comboTagEl.classList.remove('combo-fire', 'combo-ultra');
-        spawnFloatingText(block.x, block.y, block.z, `⚡ STREAK ×2! ⚡`, '#ffd700', true, { isStreak: true, streakLevel: 2 });
-        spawnExpandRing(block.x, block.z, block.y, block.w * 1.15, block.d * 1.15);
-        streakShake = 3.6;
-        particleCount = 30;
-      } else if (perfectCombo === 3) {
-        comboTagEl.textContent = `🔥 3 SUPER STREAK!`;
-        comboTagEl.classList.add('combo-fire');
-        comboTagEl.classList.remove('combo-ultra');
-        spawnFloatingText(block.x, block.y, block.z, `🔥 STREAK ×3! 🔥`, '#ffab00', true, { isStreak: true, streakLevel: 3 });
-        spawnExpandRing(block.x, block.z, block.y, block.w * 1.25, block.d * 1.25);
-        setTimeout(() => spawnExpandRing(block.x, block.z, block.y, block.w * 1.1, block.d * 1.1), 75);
-        streakShake = 4.8;
-        particleCount = 42;
-      } else if (perfectCombo === 4) {
-        comboTagEl.textContent = `🌟 4 MEGA STREAK!`;
-        comboTagEl.classList.add('combo-fire');
-        comboTagEl.classList.remove('combo-ultra');
-        spawnFloatingText(block.x, block.y, block.z, `🌟 STREAK ×4! 🌟`, '#ffd700', true, { isStreak: true, streakLevel: 4 });
-        spawnExpandRing(block.x, block.z, block.y, block.w * 1.32, block.d * 1.32);
-        setTimeout(() => spawnExpandRing(block.x, block.z, block.y, block.w * 1.15, block.d * 1.15), 65);
-        streakShake = 5.8;
-        particleCount = 52;
       } else {
-        comboTagEl.textContent = `👑 ${perfectCombo} ULTRA STREAK!`;
-        comboTagEl.classList.remove('combo-fire');
-        comboTagEl.classList.add('combo-ultra');
-        spawnFloatingText(block.x, block.y, block.z, `👑 STREAK ×${perfectCombo}! 👑`, '#ff4081', true, { isStreak: true, streakLevel: perfectCombo });
-        spawnExpandRing(block.x, block.z, block.y, block.w * 1.42, block.d * 1.42);
-        setTimeout(() => spawnExpandRing(block.x, block.z, block.y, block.w * 1.22, block.d * 1.22), 60);
-        setTimeout(() => spawnExpandRing(block.x, block.z, block.y, block.w * 1.08, block.d * 1.08), 120);
-        streakShake = 7.0;
-        particleCount = 64;
+        comboTagEl.classList.remove('combo-pop');
+        void comboTagEl.offsetWidth;
+        comboTagEl.classList.add('combo-pop', 'show');
+
+        if (perfectCombo === 2) {
+          comboTagEl.textContent = `⚡ 2 STREAK!`;
+          comboTagEl.classList.remove('combo-fire', 'combo-ultra');
+          spawnFloatingText(block.x, block.y, block.z, `⚡ STREAK ×2! ⚡`, '#ffd700', true, { isStreak: true, streakLevel: 2 });
+          spawnExpandRing(block.x, block.z, block.y, block.w * 1.15, block.d * 1.15);
+          streakShake = 3.6;
+          particleCount = 30;
+        } else if (perfectCombo === 3) {
+          comboTagEl.textContent = `🔥 3 SUPER STREAK!`;
+          comboTagEl.classList.add('combo-fire');
+          comboTagEl.classList.remove('combo-ultra');
+          spawnFloatingText(block.x, block.y, block.z, `🔥 STREAK ×3! 🔥`, '#ffab00', true, { isStreak: true, streakLevel: 3 });
+          spawnExpandRing(block.x, block.z, block.y, block.w * 1.25, block.d * 1.25);
+          setTimeout(() => spawnExpandRing(block.x, block.z, block.y, block.w * 1.1, block.d * 1.1), 75);
+          streakShake = 4.8;
+          particleCount = 42;
+        } else if (perfectCombo === 4) {
+          comboTagEl.textContent = `🌟 4 MEGA STREAK!`;
+          comboTagEl.classList.add('combo-fire');
+          comboTagEl.classList.remove('combo-ultra');
+          spawnFloatingText(block.x, block.y, block.z, `🌟 STREAK ×4! 🌟`, '#ffd700', true, { isStreak: true, streakLevel: 4 });
+          spawnExpandRing(block.x, block.z, block.y, block.w * 1.32, block.d * 1.32);
+          setTimeout(() => spawnExpandRing(block.x, block.z, block.y, block.w * 1.15, block.d * 1.15), 65);
+          streakShake = 5.8;
+          particleCount = 52;
+        } else {
+          comboTagEl.textContent = `👑 ${perfectCombo} ULTRA STREAK!`;
+          comboTagEl.classList.remove('combo-fire');
+          comboTagEl.classList.add('combo-ultra');
+          spawnFloatingText(block.x, block.y, block.z, `👑 STREAK ×${perfectCombo}! 👑`, '#ff4081', true, { isStreak: true, streakLevel: perfectCombo });
+          spawnExpandRing(block.x, block.z, block.y, block.w * 1.42, block.d * 1.42);
+          setTimeout(() => spawnExpandRing(block.x, block.z, block.y, block.w * 1.22, block.d * 1.22), 60);
+          setTimeout(() => spawnExpandRing(block.x, block.z, block.y, block.w * 1.08, block.d * 1.08), 120);
+          streakShake = 7.0;
+          particleCount = 64;
+        }
       }
 
       flashOverlayEl.style.opacity = isStreakCombo ? '0.65' : '0.50';
@@ -498,7 +499,7 @@
           setMascot('happy', `COMBO ×${perfectCombo}! 🔥`, 800);
         }
       } else {
-        const msg = perfectCombo > 2 ? `COMBO ×${perfectCombo}! ✨` : `MEOWFECT! ✨`;
+        const msg = perfectCombo >= 2 ? `COMBO ×${perfectCombo}! 🔥` : `NICE! 🐾`;
         setMascot('happy', msg, 700);
       }
 

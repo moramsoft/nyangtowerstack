@@ -371,20 +371,6 @@
 
   // --- FLOATING TEXTS (+1, MEOWFECT, STREAKS, SIZE UP) ---
   const floatingTexts = [];
-  function drawFloatingBadgePill(c, x, y, w, h, r) {
-    c.beginPath();
-    if (typeof c.roundRect === 'function') {
-      c.roundRect(x, y, w, h, r);
-    } else {
-      c.moveTo(x + r, y);
-      c.lineTo(x + w - r, y);
-      c.arcTo(x + w, y, x + w, y + h, r);
-      c.arcTo(x + w, y + h, x, y + h, r);
-      c.arcTo(x, y + h, x, y, r);
-      c.arcTo(x, y, x + w, y, r);
-      c.closePath();
-    }
-  }
 
   function spawnFloatingText(x, y, z, text, color = '#ffffff', isBig = false, opts = {}) {
     // Gently dismiss prior floating texts so they don't stack/overlap
@@ -456,107 +442,36 @@
       ctx.globalAlpha = alpha;
 
       // Typography
-      let fontSize = 19;
-      let fontWeight = '800';
+      let fontSize = 22;
+      let fontWeight = '900';
       if (ft.isStreak) {
-        fontSize = ft.streakLevel >= 5 ? 26 : (ft.streakLevel >= 3 ? 24 : 21);
-        fontWeight = '900';
+        fontSize = ft.streakLevel >= 5 ? 30 : (ft.streakLevel >= 3 ? 27 : 24);
       } else if (ft.isBig) {
-        fontSize = 22;
-        fontWeight = '900';
+        fontSize = 25;
       }
 
-      ctx.font = `${fontWeight} ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.font = `${fontWeight} ${fontSize}px "Fredoka", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      // Measure text for pill badge
-      const metrics = ctx.measureText(ft.text);
-      const textW = metrics.width;
-      const padX = ft.isStreak ? 14 : 10;
-      const padY = ft.isStreak ? 7 : 5;
-      const pillW = textW + padX * 2;
-      const pillH = fontSize + padY * 2;
-      const pillR = pillH / 2;
-
-      // Draw frosted pill backdrop
+      // Pure Floating Arcade Typography (no black/dark background box)
       ctx.save();
-      if (ft.isStreak) {
-        const grad = ctx.createLinearGradient(-pillW / 2, 0, pillW / 2, 0);
-        if (ft.streakLevel >= 5) {
-          // Royal rainbow gold
-          grad.addColorStop(0, 'rgba(255, 64, 129, 0.95)');
-          grad.addColorStop(0.5, 'rgba(255, 215, 0, 0.98)');
-          grad.addColorStop(1, 'rgba(0, 229, 255, 0.95)');
-          ctx.shadowColor = '#ffd700';
-          ctx.shadowBlur = 20;
-        } else if (ft.streakLevel >= 3) {
-          // Super fiery gold
-          grad.addColorStop(0, 'rgba(255, 87, 34, 0.95)');
-          grad.addColorStop(0.5, 'rgba(255, 193, 7, 0.98)');
-          grad.addColorStop(1, 'rgba(255, 111, 0, 0.95)');
-          ctx.shadowColor = '#ff9800';
-          ctx.shadowBlur = 16;
-        } else {
-          // Electric cyan gold
-          grad.addColorStop(0, 'rgba(0, 188, 212, 0.92)');
-          grad.addColorStop(0.5, 'rgba(255, 215, 0, 0.95)');
-          grad.addColorStop(1, 'rgba(76, 175, 80, 0.92)');
-          ctx.shadowColor = '#00e5ff';
-          ctx.shadowBlur = 12;
-        }
+      // Outer shadow / glow
+      ctx.shadowColor = ft.isStreak
+        ? (ft.streakLevel >= 5 ? 'rgba(255, 64, 129, 0.9)' : (ft.streakLevel >= 3 ? 'rgba(255, 152, 0, 0.9)' : 'rgba(0, 229, 255, 0.9)'))
+        : (ft.glowColor || 'rgba(255, 215, 0, 0.85)');
+      ctx.shadowBlur = ft.isBig ? 16 : 10;
 
-        ctx.fillStyle = grad;
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2.5;
+      // Heavy contrast dark outline so the text pops on any background without needing a box
+      ctx.lineWidth = 5.0;
+      ctx.strokeStyle = '#0d091a';
+      ctx.lineJoin = 'round';
+      ctx.miterLimit = 2;
+      ctx.strokeText(ft.text, 0, 0);
 
-        drawFloatingBadgePill(ctx, -pillW / 2, -pillH / 2, pillW, pillH, pillR);
-        ctx.fill();
-        ctx.stroke();
-
-      } else if (ft.isBig) {
-        ctx.fillStyle = 'rgba(22, 14, 40, 0.88)';
-        ctx.strokeStyle = ft.color || '#ffe082';
-        ctx.lineWidth = 2;
-        ctx.shadowColor = ft.glowColor || 'rgba(0, 0, 0, 0.85)';
-        ctx.shadowBlur = 12;
-
-        drawFloatingBadgePill(ctx, -pillW / 2, -pillH / 2, pillW, pillH, pillR);
-        ctx.fill();
-        ctx.stroke();
-
-      } else {
-        ctx.fillStyle = 'rgba(16, 11, 30, 0.82)';
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
-        ctx.lineWidth = 1.6;
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-        ctx.shadowBlur = 8;
-
-        drawFloatingBadgePill(ctx, -pillW / 2, -pillH / 2, pillW, pillH, pillR);
-        ctx.fill();
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // Draw text with crisp stroke and fill
-      ctx.save();
-      if (ft.isStreak) {
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
-        ctx.shadowBlur = 8;
-        ctx.lineWidth = 4;
-        ctx.strokeStyle = '#220e36';
-        ctx.strokeText(ft.text, 0, 1);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(ft.text, 0, 1);
-      } else {
-        ctx.shadowColor = ft.glowColor || 'rgba(0, 0, 0, 0.9)';
-        ctx.shadowBlur = ft.isBig ? 12 : 8;
-        ctx.lineWidth = ft.isBig ? 4.5 : 3.5;
-        ctx.strokeStyle = ft.strokeColor || '#140c26';
-        ctx.strokeText(ft.text, 0, 1);
-        ctx.fillStyle = ft.color;
-        ctx.fillText(ft.text, 0, 1);
-      }
+      // Inner text fill
+      ctx.fillStyle = ft.color || '#ffffff';
+      ctx.fillText(ft.text, 0, 0);
       ctx.restore();
 
       ctx.restore();
