@@ -44,7 +44,9 @@
     ctx.resetTransform?.();
     ctx.scale(dpr, dpr);
 
-    baseTileS = Math.min(viewW / 19, 22);
+    // Responsive scale: dynamically scales on tablets/iPads while maintaining optimal phone baseline
+    const referenceDimension = Math.min(viewW, viewH * 0.58);
+    baseTileS = Math.max(18, Math.min(referenceDimension / 18, 36));
   }
   window.addEventListener('resize', handleResize);
   handleResize();
@@ -58,9 +60,12 @@
       rz += towerTiltZ * (py * 0.22);
     }
     const cx = viewW / 2;
-    const cy = viewH * 0.65 + camY * zoom;
+    // On wider/tablet screens (e.g. iPad 4:3 or 3:2), place anchor nicely balanced in lower third
+    const isTablet = viewW >= 600;
+    const cyAnchor = isTablet ? 0.68 : 0.65;
+    const cy = viewH * cyAnchor + camY * zoom;
     const effTileS = baseTileS * zoom;
-    const effH = BLOCK_HEIGHT_PX * zoom;
+    const effH = (baseTileS * 1.05) * zoom;
     return {
       x: cx + (rx - rz) * cos30 * effTileS,
       y: cy + (rx + rz) * sin30 * effTileS - ry * effH

@@ -1086,3 +1086,119 @@
       0% { transform: scale(0.6); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
+
+    /* ============================================================
+       TABLET & IPAD ENHANCED RESPONSIVE SYSTEM (min-width: 600px)
+       ============================================================ */
+    @media (min-width: 600px) {
+      /* Home start screen */
+      .start-content {
+        max-width: 580px;
+        padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 24px);
+      }
+      .title-logo-spacer {
+        height: 30vh;
+        min-height: 220px;
+      }
+      .start-dock {
+        max-width: 540px;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 28px;
+      }
+      .dock-btn {
+        padding: 10px 16px;
+        border-radius: 20px;
+      }
+      .dock-icon {
+        font-size: 30px;
+      }
+      .dock-label {
+        font-size: 13px;
+      }
+      .primary-play-btn {
+        min-width: 340px;
+        font-size: 23px;
+        padding: 18px 36px;
+        border-radius: 36px;
+      }
+      .start-progress-pill {
+        font-size: 15px;
+        padding: 7px 22px;
+      }
+
+      /* Stage Select World Grid */
+      #select-list, .select-legend, .select-header {
+        max-width: 820px;
+      }
+      .select-title {
+        font-size: 22px;
+      }
+      .stage-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+      }
+      .stage-btn {
+        padding: 12px 6px;
+        border-radius: 18px;
+      }
+      .stage-btn .sb-num {
+        font-size: 17px;
+      }
+      .stage-btn .sb-stars {
+        font-size: 13px;
+      }
+      .stage-btn .sb-type {
+        font-size: 12px;
+      }
+
+      /* Expedition Prep (Ready) Modal */
+      .ready-card-box {
+        max-width: 520px;
+        padding: 24px 22px;
+      }
+      .ready-stage-badge {
+        font-size: 14px;
+        padding: 6px 16px;
+      }
+      .ready-stage-title {
+        font-size: 24px;
+      }
+      .ready-stage-target {
+        font-size: 17px;
+      }
+      .ready-chip {
+        min-width: 76px;
+        padding: 8px 10px;
+      }
+      .ready-chip-avatar {
+        width: 48px;
+        height: 48px;
+      }
+
+      /* Game Over & Stage Clear Modals */
+      .gameover-box {
+        max-width: 480px;
+        padding: 38px 36px;
+      }
+      .gameover-title {
+        font-size: 32px;
+      }
+      .score-val {
+        font-size: 64px;
+      }
+      .reward-chips-row {
+        gap: 16px;
+      }
+      .reward-chip-card {
+        padding: 12px 20px;
+        min-width: 140px;
+      }
+      .reward-chip-img {
+        width: 44px;
+        height: 44px;
+      }
+      .reward-chip-val {
+        font-size: 24px;
+      }
+    }

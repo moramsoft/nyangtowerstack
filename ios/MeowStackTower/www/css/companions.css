@@ -338,3 +338,21 @@
       margin-bottom: 18px;
       line-height: 1.3;
     }
+
+    /* Tablet & iPad Responsive for Companions */
+    @media (min-width: 600px) {
+      .companion-box {
+        max-width: 680px;
+        max-height: 86vh;
+        padding: 24px 22px;
+      }
+      .companion-title {
+        font-size: 22px;
+      }
+      .companion-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        max-height: 64vh;
+      }
+    }
