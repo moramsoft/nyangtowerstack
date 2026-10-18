@@ -220,7 +220,7 @@ async function runProfileTests(profile, port) {
         hasBtnGacha: !!btnGacha,
         hasBtnCats: !!btnCats,
         hasBtnSettings: !!btnSettings,
-        hasVersionTag: !!versionTag && (versionTag.textContent || '').includes('v1.2.0'),
+        hasVersionTag: !!versionTag && /^v\d+\.\d+\.\d+/.test((versionTag.textContent || '').trim()),
         versionText: versionTag?.textContent || '',
         hasGameHarness: !!window.__game
       };

@@ -1,6 +1,6 @@
 // Stack Tower - Game Configuration & I18N Data
 
-  const APP_VERSION = 'v1.2.0';
+  const APP_VERSION = 'v1.3.0';
 
   const ASSET_PATHS = {
     smile: 'assets/chara_smile.png',
@@ -276,7 +276,7 @@
       settingResetBtn: "🔄 Reset Game Progress",
       settingResetConfirm: "Are you sure you want to reset all game data (stars, companions, churu coins)? This cannot be undone!",
       settingResetSuccess: "Game progress has been reset, meow! 🐾",
-      settingVersion: "Meow Stack Tower v1.2.0 · Designed with 💖"
+      settingVersion: "Meow Stack Tower v1.3.0 · Designed with 💖"
     },
     ko: {
       menu: "메뉴",
@@ -437,7 +437,7 @@
       settingResetBtn: "🔄 게임 데이터 초기화",
       settingResetConfirm: "정말 모든 게임 데이터(별, 동료 고양이, 츄르 등)를 초기화하시겠습니까? 되돌릴 수 없습니다!",
       settingResetSuccess: "게임 데이터가 초기화되었습니다냥! 🐾",
-      settingVersion: "Meow Stack Tower v1.2.0 · Designed with 💖"
+      settingVersion: "Meow Stack Tower v1.3.0 · Designed with 💖"
     }
   };
 

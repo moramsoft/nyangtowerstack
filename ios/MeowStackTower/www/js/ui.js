@@ -668,7 +668,7 @@
         : `⭐ ${totalStars()} / ${TOTAL_STAGES * 3}  ·  Cleared ${clearedCount()} / ${TOTAL_STAGES}`;
     }
     if ($('start-version-tag')) {
-      $('start-version-tag').textContent = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : 'v1.2.0';
+      $('start-version-tag').textContent = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : 'v1.3.0';
     }
     applyCompanionVisual();
   }
