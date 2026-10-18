@@ -28,27 +28,33 @@
   }
 
   function handleResize() {
-    viewW = window.innerWidth;
-    viewH = window.innerHeight;
+    viewW = window.innerWidth || document.documentElement.clientWidth || 375;
+    viewH = window.innerHeight || document.documentElement.clientHeight || 667;
     dpr = window.devicePixelRatio || 1;
 
     if (bgCanvas && bgCtx) {
       bgCanvas.width = Math.round(viewW * dpr);
       bgCanvas.height = Math.round(viewH * dpr);
-      bgCtx.resetTransform?.();
-      bgCtx.scale(dpr, dpr);
+      bgCanvas.style.width = viewW + 'px';
+      bgCanvas.style.height = viewH + 'px';
+      bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    canvas.width = Math.round(viewW * dpr);
-    canvas.height = Math.round(viewH * dpr);
-    ctx.resetTransform?.();
-    ctx.scale(dpr, dpr);
+    if (canvas && ctx) {
+      canvas.width = Math.round(viewW * dpr);
+      canvas.height = Math.round(viewH * dpr);
+      canvas.style.width = viewW + 'px';
+      canvas.style.height = viewH + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
 
     // Responsive scale: dynamically scales on tablets/iPads while maintaining optimal phone baseline
     const referenceDimension = Math.min(viewW, viewH * 0.58);
     baseTileS = Math.max(18, Math.min(referenceDimension / 18, 36));
   }
+  window.handleResize = handleResize;
   window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', () => setTimeout(handleResize, 150));
   handleResize();
 
   function project3D(px, py, pz, camY, zoom = currentZoom) {

@@ -1120,7 +1120,18 @@
     const bgTop = `hsl(${currentTopHue.toFixed(1)}, ${satTop.toFixed(1)}%, ${lightTop.toFixed(1)}%)`;
     const bgBot = `hsl(${currentBotHue.toFixed(1)}, ${satBot.toFixed(1)}%, ${lightBot.toFixed(1)}%)`;
 
+    // Dynamic resize check if window or DPR changes (e.g. tablet orientation, split-screen)
+    if (typeof handleResize === 'function' && (window.innerWidth !== viewW || window.innerHeight !== viewH)) {
+      handleResize();
+    }
+
     const skyCtx = bgCtx || ctx;
+
+    // Ensure 100% deterministic high-DPI transform every single frame across WebKit / Safari
+    if (bgCanvas && bgCtx) {
+      bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     // 1. Primary Atmosphere Radial Gradient
     const bgGrad = skyCtx.createRadialGradient(
@@ -1196,8 +1207,11 @@
     updateFloatingItems(dt);
     drawFloatingItems(skyCtx);
 
-    // Clear game canvas for transparent background behind 3D tower!
-    ctx.clearRect(0, 0, viewW, viewH);
+    // Clear entire game canvas buffer for transparent background behind 3D tower
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
 
     if (gameState === 'PLAYING' && mode === 'STAGE' && cfg.stageType === 'bonus') {
       updateBonusGame(dt, time);
