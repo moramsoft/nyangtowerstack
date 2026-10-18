@@ -23,6 +23,8 @@ const FirebaseTracker = {
           name: String(name),
           params: params
         });
+      } else if (typeof window.gtag === 'function') {
+        window.gtag('event', String(name), params);
       } else {
         console.log(`[Firebase Analytics (Dev)] ${name}`, params);
       }
@@ -44,6 +46,12 @@ const FirebaseTracker = {
           stack: stack
         });
       } else {
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'exception', {
+            description: fullContext,
+            fatal: false
+          });
+        }
         console.warn(`[Firebase Crashlytics (Dev)] ${fullContext}\n${stack}`);
       }
     } catch (e) {
