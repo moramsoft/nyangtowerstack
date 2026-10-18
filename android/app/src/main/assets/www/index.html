@@ -403,9 +403,53 @@
         <div id="clear-stage" class="gameover-stage"></div>
         
         <div id="clear-stars" class="clear-stars-row">
-          <div class="cstar" id="cstar-1"><span class="cstar-char">★</span></div>
-          <div class="cstar" id="cstar-2"><span class="cstar-char">★</span></div>
-          <div class="cstar" id="cstar-3"><span class="cstar-char">★</span></div>
+          <div class="cstar" id="cstar-1">
+            <span class="cstar-char" style="display:none;">★</span>
+            <svg class="cstar-paw" viewBox="-36 -38 72 72" aria-hidden="true">
+              <defs>
+                <linearGradient id="pawGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#fff9c4"/>
+                  <stop offset="35%" stop-color="#ffd54f"/>
+                  <stop offset="100%" stop-color="#ff9800"/>
+                </linearGradient>
+                <linearGradient id="pawBeanGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#ffffff"/>
+                  <stop offset="100%" stop-color="#ffe082"/>
+                </linearGradient>
+              </defs>
+              <ellipse class="paw-palm" cx="0" cy="8" rx="22" ry="17"/>
+              <path class="paw-dip" d="M -10 1 Q 0 7 10 1 Q 0 -2 -10 1 Z"/>
+              <ellipse class="paw-toe" cx="-23" cy="-14" rx="9" ry="12" transform="rotate(-25, -23, -14)"/>
+              <ellipse class="paw-toe" cx="-8" cy="-22" rx="9" ry="12.5" transform="rotate(-8, -8, -22)"/>
+              <ellipse class="paw-toe" cx="8" cy="-22" rx="9" ry="12.5" transform="rotate(8, 8, -22)"/>
+              <ellipse class="paw-toe" cx="23" cy="-14" rx="9" ry="12" transform="rotate(25, 23, -14)"/>
+              <circle class="paw-shine" cx="-8" cy="5" r="3.2"/>
+            </svg>
+          </div>
+          <div class="cstar" id="cstar-2">
+            <span class="cstar-char" style="display:none;">★</span>
+            <svg class="cstar-paw" viewBox="-36 -38 72 72" aria-hidden="true">
+              <ellipse class="paw-palm" cx="0" cy="8" rx="22" ry="17"/>
+              <path class="paw-dip" d="M -10 1 Q 0 7 10 1 Q 0 -2 -10 1 Z"/>
+              <ellipse class="paw-toe" cx="-23" cy="-14" rx="9" ry="12" transform="rotate(-25, -23, -14)"/>
+              <ellipse class="paw-toe" cx="-8" cy="-22" rx="9" ry="12.5" transform="rotate(-8, -8, -22)"/>
+              <ellipse class="paw-toe" cx="8" cy="-22" rx="9" ry="12.5" transform="rotate(8, 8, -22)"/>
+              <ellipse class="paw-toe" cx="23" cy="-14" rx="9" ry="12" transform="rotate(25, 23, -14)"/>
+              <circle class="paw-shine" cx="-8" cy="5" r="3.2"/>
+            </svg>
+          </div>
+          <div class="cstar" id="cstar-3">
+            <span class="cstar-char" style="display:none;">★</span>
+            <svg class="cstar-paw" viewBox="-36 -38 72 72" aria-hidden="true">
+              <ellipse class="paw-palm" cx="0" cy="8" rx="22" ry="17"/>
+              <path class="paw-dip" d="M -10 1 Q 0 7 10 1 Q 0 -2 -10 1 Z"/>
+              <ellipse class="paw-toe" cx="-23" cy="-14" rx="9" ry="12" transform="rotate(-25, -23, -14)"/>
+              <ellipse class="paw-toe" cx="-8" cy="-22" rx="9" ry="12.5" transform="rotate(-8, -8, -22)"/>
+              <ellipse class="paw-toe" cx="8" cy="-22" rx="9" ry="12.5" transform="rotate(8, 8, -22)"/>
+              <ellipse class="paw-toe" cx="23" cy="-14" rx="9" ry="12" transform="rotate(25, 23, -14)"/>
+              <circle class="paw-shine" cx="-8" cy="5" r="3.2"/>
+            </svg>
+          </div>
         </div>
         <div id="clear-purrfect-banner" class="clear-purrfect-banner" style="display:none;">PURR-FECT! 👑</div>
 
