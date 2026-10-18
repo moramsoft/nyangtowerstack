@@ -888,7 +888,7 @@ async function runProfileTests(profile, port) {
     record('TC-23', '3-Star Companion Active Skill (Magnetic Snap Guaranteed Meowfect)', false, e.message);
   }
 
-  // TC-24: Web Audio Marimba BGM & Background Tab Visibility Pause/Resume
+  // TC-24: Web Audio Dual-Track BGM (Gameplay vs Menu) & Background Tab Visibility Pause/Resume
   try {
     const res = await evaluate(async () => {
       window.__game.startStage(0);
@@ -901,6 +901,11 @@ async function runProfileTests(profile, port) {
       await new Promise(r => setTimeout(r, 150));
 
       const bgmBefore = window.__gameAudio.isBgmPlaying();
+      const gameplayTrack = (typeof window.__gameAudio.getBgmTrack === 'function') ? window.__gameAudio.getBgmTrack() : null;
+
+      // Switch to menu/stage select
+      window.__game.openSelect();
+      const menuTrack = (typeof window.__gameAudio.getBgmTrack === 'function') ? window.__gameAudio.getBgmTrack() : null;
 
       // Simulate tab switch out
       Object.defineProperty(document, 'hidden', { value: true, configurable: true });
@@ -915,12 +920,13 @@ async function runProfileTests(profile, port) {
 
       const bgmRestored = window.__gameAudio.isBgmPlaying();
 
-      return { bgmBefore, bgmHidden, bgmRestored };
+      return { bgmBefore, bgmHidden, bgmRestored, gameplayTrack, menuTrack };
     });
-    const pass = res.bgmBefore === true && res.bgmHidden === false && res.bgmRestored === true;
-    record('TC-24', 'Web Audio Marimba BGM & Background Tab Visibility Pause/Resume', pass, `BGM: ${res.bgmBefore} -> ${res.bgmHidden} -> ${res.bgmRestored}`);
+    const pass = res.bgmBefore === true && res.bgmHidden === false && res.bgmRestored === true &&
+                 res.gameplayTrack === 'gameplay' && res.menuTrack === 'menu';
+    record('TC-24', 'Web Audio Dual-Track BGM (Gameplay vs Menu) & Background Tab Visibility Pause/Resume', pass, `BGM: ${res.bgmBefore} -> ${res.bgmHidden} -> ${res.bgmRestored}, Tracks: ${res.gameplayTrack} / ${res.menuTrack}`);
   } catch (e) {
-    record('TC-24', 'Web Audio Marimba BGM & Background Tab Visibility Pause/Resume', false, e.message);
+    record('TC-24', 'Web Audio Dual-Track BGM (Gameplay vs Menu) & Background Tab Visibility Pause/Resume', false, e.message);
   }
 
   // TC-25: Platform Native Bridge & Error Integrity (Zero Uncaught Errors)

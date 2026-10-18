@@ -37,17 +37,32 @@
     }
   }
 
-  // --- PROCEDURAL AMBIENT MARIMBA BGM ENGINE ---
+  // --- PROCEDURAL DUAL BGM ENGINE (Gameplay vs. Stage Select / Menu) ---
   let bgmTimer = null;
   let bgmStep = 0;
-  const BGM_CHORDS = [
+  let currentBgmTrack = 'menu'; // 'gameplay' | 'menu'
+
+  // Track A: In-Game Climbing Rhythm (Energetic, rhythmic, crisp wooden marimba)
+  const GAMEPLAY_BGM_CHORDS = [
     [261.63, 392.00, 493.88, 587.33], // C4, G4, B4, D5 (C maj9)
     [220.00, 329.63, 392.00, 523.25], // A3, E4, G4, C5 (A min7)
     [174.61, 261.63, 329.63, 440.00], // F3, C4, E4, A4 (F maj7)
     [196.00, 293.66, 392.00, 523.25]  // G3, D4, G4, C5 (G sus4)
   ];
+  const GAMEPLAY_STEP_INTERVAL = 440;
+  const GAMEPLAY_ARP_PATTERN = [0, 2, 1, 3];
 
-  function playBgmNote(freq, time, dur = 0.45, isRoot = false) {
+  // Track B: Outside Stage Select & World Map (Dreamy, cozy, sparkling music box waltz)
+  const MENU_BGM_CHORDS = [
+    [349.23, 440.00, 523.25, 659.25], // F4, A4, C5, E5 (F maj9)
+    [293.66, 392.00, 493.88, 587.33], // D4, G4, B4, D5 (G6 / D)
+    [329.63, 392.00, 493.88, 659.25], // E4, G4, B4, E5 (E min7)
+    [220.00, 329.63, 523.25, 587.33]  // A3, E4, C5, D5 (A min9)
+  ];
+  const MENU_STEP_INTERVAL = 580;
+  const MENU_ARP_PATTERN = [0, 1, 3, 2];
+
+  function playGameplayBgmNote(freq, time, dur = 0.44, isRoot = false) {
     if (!audioCtx) return;
     try {
       // 1. Primary Marimba Note (warm triangle tone)
@@ -62,7 +77,7 @@
       filter.frequency.setValueAtTime(1150, time);
 
       gain.gain.setValueAtTime(0.0001, time);
-      gain.gain.linearRampToValueAtTime(0.16, time + 0.035);
+      gain.gain.linearRampToValueAtTime(0.15, time + 0.035);
       gain.gain.exponentialRampToValueAtTime(0.0001, time + dur);
 
       osc.connect(filter);
@@ -86,7 +101,7 @@
       oscHarm.start(time);
       oscHarm.stop(time + 0.17);
 
-      // 3. Gentle Root Bass Pad on Chord Downbeat (creates cozy musical depth)
+      // 3. Gentle Root Bass Pad on Chord Downbeat
       if (isRoot) {
         const bassOsc = audioCtx.createOscillator();
         const bassGain = audioCtx.createGain();
@@ -104,10 +119,98 @@
     } catch (e) { /* ignore */ }
   }
 
-  function startBgm() {
+  function playMenuBgmNote(freq, time, dur = 0.58, isRoot = false) {
+    if (!audioCtx) return;
+    try {
+      // 1. Soft Music Box & Kalimba (crystalline sine tone with warm bell resonance)
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const filter = audioCtx.createBiquadFilter();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, time);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(1900, time);
+      filter.Q.setValueAtTime(1.2, time);
+
+      gain.gain.setValueAtTime(0.0001, time);
+      gain.gain.linearRampToValueAtTime(0.12, time + 0.045);
+      gain.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(time);
+      osc.stop(time + dur);
+
+      // 2. Sparkling High Bell Chime partial (celeste octave overtone)
+      const oscBell = audioCtx.createOscillator();
+      const gainBell = audioCtx.createGain();
+      oscBell.type = 'sine';
+      oscBell.frequency.setValueAtTime(freq * 2.0, time);
+      gainBell.gain.setValueAtTime(0.0001, time);
+      gainBell.gain.linearRampToValueAtTime(0.032, time + 0.025);
+      gainBell.gain.exponentialRampToValueAtTime(0.0001, time + 0.28);
+
+      oscBell.connect(gainBell);
+      gainBell.connect(audioCtx.destination);
+      oscBell.start(time);
+      oscBell.stop(time + 0.30);
+
+      // 3. Dreamy warm low harp bass note on the downbeat
+      if (isRoot) {
+        const harpOsc = audioCtx.createOscillator();
+        const harpGain = audioCtx.createGain();
+        harpOsc.type = 'triangle';
+        harpOsc.frequency.setValueAtTime(freq * 0.5, time);
+        harpGain.gain.setValueAtTime(0.0001, time);
+        harpGain.gain.linearRampToValueAtTime(0.075, time + 0.09);
+        harpGain.gain.exponentialRampToValueAtTime(0.0001, time + 1.4);
+
+        harpOsc.connect(harpGain);
+        harpGain.connect(audioCtx.destination);
+        harpOsc.start(time);
+        harpOsc.stop(time + 1.45);
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  function setBgmTrack(track) {
+    if (track !== 'gameplay' && track !== 'menu') track = 'menu';
+    currentBgmTrack = track;
+    bgmStep = 0;
+    if (bgmTimer) {
+      stopBgm();
+      startBgm(track);
+    }
+  }
+
+  function getBgmTrack() {
+    return currentBgmTrack;
+  }
+
+  function startBgm(overrideTrack) {
     if (bgmTimer) return;
     if (typeof document !== 'undefined' && document.hidden) return;
     if (!isBgmEnabled() || !audioCtx) return;
+
+    if (overrideTrack) {
+      currentBgmTrack = overrideTrack;
+      bgmStep = 0;
+    } else if (typeof gameState !== 'undefined') {
+      const target = (gameState === 'PLAYING') ? 'gameplay' : 'menu';
+      if (currentBgmTrack !== target) {
+        currentBgmTrack = target;
+        bgmStep = 0;
+      }
+    }
+
+    const isMenu = (currentBgmTrack === 'menu');
+    const chords = isMenu ? MENU_BGM_CHORDS : GAMEPLAY_BGM_CHORDS;
+    const interval = isMenu ? MENU_STEP_INTERVAL : GAMEPLAY_STEP_INTERVAL;
+    const arpPattern = isMenu ? MENU_ARP_PATTERN : GAMEPLAY_ARP_PATTERN;
 
     function scheduleBgmPattern() {
       if (typeof document !== 'undefined' && document.hidden) {
@@ -118,17 +221,32 @@
         stopBgm();
         return;
       }
+
+      if (typeof gameState !== 'undefined') {
+        const expected = (gameState === 'PLAYING') ? 'gameplay' : 'menu';
+        if (currentBgmTrack !== expected) {
+          setBgmTrack(expected);
+          return;
+        }
+      }
+
       const now = audioCtx.currentTime;
-      const chordIdx = Math.floor(bgmStep / 4) % BGM_CHORDS.length;
-      const noteIdx = bgmStep % 4;
-      const chord = BGM_CHORDS[chordIdx];
+      const chordIdx = Math.floor(bgmStep / 4) % chords.length;
+      const stepInChord = bgmStep % 4;
+      const noteIdx = arpPattern[stepInChord];
+      const chord = chords[chordIdx];
       const freq = chord[noteIdx];
-      playBgmNote(freq, now + 0.04, 0.44, noteIdx === 0);
+
+      if (isMenu) {
+        playMenuBgmNote(freq, now + 0.04, 0.58, stepInChord === 0);
+      } else {
+        playGameplayBgmNote(freq, now + 0.04, 0.44, stepInChord === 0);
+      }
       bgmStep = (bgmStep + 1) % 16;
     }
 
     scheduleBgmPattern();
-    bgmTimer = setInterval(scheduleBgmPattern, 480);
+    bgmTimer = setInterval(scheduleBgmPattern, interval);
   }
 
   function stopBgm() {

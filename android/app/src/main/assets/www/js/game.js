@@ -40,6 +40,7 @@
   }
 
   function startStage(id) {
+    if (typeof setBgmTrack === 'function') setBgmTrack('gameplay');
     mode = 'STAGE';
     const rawCfg = buildStageConfig(id);
     if (rawCfg.stageType === 'bonus' && isBonusStageAlreadyPlayed(id)) {
@@ -74,6 +75,7 @@
     initGame();
   }
   function startEndless() {
+    if (typeof setBgmTrack === 'function') setBgmTrack('gameplay');
     mode = 'ENDLESS';
     cfg = ENDLESS_CFG;
     FirebaseTracker.setCustomKey('game_mode', 'ENDLESS');
@@ -182,6 +184,7 @@
     targetZoom = 1.0;
 
     gameState = 'PLAYING';
+    if (typeof setBgmTrack === 'function') setBgmTrack('gameplay');
     hideOverlays();
     updateHud();
 
@@ -1515,7 +1518,9 @@
     getMusicalStep: () => musicalStep,
     getAudioContext: () => (typeof audioCtx !== 'undefined' ? audioCtx : null),
     isBgmPlaying: () => (typeof bgmTimer !== 'undefined' ? !!bgmTimer : false),
-    handleVisibilityChange: (typeof handleVisibilityChange === 'function' ? handleVisibilityChange : null)
+    handleVisibilityChange: (typeof handleVisibilityChange === 'function' ? handleVisibilityChange : null),
+    setBgmTrack: (typeof setBgmTrack === 'function' ? setBgmTrack : () => {}),
+    getBgmTrack: (typeof getBgmTrack === 'function' ? getBgmTrack : () => 'menu')
   };
 
   // Test harness bridge for automated E2E testing

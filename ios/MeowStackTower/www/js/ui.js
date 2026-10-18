@@ -675,6 +675,7 @@
     const bs = $('boss-speech'); if (bs) bs.style.opacity = '0';
     resetScene();
     gameState = 'START';
+    if (typeof setBgmTrack === 'function') setBgmTrack('menu');
     hideOverlays();
     refreshStartScreen();
     startScreenEl.classList.remove('screen-entering');
@@ -690,6 +691,7 @@
     const bs = $('boss-speech'); if (bs) bs.style.opacity = '0';
     resetScene();
     gameState = 'SELECT';
+    if (typeof setBgmTrack === 'function') setBgmTrack('menu');
     hideOverlays();
     renderSelect();
     selectScreenEl.classList.remove('screen-entering');
