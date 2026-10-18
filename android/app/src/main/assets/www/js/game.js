@@ -839,23 +839,15 @@
       const blocksUsed = Math.max(1, bossBlocksPlaced);
       $('clear-stats').innerHTML = `
         <div class="clear-paw-card boss-paw-card clear-stat-pill">
-          <div class="clear-paw-toes">
-            <span class="clear-paw-bean toe-b1"></span>
-            <span class="clear-paw-bean toe-b2"></span>
-            <span class="clear-paw-bean toe-b3"></span>
-            <span class="clear-paw-bean toe-b4"></span>
+          <div class="clear-paw-icon-badge boss-icon">
+            👑
           </div>
-          <div class="clear-paw-pad">
-            <div class="clear-paw-icon-badge boss-icon">
-              👑
-            </div>
-            <div class="clear-paw-data">
-              <span class="clear-paw-title">${isKo ? '보스 격파 달성' : 'BOSS KNOCKOUT'}</span>
-              <div class="clear-paw-score-row">
-                <span class="clear-paw-num">${blocksUsed}</span>
-                <span class="clear-paw-target" style="font-size:16px; margin-left:2px;">${isKo ? '블록만으로 성공!' : 'Blocks Used!'}</span>
-                ${improved && prev > 0 ? `<span class="clear-paw-new-pill">★ NEW</span>` : ''}
-              </div>
+          <div class="clear-paw-data">
+            <span class="clear-paw-title">${isKo ? '보스 격파 달성' : 'BOSS KNOCKOUT'}</span>
+            <div class="clear-paw-score-row">
+              <span class="clear-paw-num">${blocksUsed}</span>
+              <span class="clear-paw-target" style="font-size:16px; margin-left:2px;">${isKo ? '블록만으로 성공!' : 'Blocks Used!'}</span>
+              ${improved && prev > 0 ? `<span class="clear-paw-new-pill">★ NEW</span>` : ''}
             </div>
           </div>
         </div>
@@ -863,31 +855,16 @@
     } else {
       $('clear-stats').innerHTML = `
         <div class="clear-paw-card clear-stat-pill">
-          <div class="clear-paw-toes">
-            <span class="clear-paw-bean toe-b1"></span>
-            <span class="clear-paw-bean toe-b2"></span>
-            <span class="clear-paw-bean toe-b3"></span>
-            <span class="clear-paw-bean toe-b4"></span>
+          <div class="clear-paw-icon-badge">
+            <img src="assets/badge_paw_glow.png" class="clear-paw-badge-img" alt="Meowfect">
           </div>
-          <div class="clear-paw-pad">
-            <div class="clear-paw-icon-badge">
-              <svg viewBox="-36 -38 72 72" class="clear-paw-badge-svg" aria-hidden="true">
-                <ellipse cx="0" cy="8" rx="22" ry="17" fill="#ffffff"/>
-                <ellipse cx="-23" cy="-14" rx="9" ry="12" fill="#ffffff" transform="rotate(-25, -23, -14)"/>
-                <ellipse cx="-8" cy="-22" rx="9" ry="12.5" fill="#ffffff" transform="rotate(-8, -8, -22)"/>
-                <ellipse cx="8" cy="-22" rx="9" ry="12.5" fill="#ffffff" transform="rotate(8, 8, -22)"/>
-                <ellipse cx="23" cy="-14" rx="9" ry="12" fill="#ffffff" transform="rotate(25, 23, -14)"/>
-                <circle cx="-6" cy="6" r="3" fill="#ff4081" opacity="0.6"/>
-              </svg>
-            </div>
-            <div class="clear-paw-data">
-              <span class="clear-paw-title">${isKo ? '묘펙트 달성' : 'MEOWFECT'}</span>
-              <div class="clear-paw-score-row">
-                <span class="clear-paw-num">${perfectTotal}</span>
-                <span class="clear-paw-sep">/</span>
-                <span class="clear-paw-target">${cfg.target}</span>
-                ${improved && prev > 0 ? `<span class="clear-paw-new-pill">★ NEW</span>` : ''}
-              </div>
+          <div class="clear-paw-data">
+            <span class="clear-paw-title">${isKo ? '묘펙트 달성' : 'MEOWFECT'}</span>
+            <div class="clear-paw-score-row">
+              <span class="clear-paw-num">${perfectTotal}</span>
+              <span class="clear-paw-sep">/</span>
+              <span class="clear-paw-target">${cfg.target}</span>
+              ${improved && prev > 0 ? `<span class="clear-paw-new-pill">★ NEW</span>` : ''}
             </div>
           </div>
         </div>
