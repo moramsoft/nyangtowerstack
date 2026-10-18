@@ -61,7 +61,7 @@
     let bossInfo = null;
 
     if (stageType === 'boss') {
-      target = 16 + Math.floor(w * 1.5);
+      target = 24 + Math.floor(w * 2.0);
       bossInfo = WORLD_BOSS_NAMES[w] || WORLD_BOSS_NAMES[0];
     } else if (stageType === 'bonus') {
       target = 100; // Goal score for 2 stars in minigame

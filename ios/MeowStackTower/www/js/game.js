@@ -22,6 +22,7 @@
     lastTapTime = 0;
     const bioReset = $('boss-intro-overlay');
     if (bioReset) bioReset.style.display = 'none';
+    bossBlocksPlaced = 0;
     towerTiltX = 0;
     towerTiltZ = 0;
     towerTiltTargetX = 0;
@@ -139,6 +140,7 @@
       bossMaxHp = cfg.boss ? cfg.target : 0;
       bossCurrentHp = bossMaxHp;
       bossFrenzy = false;
+      bossBlocksPlaced = 0;
       precisionStreakAchieved = false;
       lastTickSecond = -1;
 
@@ -435,6 +437,7 @@
       // Archetype handling for PERFECT placement
       if (mode === 'STAGE') {
         if (cfg.stageType === 'boss') {
+          bossBlocksPlaced++;
           const dmg = getSelectedCat().roleWorld === 5 ? 3 : 2;
           bossCurrentHp = Math.max(0, bossCurrentHp - dmg);
           const bh = $('boss-hud');
@@ -443,7 +446,6 @@
           if (bossCurrentHp <= 0) {
             const defQ = (cfg && cfg.bossInfo && getBossQuote(cfg.bossInfo, 'defeatQuote')) || (getLang() === 'ko' ? '😾 냐아아앙~~ 항복이다냥! 🏳️💦' : '😾 Meowch~~ I surrender, meow! 🏳️💦');
             setBossState('defeat', defQ);
-            score = cfg.target;
             tower.push({ x: block.x, z: block.z, y: block.y, w: block.w, d: block.d, color: block.color, blockType: block.blockType, meltTimer: block.meltTimer });
             finishPlacement(block);
             return;
@@ -561,6 +563,7 @@
     // Archetype handling for NORMAL placement
     if (mode === 'STAGE') {
       if (cfg.stageType === 'boss') {
+        bossBlocksPlaced++;
         const dmg = 1;
         bossCurrentHp = Math.max(0, bossCurrentHp - dmg);
         const bh = $('boss-hud');
@@ -662,7 +665,6 @@
     });
 
     if (mode === 'STAGE' && cfg.stageType === 'boss' && bossCurrentHp <= 0) {
-      score = cfg.target;
       finishPlacement(block);
       return;
     }
@@ -682,6 +684,19 @@
     let stars;
     if (cfg.stageType === 'bonus') {
       stars = bonusScore >= 150 ? 3 : (bonusScore >= 60 ? 2 : 1);
+    } else if (cfg.stageType === 'boss') {
+      // Boss battle star rating: Speed / Efficiency bonus!
+      // Quick, high-combo victory with critical Meowfect hits earns higher stars.
+      const blocksUsed = Math.max(1, bossBlocksPlaced);
+      const minPossibleBlocks = Math.ceil(cfg.target / 2); // all critical hits
+      const ratio = minPossibleBlocks / blocksUsed;
+      if (ratio >= 0.70 || blocksUsed <= minPossibleBlocks + 3) {
+        stars = 3; // Rapid boss knockout with mostly Meowfect critical hits
+      } else if (ratio >= 0.45 || blocksUsed <= minPossibleBlocks + 8) {
+        stars = 2; // Decent speed boss knockout
+      } else {
+        stars = 1; // Defeated boss with slow/normal chip damage
+      }
     } else {
       const ratio = perfectTotal / cfg.target;
       stars = ratio >= 0.4 ? 3 : (ratio >= 0.2 ? 2 : 1);
@@ -816,6 +831,14 @@
           </div>
         `;
       }
+    } else if (cfg.stageType === 'boss') {
+      const blocksUsed = Math.max(1, bossBlocksPlaced);
+      $('clear-stats').innerHTML = `
+        <div class="clear-stat-pill">
+          ⚡ ${blocksUsed} ${isKo ? '블록만으로 격파!' : 'Blocks to Knockout!'}
+          ${improved && prev > 0 ? `<span style="color:#69f0ae; margin-left:4px;">★ NEW</span>` : ''}
+        </div>
+      `;
     } else {
       $('clear-stats').innerHTML = `
         <div class="clear-stat-pill">

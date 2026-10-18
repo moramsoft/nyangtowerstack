@@ -30,6 +30,7 @@
   let bossCurrentHp = 0;
   let bossMaxHp = 0;
   let bossFrenzy = false;
+  let bossBlocksPlaced = 0;
   let precisionStreakAchieved = false;
   let lastTickSecond = -1;
 
