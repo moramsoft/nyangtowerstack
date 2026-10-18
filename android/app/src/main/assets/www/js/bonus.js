@@ -151,6 +151,11 @@
           bonusHearts--;
           triggerShake(5.5, 0.3);
           triggerHaptic([60, 40, 80]);
+          FirebaseTracker.logEvent('bonus_hazard_hit', {
+            stage_id: (typeof cfg !== 'undefined' && cfg) ? cfg.id : 0,
+            hearts_remaining: bonusHearts,
+            bonus_score: bonusScore
+          });
 
           floatingTexts.push({
             text: '🐭 -1 ❤️',

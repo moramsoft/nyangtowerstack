@@ -986,6 +986,12 @@
       save.unlockedCats.push(chosen.id);
     } else {
       save.churu = (save.churu || 0) + 25; // Duplicate refund
+      FirebaseTracker.logEvent('churu_earned', {
+        source: 'gacha_duplicate',
+        amount: 25,
+        total_churu: save.churu,
+        cat_id: chosen.id
+      });
     }
     return { cat: chosen, isDuplicate: isDuplicate };
   }
@@ -1358,6 +1364,7 @@
       applyLanguage();
       renderSettingsModal();
       playMarimbaNote(587.33, true);
+      FirebaseTracker.logEvent('settings_changed', { setting_name: 'language', new_value: 'ko' });
     }
   }, 0);
 
@@ -1368,6 +1375,7 @@
       applyLanguage();
       renderSettingsModal();
       playMarimbaNote(587.33, true);
+      FirebaseTracker.logEvent('settings_changed', { setting_name: 'language', new_value: 'en' });
     }
   }, 0);
 
@@ -1377,6 +1385,7 @@
     updateBgmPlayback();
     renderSettingsModal();
     playMarimbaNote(659.25, true);
+    FirebaseTracker.logEvent('settings_changed', { setting_name: 'bgm', new_value: save.settings.bgm });
   }, 0);
 
   bindBtn('toggle-sfx', () => {
@@ -1384,6 +1393,7 @@
     persist();
     renderSettingsModal();
     if (save.settings.sfx) playMarimbaNote(659.25, true);
+    FirebaseTracker.logEvent('settings_changed', { setting_name: 'sfx', new_value: save.settings.sfx });
   }, 0);
 
   bindBtn('toggle-haptics', () => {
@@ -1392,6 +1402,7 @@
     if (save.settings.haptics) triggerHaptic(35);
     renderSettingsModal();
     playMarimbaNote(523.25, true);
+    FirebaseTracker.logEvent('settings_changed', { setting_name: 'haptics', new_value: save.settings.haptics });
   }, 0);
 
   bindBtn('toggle-shake', () => {
@@ -1400,6 +1411,7 @@
     if (save.settings.screenShake) triggerShake(4, 0.2);
     renderSettingsModal();
     playMarimbaNote(523.25, true);
+    FirebaseTracker.logEvent('settings_changed', { setting_name: 'screenShake', new_value: save.settings.screenShake });
   }, 0);
 
   bindBtn('toggle-particles', () => {
@@ -1407,10 +1419,17 @@
     persist();
     renderSettingsModal();
     playMarimbaNote(523.25, true);
+    FirebaseTracker.logEvent('settings_changed', { setting_name: 'particles', new_value: save.settings.particles });
   }, 0);
 
   bindBtn('btn-reset-data', () => {
     if (window.confirm(t('settingResetConfirm'))) {
+      const prevStarsCount = Object.keys(save.stars || {}).length;
+      const prevChuru = save.churu || 0;
+      FirebaseTracker.logEvent('user_data_reset', {
+        previous_stars_count: prevStarsCount,
+        previous_churu: prevChuru
+      });
       localStorage.removeItem(SAVE_KEY);
       save = loadSave();
       persist();

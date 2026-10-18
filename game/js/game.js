@@ -346,6 +346,13 @@
       spawn3DStarBurst(block.x, block.z, block.y, cameraY, 32, true, 3);
       spawnFloatingText(block.x, block.y + 1.2, block.z, (getLang() === 'ko' ? '🧲 자석 솜방망이 100%!' : '🧲 MAGNETIC SNAP! 100%'), '#00e5ff', true);
       playMarimbaNote(880, true);
+      FirebaseTracker.logEvent('active_skill_used', {
+        cat_id: save.selectedCat || 'luna',
+        skill_name: 'magnetic_snap',
+        stage_id: (typeof cfg !== 'undefined' && cfg) ? cfg.id : 0,
+        game_mode: mode,
+        score: score
+      });
     }
 
     const currentPos = (axis === 'x') ? block.x : block.z;
@@ -446,6 +453,12 @@
             const freQ = (cfg && cfg.bossInfo && getBossQuote(cfg.bossInfo, 'frenzyQuote')) || (getLang() === 'ko' ? '😾 감히 내 털을 뽑다니... 진심 모드다냥! 🔥' : '😾 Furious Serious Mode, meow! 🔥');
             setBossState('frenzy', freQ, 2500);
             setMascot('excited', t('bossEnragedMascot', { boss: cfg.bossInfo.name }), 1200);
+            FirebaseTracker.logEvent('boss_frenzy_entered', {
+              stage_id: cfg.id,
+              boss_name: (cfg.bossInfo && cfg.bossInfo.name) || 'Boss',
+              remaining_hp: bossCurrentHp,
+              max_hp: bossMaxHp
+            });
           } else {
             const q = (cfg && cfg.bossInfo && getBossQuote(cfg.bossInfo, 'hurtQuote')) || getRandomBossHurtQuote();
             setBossState('hurt', q, 1300);
@@ -472,6 +485,13 @@
           playSizeExpandChime();
           spawnFloatingText(block.x, block.y + 0.8, block.z, `SIZE UP! ✨`, '#ff80ab', true);
           setMascot('happy', `Size up, meow! 💖🐾 (${perfectCombo} streak)`, 800);
+          FirebaseTracker.logEvent('expand_ring_triggered', {
+            streak_count: perfectCombo,
+            stage_id: (typeof cfg !== 'undefined' && cfg) ? cfg.id : 0,
+            game_mode: mode,
+            new_width: Number(block.w.toFixed(2)),
+            new_depth: Number(block.d.toFixed(2))
+          });
         } else {
           setMascot('happy', `Genius hooman! (${perfectCombo} streak) 🔥`, 800);
         }
@@ -710,6 +730,12 @@
     if (cfg.boss) {
       save.gachaTickets = (save.gachaTickets || 0) + 1;
       persist();
+      FirebaseTracker.logEvent('ticket_earned', {
+        source: 'boss_defeat',
+        amount: 1,
+        total_tickets: save.gachaTickets,
+        stage_id: cfg.id
+      });
       showToast(getLang() === 'ko' ? '👑 보스 격파 보상! 🎟️ 냥이 가챠 티켓 1장 획득!' : '👑 Boss Defeated! +1 🎟️ Gacha Ticket!');
     }
 
@@ -723,9 +749,21 @@
         save.churu = (save.churu || 0) + bonusScore;
         save.bonusChuruEarned[cfg.id] = bonusScore;
         updateChuruDisplays();
+        FirebaseTracker.logEvent('churu_earned', {
+          source: 'bonus_stage',
+          amount: bonusScore,
+          total_churu: save.churu,
+          stage_id: cfg.id
+        });
         if (stars === 3) {
           if (prev < 3) {
             save.gachaTickets = (save.gachaTickets || 0) + 1;
+            FirebaseTracker.logEvent('ticket_earned', {
+              source: 'three_star_clear',
+              amount: 1,
+              total_tickets: save.gachaTickets,
+              stage_id: cfg.id
+            });
             showToast(getLang() === 'ko' ? `🎉 3성 달성! 🎟️ 가챠 티켓 1장 & +${bonusScore} 츄르 획득!` : `🎉 3-Star Purr-fect! +1 🎟️ Ticket & +${bonusScore} Churu!`);
           } else {
             showToast(getLang() === 'ko' ? `🎉 3성 달성! +${bonusScore} 츄르 획득!` : `🎉 3-Star Purr-fect! +${bonusScore} Churu!`);
@@ -1430,6 +1468,11 @@
     hitBonusMouse: () => {
       bonusStreak = 0;
       bonusHearts--;
+      FirebaseTracker.logEvent('bonus_hazard_hit', {
+        stage_id: (typeof cfg !== 'undefined' && cfg) ? cfg.id : 0,
+        hearts_remaining: bonusHearts,
+        bonus_score: bonusScore
+      });
       if (bonusHearts <= 0) {
         bonusActive = false;
         playCatSad();
