@@ -200,7 +200,7 @@ async function runProfileTests(profile, port) {
     }
   }
 
-  // TC-01: Start Screen & Navigation Dock Initialized
+  // TC-01: Start Screen & Navigation Dock Initialized (with Deployed Version Tag)
   try {
     const res = await evaluate(() => {
       const start = document.getElementById('start-screen');
@@ -210,6 +210,7 @@ async function runProfileTests(profile, port) {
       const btnGacha = document.getElementById('btn-gacha');
       const btnCats = document.getElementById('btn-cats');
       const btnSettings = document.getElementById('start-settings-btn');
+      const versionTag = document.getElementById('start-version-tag');
       return {
         title: document.title,
         startVisible: start && window.getComputedStyle(start).display !== 'none',
@@ -219,13 +220,15 @@ async function runProfileTests(profile, port) {
         hasBtnGacha: !!btnGacha,
         hasBtnCats: !!btnCats,
         hasBtnSettings: !!btnSettings,
+        hasVersionTag: !!versionTag && (versionTag.textContent || '').includes('v1.2.0'),
+        versionText: versionTag?.textContent || '',
         hasGameHarness: !!window.__game
       };
     });
-    const pass = res.title === 'Meow Stack Tower 3D' && res.startVisible && res.hasBtnContinue && res.hasBtnSettings && res.hasGameHarness;
-    record('TC-01', 'Initial Boot & Home Screen / Dock Rendered', pass, `Title: ${res.title}`);
+    const pass = res.title === 'Meow Stack Tower 3D' && res.startVisible && res.hasBtnContinue && res.hasBtnSettings && res.hasVersionTag && res.hasGameHarness;
+    record('TC-01', 'Initial Boot & Home Screen / Dock Rendered (with Deployed Version Tag)', pass, `Title: ${res.title}, Version: ${res.versionText}`);
   } catch (e) {
-    record('TC-01', 'Initial Boot & Home Screen / Dock Rendered', false, e.message);
+    record('TC-01', 'Initial Boot & Home Screen / Dock Rendered (with Deployed Version Tag)', false, e.message);
   }
 
   // TC-02: Localization Real-Time Switch & Persistence

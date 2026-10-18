@@ -1,5 +1,7 @@
 // Stack Tower - Game Configuration & I18N Data
 
+  const APP_VERSION = 'v1.2.0';
+
   const ASSET_PATHS = {
     smile: 'assets/chara_smile.png',
     excited: 'assets/chara_excited.png',

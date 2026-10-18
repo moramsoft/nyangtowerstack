@@ -859,6 +859,21 @@
       background: rgba(255, 255, 255, 0.3);
     }
 
+    .start-version-tag {
+      position: absolute;
+      right: calc(env(safe-area-inset-right, 12px) + 12px);
+      bottom: calc(env(safe-area-inset-bottom, 8px) + 4px);
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.55);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 6px rgba(0, 0, 0, 0.5);
+      letter-spacing: 0.5px;
+      pointer-events: none;
+      z-index: 15;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+    }
+
     #settings-modal {
       display: none;
       background: rgba(10, 8, 20, 0.86);
@@ -1125,6 +1140,12 @@
       .start-progress-pill {
         font-size: 15px;
         padding: 7px 22px;
+      }
+      .start-version-tag {
+        font-size: 13px;
+        right: calc(env(safe-area-inset-right, 18px) + 16px);
+        bottom: calc(env(safe-area-inset-bottom, 12px) + 8px);
+        color: rgba(255, 255, 255, 0.65);
       }
 
       /* Stage Select World Grid */

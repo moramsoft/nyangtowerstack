@@ -667,6 +667,9 @@
         ? `⭐ ${totalStars()} / ${TOTAL_STAGES * 3}  ·  클리어 ${clearedCount()} / ${TOTAL_STAGES}`
         : `⭐ ${totalStars()} / ${TOTAL_STAGES * 3}  ·  Cleared ${clearedCount()} / ${TOTAL_STAGES}`;
     }
+    if ($('start-version-tag')) {
+      $('start-version-tag').textContent = (typeof APP_VERSION !== 'undefined') ? APP_VERSION : 'v1.2.0';
+    }
     applyCompanionVisual();
   }
 
