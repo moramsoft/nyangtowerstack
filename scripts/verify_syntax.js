@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
+const args = process.argv.slice(2);
+const shouldSync = args.includes('--sync');
+
 function checkHtmlAndScripts(htmlPath) {
   console.log(`Checking syntax for: ${htmlPath}`);
   if (!fs.existsSync(htmlPath)) {
@@ -72,22 +75,66 @@ function checkHtmlAndScripts(htmlPath) {
   return true;
 }
 
+function copyRecursiveSync(src, dest) {
+  const exists = fs.existsSync(src);
+  const stats = exists && fs.statSync(src);
+  const isDirectory = exists && stats.isDirectory();
+  if (isDirectory) {
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest, { recursive: true });
+    }
+    fs.readdirSync(src).forEach((childItemName) => {
+      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+    });
+  } else {
+    const parentDir = path.dirname(dest);
+    if (!fs.existsSync(parentDir)) {
+      fs.mkdirSync(parentDir, { recursive: true });
+    }
+    fs.copyFileSync(src, dest);
+  }
+}
+
+function syncAssets(srcDir, destDir, targetName) {
+  console.log(`Syncing assets: game/ -> ${targetName} ...`);
+  if (!fs.existsSync(destDir)) {
+    fs.mkdirSync(destDir, { recursive: true });
+  }
+
+  const items = ['index.html', 'manifest.json', 'css', 'js', 'assets'];
+  for (const item of items) {
+    const s = path.join(srcDir, item);
+    const d = path.join(destDir, item);
+    if (fs.existsSync(s)) {
+      copyRecursiveSync(s, d);
+    }
+  }
+}
+
 function verifySync() {
   const gameDir = path.resolve(__dirname, '../game');
   const androidDir = path.resolve(__dirname, '../android/app/src/main/assets/www');
+  const iosDir = path.resolve(__dirname, '../ios/MeowStackTower/www');
+
+  if (shouldSync) {
+    syncAssets(gameDir, androidDir, 'android/app/src/main/assets/www');
+    syncAssets(gameDir, iosDir, 'ios/MeowStackTower/www');
+  }
 
   const gameHtml = path.join(gameDir, 'index.html');
   const androidHtml = path.join(androidDir, 'index.html');
+  const iosHtml = path.join(iosDir, 'index.html');
 
   checkHtmlAndScripts(gameHtml);
   checkHtmlAndScripts(androidHtml);
+  checkHtmlAndScripts(iosHtml);
 
-  function compareRecursive(relPath) {
+  function compareRecursive(relPath, targetDir, targetLabel) {
     const p1 = path.join(gameDir, relPath);
-    const p2 = path.join(androidDir, relPath);
+    const p2 = path.join(targetDir, relPath);
 
     if (!fs.existsSync(p2)) {
-      throw new Error(`File missing in android assets: ${relPath}`);
+      throw new Error(`File missing in ${targetLabel}: ${relPath}`);
     }
 
     const stat1 = fs.statSync(p1);
@@ -96,30 +143,30 @@ function verifySync() {
     if (stat1.isDirectory()) {
       const items = fs.readdirSync(p1);
       for (const item of items) {
-        compareRecursive(path.join(relPath, item));
+        compareRecursive(path.join(relPath, item), targetDir, targetLabel);
       }
     } else {
       const buf1 = fs.readFileSync(p1);
       const buf2 = fs.readFileSync(p2);
       if (!buf1.equals(buf2)) {
-        throw new Error(`File content mismatch between game/ and android assets for: ${relPath}`);
+        throw new Error(`File content mismatch between game/ and ${targetLabel} for: ${relPath}`);
       }
     }
   }
 
   // Compare index.html, manifest.json, css/, js/, assets/
-  compareRecursive('index.html');
-  compareRecursive('manifest.json');
-  compareRecursive('css');
-  compareRecursive('js');
-  compareRecursive('assets');
+  const itemsToVerify = ['index.html', 'manifest.json', 'css', 'js', 'assets'];
+  for (const item of itemsToVerify) {
+    compareRecursive(item, androidDir, 'android assets www/');
+    compareRecursive(item, iosDir, 'ios assets www/');
+  }
 
-  console.log('  ✓ game/ and android assets www/ are 100% byte-for-byte synchronized.');
+  console.log('  ✓ 3-way byte-for-byte asset sync verified: game/ ↔ android/ ↔ ios/');
 }
 
 try {
   verifySync();
-  console.log('\n[PASS] All JavaScript syntax and asset sync checks passed!\n');
+  console.log('\n[PASS] All JavaScript syntax and 3-way asset sync checks passed!\n');
 } catch (e) {
   console.error('\n[FAIL] Syntax / sync verification failed:', e.message);
   process.exit(1);

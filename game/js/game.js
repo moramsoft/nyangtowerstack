@@ -1449,5 +1449,9 @@
     getClimbingKitten: () => (typeof climbingKitten !== 'undefined' ? climbingKitten : null),
     getMeltingBlocks: () => meltingBlocks,
     getTowerTilt: () => ({ x: towerTiltX, z: towerTiltZ }),
-    setTowerTiltTarget: (x, z) => { towerTiltTargetX = x; towerTiltTargetZ = z; }
+    setTowerTiltTarget: (x, z) => { towerTiltTargetX = x; towerTiltTargetZ = z; },
+    openSettingsModal: () => { if (typeof openSettingsModal === 'function') openSettingsModal(); },
+    closeSettingsModal: () => { if (typeof closeSettingsModal === 'function') closeSettingsModal(); },
+    applyLanguage: () => { if (typeof applyLanguage === 'function') applyLanguage(); },
+    buildStageConfig: (s) => (typeof buildStageConfig === 'function' ? buildStageConfig(s) : null)
   };

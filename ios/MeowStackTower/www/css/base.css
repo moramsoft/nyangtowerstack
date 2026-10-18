@@ -1,0 +1,190 @@
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #151124;
+      touch-action: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #151124;
+    }
+    #bg-canvas, #game-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+    }
+    #bg-canvas {
+      z-index: 1;
+    }
+    #game-canvas {
+      z-index: 5;
+    }
+
+    /* Overlay Screens & Modal Game Animation Framework */
+    .screen-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 25;
+      pointer-events: auto;
+      transition: opacity 0.22s ease-out;
+    }
+
+    .screen-overlay.modal-active {
+      animation: overlayFadeIn 0.22s ease-out forwards;
+    }
+
+    .screen-overlay.modal-closing {
+      animation: overlayFadeOut 0.17s ease-in forwards !important;
+      pointer-events: none !important;
+    }
+
+    @keyframes overlayFadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes overlayFadeOut {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Modal box juicy spring entrance & exit */
+    .gameover-box,
+    .companion-box,
+    .ready-card-box,
+    .gacha-box,
+    .gacha-reveal-box,
+    .settings-box,
+    .unlock-card-box {
+      transform-origin: center center;
+      animation: gameModalPopIn 0.32s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+      will-change: transform, opacity;
+    }
+
+    .modal-closing > .gameover-box,
+    .modal-closing > .companion-box,
+    .modal-closing > .ready-card-box,
+    .modal-closing > .gacha-box,
+    .modal-closing > .gacha-reveal-box,
+    .modal-closing > .settings-box,
+    .modal-closing > .unlock-card-box {
+      animation: gameModalPopOut 0.17s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+    }
+
+    @keyframes gameModalPopIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.78) translateY(32px);
+      }
+      65% {
+        opacity: 1;
+        transform: scale(1.035) translateY(-4px);
+      }
+      85% {
+        transform: scale(0.99) translateY(1px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes gameModalPopOut {
+      0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.82) translateY(24px);
+      }
+    }
+
+    /* Tactile Game Button Physics & Reactions */
+    button,
+    .menu-btn,
+    .primary-play-btn,
+    .dock-btn,
+    .stage-btn,
+    .companion-card,
+    .ready-chip,
+    .small-btn,
+    .settings-lang-btn,
+    .settings-reset-btn {
+      transition: transform 0.16s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                  box-shadow 0.16s ease,
+                  filter 0.12s ease !important;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    button:active,
+    .menu-btn:active,
+    .primary-play-btn:active,
+    .dock-btn:active,
+    .stage-btn:active,
+    .companion-card:active,
+    .ready-chip:active,
+    .small-btn:active,
+    .settings-lang-btn:active,
+    .settings-reset-btn:active,
+    .btn-pressing {
+      transform: scale(0.92) translateY(2px) !important;
+      filter: brightness(0.92) contrast(1.05) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* Screen entering animations */
+    #start-screen.screen-entering .start-top-section {
+      animation: startActionPopIn 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    }
+    #start-screen.screen-entering .start-dock {
+      animation: startDockSlideUp 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    }
+    #select-screen.screen-entering .select-header {
+      animation: selectHeaderSlideDown 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    }
+    #select-screen.screen-entering .world {
+      animation: worldFadeSlideIn 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    }
+
+    @keyframes startActionPopIn {
+      0% { opacity: 0; transform: scale(0.85) translateY(-20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes startDockSlideUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes selectHeaderSlideDown {
+      0% { opacity: 0; transform: translateY(-24px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes worldFadeSlideIn {
+      0% { opacity: 0; transform: translateY(16px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
