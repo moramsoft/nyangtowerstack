@@ -870,42 +870,162 @@
     ctx.restore();
   }
 
-  // --- FOGGY VILLAGE ROLLING MISTS (안개 낀 마을) ---
-  const fogClouds = [];
-  for (let i = 0; i < 9; i++) {
-    fogClouds.push({
-      xRatio: ((i * 13) % 10) / 10,
-      yRatio: 0.16 + ((i * 7) % 6) * 0.08,
-      radius: 80 + (i % 4) * 25,
-      speedX: 9 + (i % 3) * 5,
-      phase: (i * 0.7) % 6.28
+  // --- FOGGY VILLAGE DYNAMIC ROLLING MISTS & TOP-OBSTRUCTION FOG (안개 낀 마을) ---
+  // Background ambient drifting clouds
+  const ambientFogClouds = [];
+  for (let i = 0; i < 8; i++) {
+    ambientFogClouds.push({
+      xRatio: ((i * 17 + 5) % 100) / 100,
+      yRatio: 0.12 + ((i * 7) % 6) * 0.09,
+      radius: 90 + (i % 4) * 30,
+      speedX: 6 + (i % 3) * 4,
+      phase: (i * 0.8) % 6.28
     });
   }
 
+  // Pre-configured satellite puff offsets for the focal landing obstruction
+  const FOCAL_PUFFS = [
+    { radDist: 0.40, angleSpd: 0.55, phase: 0.0,  sizeScale: 0.80, alphaMult: 0.90 },
+    { radDist: 0.58, angleSpd: -0.42, phase: 1.8, sizeScale: 0.95, alphaMult: 0.85 },
+    { radDist: 0.75, angleSpd: 0.38, phase: 3.4,  sizeScale: 1.05, alphaMult: 0.75 },
+    { radDist: 0.50, angleSpd: -0.65, phase: 4.9, sizeScale: 0.85, alphaMult: 0.80 },
+    { radDist: 0.85, angleSpd: 0.30, phase: 2.3,  sizeScale: 1.10, alphaMult: 0.65 }
+  ];
+
   function drawFogLayer(time, dt) {
     if (!cfg || !cfg.fog) return;
+
     const fogClearMult = (cfg.fogClear) ? (1 - cfg.fogClear) : 1.0;
-    const oscAlpha = (0.35 + 0.32 * Math.sin(time / 2200)) * fogClearMult;
-    if (oscAlpha <= 0.02) return;
+    const tSec = time / 1000;
+
+    // --- 1. LEVEL & STAGE SCALING FACTOR (0.0: early stages, 1.0: high difficulty) ---
+    const stageIdx = (typeof cfg.idx === 'number') ? cfg.idx : Math.min(9, Math.floor(score / 5));
+    const stageCount = (typeof cfg.count === 'number' && cfg.count > 1) ? cfg.count : 10;
+    const worldIdx = (typeof cfg.world === 'number') ? cfg.world : 5;
+
+    // Stage progress within current world (0.0 at stage 1 -> 1.0 at final/boss stage)
+    const stageProg = Math.max(0, Math.min(1.0, stageIdx / Math.max(1, stageCount - 1)));
+    // Bonus scaling for deeper worlds (World 5 Foggy Village -> World 11 -> World 17 -> World 22)
+    const worldBonus = Math.min(0.25, Math.max(0, (worldIdx - 5) * 0.03));
+    const levelFactor = Math.min(1.0, stageProg * 0.85 + worldBonus);
+
+    // --- 2. DYNAMIC CYCLE: DENSE SOUP VS CLEAR GLIMPSE WINDOW ---
+    // Higher levels stay dense for significantly longer periods
+    const cyclePeriod = 6.8; // seconds per cycle
+    const cycleT = (tSec % cyclePeriod) / cyclePeriod; // 0.0 to 1.0
+
+    // Dense duty cycle: early stages are dense ~36% of the time, high stages ~78% of the time!
+    const denseRatio = 0.36 + levelFactor * 0.42;
+    const fadeLen = 0.12; // ~0.8s smooth transition between dense and clear
+
+    let densityK = 0.0;
+    if (cycleT < denseRatio - fadeLen) {
+      // Sustained thick dense fog phase
+      densityK = 1.0;
+    } else if (cycleT < denseRatio) {
+      // Smooth fade-out to clearer window
+      const p = (cycleT - (denseRatio - fadeLen)) / fadeLen;
+      densityK = 0.5 + 0.5 * Math.cos(p * Math.PI);
+    } else if (cycleT < 1.0 - fadeLen) {
+      // Clearer observation window
+      densityK = 0.0;
+    } else {
+      // Smooth fade-in back to dense fog
+      const p = (cycleT - (1.0 - fadeLen)) / fadeLen;
+      densityK = 0.5 - 0.5 * Math.cos(p * Math.PI);
+    }
+
+    // Min & Max opacity scaling with level
+    // In low levels: min ~0.08, max ~0.84
+    // In high levels: min ~0.24, max ~0.96 (heavy soup that truly challenges player!)
+    const minAlpha = 0.08 + levelFactor * 0.16;
+    const maxAlpha = 0.84 + levelFactor * 0.12;
+
+    // Living atmospheric micro-pulsing
+    const organicBreath = 0.04 * Math.sin(tSec * 2.6) + 0.03 * Math.cos(tSec * 1.5);
+    const targetAlpha = (minAlpha + (maxAlpha - minAlpha) * densityK + organicBreath);
+    const focalAlpha = Math.max(0.04, Math.min(1.0, targetAlpha * fogClearMult));
 
     ctx.save();
-    for (let cloud of fogClouds) {
+
+    // --- 3. AMBIENT BACKGROUND & MIDGROUND DRIFTING MISTS ---
+    const ambientAlpha = focalAlpha * 0.38;
+    for (let cloud of ambientFogClouds) {
       cloud.xRatio += (cloud.speedX * dt) / viewW;
       if (cloud.xRatio > 1.35) cloud.xRatio = -0.35;
 
       const cx = cloud.xRatio * viewW;
-      const cy = cloud.yRatio * viewH + Math.sin(time / 1200 + cloud.phase) * 14;
+      const cy = cloud.yRatio * viewH + Math.sin(tSec * 1.1 + cloud.phase) * 16;
       const r = cloud.radius * currentZoom;
 
       const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, r);
-      grad.addColorStop(0, `rgba(235, 238, 255, ${oscAlpha * 0.85})`);
-      grad.addColorStop(0.55, `rgba(220, 226, 250, ${oscAlpha * 0.48})`);
-      grad.addColorStop(1, 'rgba(210, 220, 245, 0)');
+      grad.addColorStop(0, `rgba(235, 240, 255, ${ambientAlpha * 0.75})`);
+      grad.addColorStop(0.55, `rgba(215, 222, 248, ${ambientAlpha * 0.40})`);
+      grad.addColorStop(1, 'rgba(205, 215, 245, 0)');
 
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    // --- 4. FOCAL TOWER STACKING ZONE HEAVY OBSTRUCTION ---
+    // Physical anchor: The top of the tower where the next block must land!
+    const topBlock = (tower && tower.length > 0) ? tower[tower.length - 1] : { x: 0, y: 0, z: 0, w: 7.5, d: 7.5 };
+    const landingY = topBlock.y + 0.5; // Top landing surface elevation
+    const focalPt = project3D(topBlock.x, landingY, topBlock.z, cameraY);
+
+    // Stacking zone obstruction radius (scales up with block size, current zoom & level)
+    const blockScreenDim = Math.max(topBlock.w || 7.5, topBlock.d || 7.5) * baseTileS * 0.5 * currentZoom;
+    const baseFocalRadius = Math.max(85, blockScreenDim * 1.25 + (levelFactor * 35));
+
+    // A) Mocha Lantern Scout synergy: Warm golden glow cutting through the mist
+    if (cfg.fogClear && cfg.fogClear > 0) {
+      const lanternRadius = (baseFocalRadius * 0.75);
+      const lGrad = ctx.createRadialGradient(focalPt.x, focalPt.y, 4, focalPt.x, focalPt.y, lanternRadius);
+      lGrad.addColorStop(0.0, 'rgba(255, 235, 150, 0.50)');
+      lGrad.addColorStop(0.35, 'rgba(255, 210, 110, 0.26)');
+      lGrad.addColorStop(1.0, 'rgba(255, 190, 80, 0)');
+      ctx.fillStyle = lGrad;
+      ctx.beginPath();
+      ctx.arc(focalPt.x, focalPt.y, lanternRadius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // B) Dense Central Core Cloud directly covering the top block
+    const coreRadius = baseFocalRadius * (1.0 + 0.08 * Math.sin(tSec * 2.2));
+    const coreGrad = ctx.createRadialGradient(focalPt.x, focalPt.y, 12, focalPt.x, focalPt.y, coreRadius);
+    coreGrad.addColorStop(0.0, `rgba(240, 243, 255, ${focalAlpha * 0.98})`);
+    coreGrad.addColorStop(0.35, `rgba(226, 232, 252, ${focalAlpha * 0.88})`);
+    coreGrad.addColorStop(0.70, `rgba(210, 218, 248, ${focalAlpha * 0.45})`);
+    coreGrad.addColorStop(1.0, 'rgba(200, 210, 245, 0)');
+
+    ctx.fillStyle = coreGrad;
+    ctx.beginPath();
+    ctx.arc(focalPt.x, focalPt.y, coreRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // C) Swirling Satellite Vapor Puffs around the landing zone
+    // These orbit and expand, obscuring the moving block's approach vector!
+    for (let puff of FOCAL_PUFFS) {
+      const angle = tSec * puff.angleSpd + puff.phase;
+      const dist = baseFocalRadius * puff.radDist * (0.88 + 0.12 * Math.cos(tSec * 1.7 + puff.phase));
+      const px = focalPt.x + Math.cos(angle) * dist;
+      // Slightly compressed along Y axis to match isometric perspective ratio (~0.6)
+      const py = focalPt.y + Math.sin(angle) * dist * 0.65;
+      const pr = baseFocalRadius * puff.sizeScale * (0.75 + 0.15 * Math.sin(tSec * 2.5 + puff.phase));
+      const puffAlpha = focalAlpha * puff.alphaMult;
+
+      const pGrad = ctx.createRadialGradient(px, py, 6, px, py, pr);
+      pGrad.addColorStop(0.0, `rgba(242, 245, 255, ${puffAlpha * 0.92})`);
+      pGrad.addColorStop(0.45, `rgba(225, 232, 252, ${puffAlpha * 0.60})`);
+      pGrad.addColorStop(1.0, 'rgba(210, 220, 248, 0)');
+
+      ctx.fillStyle = pGrad;
+      ctx.beginPath();
+      ctx.arc(px, py, pr, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     ctx.restore();
   }
