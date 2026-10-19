@@ -142,11 +142,27 @@
   }
 
 
+  const BOSS_ACTION_IMAGES = {
+    idle: 'assets/boss_chonk_idle.png',
+    smug: 'assets/boss_chonk_smug.png',
+    hurt: 'assets/boss_chonk_hurt.png',
+    frenzy: 'assets/boss_chonk_frenzy.png',
+    defeat: 'assets/boss_chonk_defeat.png',
+    victory: 'assets/boss_chonk_victory.png'
+  };
+
   function renderBossCharacter(bossInfo) {
     const actor = $('boss-actor');
     if (!actor || !bossInfo) return;
-    actor.innerHTML = getBossSvgModular(bossInfo.type || 'chonk', bossInfo.palette || {});
-    actor.title = `${bossInfo.name} (${bossInfo.title})`;
+    actor.innerHTML = `
+      <img id="boss-img-idle" class="boss-action-img" src="${BOSS_ACTION_IMAGES.idle}" alt="${bossInfo.name} Idle" />
+      <img id="boss-img-smug" class="boss-action-img" src="${BOSS_ACTION_IMAGES.smug}" alt="${bossInfo.name} Smug" style="display:none;" />
+      <img id="boss-img-hurt" class="boss-action-img" src="${BOSS_ACTION_IMAGES.hurt}" alt="${bossInfo.name} Hurt" style="display:none;" />
+      <img id="boss-img-frenzy" class="boss-action-img" src="${BOSS_ACTION_IMAGES.frenzy}" alt="${bossInfo.name} Frenzy" style="display:none;" />
+      <img id="boss-img-defeat" class="boss-action-img" src="${BOSS_ACTION_IMAGES.defeat}" alt="${bossInfo.name} Defeat" style="display:none;" />
+      <img id="boss-img-victory" class="boss-action-img" src="${BOSS_ACTION_IMAGES.victory}" alt="${bossInfo.name} Victory" style="display:none;" />
+    `;
+    actor.title = `${bossInfo.name} (${typeof bossInfo.title === 'object' ? (bossInfo.title[getLang()] || bossInfo.title.en) : bossInfo.title})`;
   }
 
   function setBossState(emotion, text = '', durationMs = 0) {
@@ -164,15 +180,17 @@
       bossEmotionTimer = null;
     }
 
-    // Hide all facial expression layers
-    ['face-idle', 'face-smug', 'face-hurt', 'face-frenzy', 'face-defeat', 'face-victory'].forEach(id => {
-      const el = $(id);
-      if (el) el.style.display = 'none';
+    // Toggle generated action image
+    ['idle', 'smug', 'hurt', 'frenzy', 'defeat', 'victory'].forEach(act => {
+      const img = $(`boss-img-${act}`);
+      if (img) img.style.display = (act === emotion) ? 'block' : 'none';
     });
 
-    // Show target face
-    const targetFace = $(`face-${emotion}`) || $('face-idle');
-    if (targetFace) targetFace.style.display = 'inline';
+    // Hide/show legacy facial expression layers if present
+    ['face-idle', 'face-smug', 'face-hurt', 'face-frenzy', 'face-defeat', 'face-victory'].forEach(id => {
+      const el = $(id);
+      if (el) el.style.display = (id === `face-${emotion}`) ? 'inline' : 'none';
+    });
 
     // Toggle frenzy flame aura
     const aura = $('boss-frenzy-aura');
@@ -1606,7 +1624,9 @@
     if (skipBtn) skipBtn.textContent = t('bossIntroSkip');
 
     const bInfo = stageCfg.bossInfo || WORLD_BOSS_NAMES[0];
-    if (avatarEl) avatarEl.textContent = bInfo.emoji || '😾';
+    if (avatarEl) {
+      avatarEl.innerHTML = `<img src="assets/boss_chonk_idle.png" class="boss-intro-avatar-img" alt="${bInfo.name}" />`;
+    }
     if (titleEl) titleEl.textContent = getBossField(bInfo, 'title');
     if (nameEl) nameEl.textContent = bInfo.name;
     if (hpNum) hpNum.textContent = `${stageCfg.target} / ${stageCfg.target}`;

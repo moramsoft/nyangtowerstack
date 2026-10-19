@@ -24,12 +24,21 @@
       pointer-events: none;
     }
     #boss-actor {
-      width: min(76vw, 300px);
-      height: min(76vw, 300px);
+      width: min(76vw, 320px);
+      height: min(76vw, 320px);
       pointer-events: none;
       filter: drop-shadow(0 14px 34px rgba(0, 0, 0, 0.68));
       transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
       transform-origin: center center;
+      position: relative;
+    }
+    .boss-action-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+      filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55));
     }
 
     /* Boss speech bubble (Floating centrally right above boss head) */
@@ -207,12 +216,20 @@
     }
     .boss-intro-avatar {
       font-size: 38px;
-      width: 58px; height: 58px;
+      width: 62px; height: 62px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.1);
       display: flex; align-items: center; justify-content: center;
-      border: 2px solid rgba(255, 213, 79, 0.6);
+      border: 2px solid rgba(255, 213, 79, 0.75);
       flex-shrink: 0;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+    }
+    .boss-intro-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     .boss-intro-info {
       display: flex; flex-direction: column; gap: 3px;
