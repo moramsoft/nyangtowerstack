@@ -787,8 +787,30 @@
     .legend-item { display: flex; align-items: center; gap: 3px; }
     #select-list { flex: 1; width: 100%; max-width: 560px; overflow-y: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch; padding: 0 14px 40px; }
     .world { margin-bottom: 22px; }
-    .world-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .world-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 2px; }
+    .world-title-wrap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .world-title { font-size: 17px; font-weight: 900; color: #fff; }
+    .btn-world-cutscene {
+      background: linear-gradient(135deg, rgba(255, 110, 180, 0.35), rgba(186, 104, 200, 0.35));
+      border: 1px solid rgba(255, 182, 193, 0.6);
+      color: #fff;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      transition: transform 0.1s ease, filter 0.15s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .btn-world-cutscene:active {
+      transform: scale(0.92);
+      filter: brightness(1.2);
+    }
     .world-status { font-size: 12px; font-weight: 700; color: #ffd54f; text-align: right; }
     .world-desc { font-size: 12px; color: #bdb3dd; margin: 2px 0 8px; }
     .world-locked .world-title { opacity: 0.5; }
@@ -1281,7 +1303,8 @@
     /* Filled star: initial hidden state */
     .cstar-img.filled {
       opacity: 0;
-      transform: translate(-50%, -50%) scale(0.2);
+      transform: translate(-50%, -50%) scale(0.6);
+      transition: opacity 0.25s ease-out;
     }
 
     /* When filled class is added to .cstar */
@@ -1291,14 +1314,17 @@
     }
     .cstar.filled .cstar-img.filled {
       opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
       filter: drop-shadow(0 0 16px rgba(255, 213, 79, 0.95)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+    }
+    .cstar.animating .cstar-img.filled {
       animation: pawPopBounce 0.44s cubic-bezier(0.175, 0.885, 0.32, 1.38) forwards;
     }
 
     @keyframes pawPopBounce {
-      0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0; }
-      65% { transform: translate(-50%, -50%) scale(1.3) rotate(6deg); opacity: 1; }
-      85% { transform: translate(-50%, -50%) scale(0.94) rotate(-2deg); }
+      0% { transform: translate(-50%, -50%) scale(0.3) rotate(-15deg); opacity: 0; }
+      65% { transform: translate(-50%, -50%) scale(1.28) rotate(6deg); opacity: 1; }
+      85% { transform: translate(-50%, -50%) scale(0.95) rotate(-2deg); }
       100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
     }
     .clear-purrfect-banner {
@@ -1314,6 +1340,194 @@
     @keyframes purrfectFade {
       0% { transform: scale(0.6); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ============================================================
+       WORLD ENTRANCE CINEMATIC CUTSCENE MODAL
+       ============================================================ */
+    #world-cutscene-modal {
+      background: rgba(10, 8, 20, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 65;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .cutscene-card {
+      position: relative;
+      width: 92%;
+      max-width: 440px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: linear-gradient(145deg, rgba(32, 22, 54, 0.98), rgba(18, 14, 34, 0.98));
+      border: 2px solid rgba(255, 215, 0, 0.55);
+      border-radius: 26px;
+      box-shadow: 0 0 45px rgba(255, 215, 0, 0.28), 0 25px 60px rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+      animation: cutscenePopIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+    }
+    @keyframes cutscenePopIn {
+      0% { transform: scale(0.72) translateY(24px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .cutscene-image-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: #0d0a1a;
+      flex-shrink: 0;
+    }
+    .cutscene-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      animation: kenBurnsZoom 18s ease-in-out infinite alternate;
+      transform-origin: center center;
+    }
+    @keyframes kenBurnsZoom {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.08) translate(-1%, -1%); }
+    }
+    .cutscene-img-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(22, 16, 38, 0.95) 0%, rgba(22, 16, 38, 0.2) 40%, transparent 100%);
+      pointer-events: none;
+    }
+    .cutscene-world-pill {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: linear-gradient(135deg, #ffd700, #ff9100);
+      color: #2b1300;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      z-index: 2;
+    }
+    .cutscene-close-btn {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .cutscene-close-btn:active {
+      transform: scale(0.9);
+      background: rgba(0, 0, 0, 0.8);
+    }
+    .cutscene-body {
+      padding: 16px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .cutscene-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .cutscene-emoji {
+      font-size: 32px;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+      flex-shrink: 0;
+    }
+    .cutscene-titles {
+      display: flex;
+      flex-direction: column;
+    }
+    .cutscene-sub {
+      font-size: 10.5px;
+      font-weight: 800;
+      color: #ffd54f;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .cutscene-name {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.15;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+    }
+    .cutscene-lore {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #e2e8f0;
+      line-height: 1.45;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .cutscene-gimmick-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #c4b5fd;
+      background: rgba(147, 51, 234, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      padding: 7px 12px;
+      border-radius: 12px;
+    }
+    .cutscene-gimmick-label {
+      color: #f472b6;
+      font-weight: 900;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+    .cutscene-start-btn {
+      margin: 6px auto 0;
+      width: 210px;
+      height: 66px;
+    }
+    .world-cutscene-trigger-btn {
+      cursor: pointer;
+      border: none;
+      background: rgba(255, 215, 0, 0.2);
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #ffd700;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      margin-left: 6px;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .world-cutscene-trigger-btn:active {
+      transform: scale(0.92);
+      background: rgba(255, 215, 0, 0.35);
     }
 
     /* ============================================================
@@ -1477,5 +1691,19 @@
       .jelly-btn-stages {
         width: 228px;
         height: 68px;
+      }
+      .cutscene-card {
+        max-width: 520px;
+      }
+      .cutscene-name {
+        font-size: 28px;
+      }
+      .cutscene-lore {
+        font-size: 15px;
+        padding: 12px 16px;
+      }
+      .cutscene-start-btn {
+        width: 250px;
+        height: 76px;
       }
     }

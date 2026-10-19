@@ -358,12 +358,21 @@ async function runProfileTests(profile, port) {
       window.__game.showStart();
       const btn = document.getElementById('btn-continue');
       if (btn) btn.click();
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r, 120));
+
+      const cutsceneModal = document.getElementById('world-cutscene-modal');
+      if (cutsceneModal && window.getComputedStyle(cutsceneModal).display !== 'none') {
+        document.getElementById('btn-cutscene-start')?.click();
+      }
 
       const readyModal = document.getElementById('ready-modal');
       if (readyModal && window.getComputedStyle(readyModal).display !== 'none') {
         document.getElementById('btn-ready-start')?.click();
-        await new Promise(r => setTimeout(r, 100));
+      }
+
+      for (let t = 0; t < 25; t++) {
+        if (window.__game.getGameState() === 'PLAYING' && window.__game.getActiveBlock()) break;
+        await new Promise(r => setTimeout(r, 25));
       }
 
       const block1 = window.__game.getActiveBlock();

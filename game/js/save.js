@@ -26,6 +26,7 @@
         s.bonusChuruEarned = s.bonusChuruEarned || {};
         s.bonusPlayed = s.bonusPlayed || {};
         s.unlockedCats = Array.isArray(s.unlockedCats) ? s.unlockedCats : ['shiro'];
+        s.seenWorlds = Array.isArray(s.seenWorlds) ? s.seenWorlds : [];
         s.selectedCat = s.selectedCat || 'shiro';
         s.lang = s.lang || defaultLang;
         s.gachaTickets = s.gachaTickets !== undefined ? s.gachaTickets : 2;
@@ -40,6 +41,7 @@
       bonusChuruEarned: {},
       bonusPlayed: {},
       unlockedCats: ['shiro'],
+      seenWorlds: [],
       selectedCat: 'shiro',
       lang: defaultLang,
       gachaTickets: 2,

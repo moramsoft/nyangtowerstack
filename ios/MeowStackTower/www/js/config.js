@@ -77,31 +77,206 @@
     }
   };
   const WORLD_DEFS = [
-    { name: 'Fluffy Village', emoji: '🧶', hue: 325, mods: {} },
-    { name: 'Churu Harbor', emoji: '🐟', hue: 200, mods: { wobble: 0.2 } },
-    { name: 'Breezy Rooftop', emoji: '🌬️', hue: 180, mods: { sway: 14 } },
-    { name: 'Frozen Peak', emoji: '❄️', hue: 195, mods: { ice: true, wobble: 0.15 } },
-    { name: 'Cardboard Town', emoji: '📦', hue: 35, mods: { scratcher: true } },
-    { name: 'Foggy Village', emoji: '🌫️', hue: 250, mods: { fog: true } },
-    { name: 'Melting Gelato', emoji: '🍦', hue: 330, mods: { melting: true, speedBoost: 1.75 } },
-    { name: 'Pinnacle Cliff', emoji: '⚖️', hue: 180, mods: { thinFoundation: true, tilt: true } },
-    { name: 'Clockwork Forge', emoji: '⚙️', hue: 15, mods: { anvil: true } },
-    { name: 'Hall of Perfection', emoji: '🎯', hue: 210, mods: { perfectionist: true } },
-    { name: 'Shrinking Void', emoji: '⚡', hue: 50, mods: { shrinkRush: true, reverse: 0.2 } },
-    { name: 'Toy Workshop', emoji: '🧸', hue: 15, mods: { scratcher: true, wobble: 0.3 } },
-    { name: 'Cloud Sanctuary', emoji: '☁️', hue: 210, mods: { fog: true, blink: 0.5 } },
-    { name: 'Lava Cavern', emoji: '🌋', hue: 5, mods: { melting: true, shrink: 0.06 } },
-    { name: 'Crystal Canyon', emoji: '💎', hue: 170, mods: { ice: true, tilt: true } },
-    { name: 'Abyssal Aquarium', emoji: '🐙', hue: 190, mods: { fog: true, sway: 14 } },
-    { name: 'Haunted Manor', emoji: '👻', hue: 270, mods: { blink: 0.8, anvil: true } },
-    { name: 'Desert Pyramid', emoji: '🏜️', hue: 35, mods: { tilt: true, shrinkRush: true } },
-    { name: 'Jungle Temple', emoji: '🌴', hue: 130, mods: { scratcher: true, reverse: 0.4 } },
-    { name: 'Space Station', emoji: '🚀', hue: 260, mods: { ice: true, blink: 0.6 } },
-    { name: 'Magic Academy', emoji: '🔮', hue: 285, mods: { perfectionist: true, reverse: 0.5 } },
-    { name: 'Aurora Tundra', emoji: '🌌', hue: 155, mods: { ice: true, fog: true, melting: true } },
-    { name: 'Pirate Galleon', emoji: '🏴‍☠️', hue: 25, mods: { tilt: true, sway: 28 } },
-    { name: 'Rift of Time', emoji: '⌛', hue: 60, mods: { shrinkRush: true, anvil: true } },
-    { name: 'Legendary Cat Tower', emoji: '👑', hue: 45, mods: { ice: true, scratcher: true, tilt: true, perfectionist: true } }
+    {
+      name: 'Fluffy Village', name_ko: '털뭉치 마을', emoji: '🧶', hue: 325, mods: {},
+      image: 'assets/cutscene_world_1.jpg',
+      lore_ko: '포근하고 알록달록한 털실 뭉치가 굴러다니는 평화로운 냥이 마을이다냥! 기본 스택 실력을 탄탄히 다져보자냥! 🐾',
+      lore_en: 'A cozy village filled with colorful soft yarn balls and gentle sunshine! Master the fundamentals of stacking, hooman! 🐾',
+      gimmick_ko: '🧱 평온한 초원 · 정밀 스택 기본 훈련',
+      gimmick_en: '🧱 Peaceful Meadow · Precision Basics'
+    },
+    {
+      name: 'Churu Harbor', name_ko: '츄르 항구', emoji: '🐟', hue: 200, mods: { wobble: 0.2 },
+      image: 'assets/cutscene_world_2.jpg',
+      lore_ko: '시원한 바닷바람과 신선한 참치 츄르가 가득한 고양이들의 항구에 도착했다냥! 바다 물결에 배가 출렁거리니 타이밍을 맞춰라냥! ⛵',
+      lore_en: 'A bustling fishing port filled with fresh tuna and Churu treats! Ocean waves make blocks wobble—time your drops carefully! ⛵',
+      gimmick_ko: '🌊 파도 출렁임 (Wobble) · 흔들리는 속도',
+      gimmick_en: '🌊 Ocean Wobble · Fluctuating Block Speed'
+    },
+    {
+      name: 'Breezy Rooftop', name_ko: '산들바람 옥상', emoji: '🌬️', hue: 180, mods: { sway: 14 },
+      image: 'assets/cutscene_world_3.jpg',
+      lore_ko: '노을빛 도시가 한눈에 내려다보이는 높은 지붕 꼭대기다냥! 세찬 바람에 캣타워가 좌우로 흔들리니 균형을 유지하라냥! 🍃',
+      lore_en: 'High rooftops overlooking a glowing golden-hour sunset! Gusting crosswinds make the tower sway—keep your balance! 🍃',
+      gimmick_ko: '🌪️ 바람의 흔들림 (Sway) · 공중 균형 유지',
+      gimmick_en: '🌪️ Wind Sway · Aerial Balancing'
+    },
+    {
+      name: 'Frozen Peak', name_ko: '빙하 꼭대기', emoji: '❄️', hue: 195, mods: { ice: true, wobble: 0.15 },
+      image: 'assets/cutscene_world_4.jpg',
+      lore_ko: '영롱한 오로라와 신비로운 눈꽃 결정이 반짝이는 만년설 정상이다냥! 얼음 블록이 미끄러우니 젤리 발바닥에 힘을 꽉 줘라냥! 🧊',
+      lore_en: 'A crystal-clear peak beneath dancing aurora skies! Icy surfaces are slippery—grip tightly with your toe beans! 🧊',
+      gimmick_ko: '❄️ 미끄러운 빙판 (Ice) & 출렁임 (Wobble)',
+      gimmick_en: '❄️ Slippery Ice & Shifting Speeds'
+    },
+    {
+      name: 'Cardboard Town', name_ko: '골판지 마을', emoji: '📦', hue: 35, mods: { scratcher: true },
+      image: 'assets/cutscene_world_5.jpg',
+      lore_ko: '고양이들의 지상 낙원! 거대한 택배 상자와 스크래처로 세운 천혜의 요새다냥! 거친 표면 마찰을 활용해 높이 쌓아보자냥! 📦',
+      lore_en: 'Cat heaven! A magnificent cardboard box fortress and giant scratcher towers! Master the high surface friction! 📦',
+      gimmick_ko: '📦 거친 스크래처 (Scratcher) · 강한 표면 마찰',
+      gimmick_en: '📦 Sisal Scratcher · Strong Surface Friction'
+    },
+    {
+      name: 'Foggy Village', name_ko: '안개 마을', emoji: '🌫️', hue: 250, mods: { fog: true },
+      image: 'assets/cutscene_world_3.jpg',
+      lore_ko: '자욱한 밤안개 사이로 희미한 불빛이 반짝이는 신비로운 마을이다냥! 시야가 흐려져도 감각을 믿고 블록을 쌓아라냥! 🌫️',
+      lore_en: 'A mystical village shrouded in swirling dense mist! Trust your feline instincts through the obscured vision! 🌫️',
+      gimmick_ko: '🌫️ 짙은 안개 (Fog) · 제한된 시야',
+      gimmick_en: '🌫️ Dense Mist · Obscured Vision'
+    },
+    {
+      name: 'Melting Gelato', name_ko: '녹아내리는 젤라또', emoji: '🍦', hue: 330, mods: { melting: true, speedBoost: 1.75 },
+      image: 'assets/cutscene_world_1.jpg',
+      lore_ko: '달콤한 딸기 바닐라 아이스크림 산이다냥! 가만히 있으면 블록이 사르르 녹아내리니 번개처럼 빠르게 쌓아야 한다냥! 🍦⚡',
+      lore_en: 'A mountain of sweet strawberry gelato! Blocks melt quickly if you hesitate—stack with lightning speed! 🍦⚡',
+      gimmick_ko: '🍦 급속 융해 (Melting) & 초고속 비행 (Speed Rush)',
+      gimmick_en: '🍦 Rapid Melting & High Velocity'
+    },
+    {
+      name: 'Pinnacle Cliff', name_ko: '외줄타기 절벽', emoji: '⚖️', hue: 180, mods: { thinFoundation: true, tilt: true },
+      image: 'assets/cutscene_world_4.jpg',
+      lore_ko: '아찔한 낭떠러지 바위 기둥 위다냥! 밑바탕이 좁고 위태롭게 기울어지니 한 치의 오차도 없이 중앙에 올려놓아야 한다냥! ⚖️',
+      lore_en: 'A breathtaking needle pinnacle high above the abyss! The thin base tilts easily—land dead center to survive! ⚖️',
+      gimmick_ko: '⚖️ 좁은 기반 (Thin Base) & 기우는 탑 (Tilt)',
+      gimmick_en: '⚖️ Narrow Base & Dynamic Tilting'
+    },
+    {
+      name: 'Clockwork Forge', name_ko: '태엽 대장간', emoji: '⚙️', hue: 15, mods: { anvil: true },
+      image: 'assets/cutscene_world_5.jpg',
+      lore_ko: '육중한 톱니바퀴와 쇳물이 끓는 스팀펑크 공방이다냥! 묵직한 모루 블록을 꾹 누르고 있다가 원하는 위치에 정확히 떨어뜨려라냥! 🔨',
+      lore_en: 'A fiery steampunk workshop humming with giant gears! Hold heavy anvil blocks and release precisely where needed! 🔨',
+      gimmick_ko: '⚙️ 묵직한 모루 (Anvil) · 길게 누른 뒤 드롭',
+      gimmick_en: '⚙️ Heavy Anvil · Press, Hold & Release'
+    },
+    {
+      name: 'Hall of Perfection', name_ko: '완벽의 전당', emoji: '🎯', hue: 210, mods: { perfectionist: true },
+      image: 'assets/cutscene_world_1.jpg',
+      lore_ko: '단 1mm의 틈도 허용하지 않는 전설의 냥마스터 수련장이다냥! 오직 완벽한 묘펙트만이 이 탑을 쌓아 올릴 수 있다냥! 👑✨',
+      lore_en: 'The sacred proving grounds of legendary cat masters! Only flawless Meowfect alignments can conquer this trial! 👑✨',
+      gimmick_ko: '🎯 완벽주의 (Perfectionist) · 묘펙트 엄격 판정',
+      gimmick_en: '🎯 Absolute Perfection · Strict Meowfect'
+    },
+    {
+      name: 'Shrinking Void', name_ko: '축소의 심연', emoji: '⚡', hue: 50, mods: { shrinkRush: true, reverse: 0.2 },
+      image: 'assets/cutscene_world_3.jpg',
+      lore_ko: '시공간이 왜곡되어 블록이 실시간으로 쪼그라드는 이차원 공간이다냥! 갑작스런 방향 반전에 당황하지 마라냥! 🌀',
+      lore_en: 'A dimension of warped spacetime where blocks shrink each second! Beware of sudden direction reversals! 🌀',
+      gimmick_ko: '⚡ 블록 축소 (Shrink) & 역방향 반전 (Reverse)',
+      gimmick_en: '⚡ Continuous Shrink & Sudden Reversals'
+    },
+    {
+      name: 'Toy Workshop', name_ko: '장난감 공방', emoji: '🧸', hue: 15, mods: { scratcher: true, wobble: 0.3 },
+      image: 'assets/cutscene_world_5.jpg',
+      lore_ko: '알록달록 방울과 쥐돌이 인형이 가득한 즐거운 놀이터다냥! 튕겨나가는 블록 속도에 맞춰 신나게 뛰어보자냥! 🐭',
+      lore_en: 'A joyful wonderland packed with jingling bell balls and plush mice! Match the bouncy shifting tempo! 🐭',
+      gimmick_ko: '🧸 스크래처 마찰 & 격렬한 출렁임',
+      gimmick_en: '🧸 Toy Friction & Erratic Wobble'
+    },
+    {
+      name: 'Cloud Sanctuary', name_ko: '구름 성역', emoji: '☁️', hue: 210, mods: { fog: true, blink: 0.5 },
+      image: 'assets/cutscene_world_4.jpg',
+      lore_ko: '푹신한 솜사탕 구름 위에 지어진 천상의 성역이다냥! 블록이 깜빡이며 사라졌다가 나타나니 리듬을 기억하라냥! ☁️✨',
+      lore_en: 'A celestial realm built on soft marshmallow clouds! Blocks blink in and out of sight—remember the cadence! ☁️✨',
+      gimmick_ko: '☁️ 구름 안개 & 깜빡이는 블록 (Blink)',
+      gimmick_en: '☁️ Cloud Mist & Blinking Blocks'
+    },
+    {
+      name: 'Lava Cavern', name_ko: '용암 동굴', emoji: '🌋', hue: 5, mods: { melting: true, shrink: 0.06 },
+      image: 'assets/cutscene_world_3.jpg',
+      lore_ko: '이글거리는 마그마가 솟구치는 뜨거운 화산 동굴이다냥! 실수 한 번에 블록이 크게 녹아버리니 집중하라냥! 🔥',
+      lore_en: 'A fiery subterranean volcanic cavern! Intense heat penalizes any misalignment with severe block erosion! 🔥',
+      gimmick_ko: '🌋 용암 열기 & 실수 시 극심한 감축',
+      gimmick_en: '🌋 Volcanic Heat & Severe Trim Penalty'
+    },
+    {
+      name: 'Crystal Canyon', name_ko: '수정 협곡', emoji: '💎', hue: 170, mods: { ice: true, tilt: true },
+      image: 'assets/cutscene_world_4.jpg',
+      lore_ko: '빛을 굴절시키는 찬란한 다이아몬드 수정 협곡이다냥! 빙판과 기울기의 이중 시련을 극복하라냥! 💎❄️',
+      lore_en: 'A canyon of towering crystalline gemstones! Conquer the perilous combination of slick ice and tilting towers! 💎❄️',
+      gimmick_ko: '💎 빙판 미끄러짐 & 아찔한 탑 기울기',
+      gimmick_en: '💎 Gemstone Ice & Dangerous Tower Tilt'
+    },
+    {
+      name: 'Abyssal Aquarium', name_ko: '심해 수족관', emoji: '🐙', hue: 190, mods: { fog: true, sway: 14 },
+      image: 'assets/cutscene_world_2.jpg',
+      lore_ko: '거대한 유리 돔 너머로 형광 해파리와 고래가 유영하는 깊은 바다다냥! 깊은 해류가 탑을 출렁이게 만든다냥! 🌊🐙',
+      lore_en: 'A deep sea observatory beneath glowing bioluminescent jellyfish! Deep ocean currents push against your tower! 🌊🐙',
+      gimmick_ko: '🐙 심해 수압 안개 & 거센 조류 (Sway)',
+      gimmick_en: '🐙 Abyssal Mist & Ocean Current Sway'
+    },
+    {
+      name: 'Haunted Manor', name_ko: '유령의 저택', emoji: '👻', hue: 270, mods: { blink: 0.8, anvil: true },
+      image: 'assets/cutscene_world_3.jpg',
+      lore_ko: '장난꾸러기 유령 고양이들이 삐걱거리는 문 뒤에 숨어있는 저택이다냥! 깜빡이는 유령 블록을 정확히 내리쳐라냥! 👻🎃',
+      lore_en: 'An eerie mansion inhabited by playful spectral felines! Time your heavy drops amidst flickering phantom lights! 👻🎃',
+      gimmick_ko: '👻 유령의 깜빡임 & 묵직한 모루 낙하',
+      gimmick_en: '👻 Phantom Blinking & Heavy Anvils'
+    },
+    {
+      name: 'Desert Pyramid', name_ko: '사막 피라미드', emoji: '🏜️', hue: 35, mods: { tilt: true, shrinkRush: true },
+      image: 'assets/cutscene_world_5.jpg',
+      lore_ko: '고대 파라오 냥이의 황금 보물이 잠들어 있는 거대한 피라미드다냥! 모래폭풍 속에서 블록이 급격히 줄어든다냥! 🏜️👑',
+      lore_en: 'An ancient pyramid guarding the pharaoh cat’s golden treasures! Sandstorms rapidly shrink oncoming blocks! 🏜️👑',
+      gimmick_ko: '🏜️ 모래사구 기울기 & 급격한 축소',
+      gimmick_en: '🏜️ Dune Tilting & Fast Block Shrink'
+    },
+    {
+      name: 'Jungle Temple', name_ko: '정글 신전', emoji: '🌴', hue: 130, mods: { scratcher: true, reverse: 0.4 },
+      image: 'assets/cutscene_world_1.jpg',
+      lore_ko: '울창한 덩굴과 거대한 캣닢 나무가 우거진 원시 정글 신전이다냥! 덩굴을 타고 변칙적으로 방향을 바꾸는 블록을 잡아라냥! 🌿🐆',
+      lore_en: 'A lush primordial jungle wrapped in wild vines and giant catnip! Predict sudden turns through dense overgrowth! 🌿🐆',
+      gimmick_ko: '🌴 정글 덩굴 마찰 & 잦은 방향 반전',
+      gimmick_en: '🌴 Vine Friction & Frequent Reversals'
+    },
+    {
+      name: 'Space Station', name_ko: '우주 정거장', emoji: '🚀', hue: 260, mods: { ice: true, blink: 0.6 },
+      image: 'assets/cutscene_world_4.jpg',
+      lore_ko: '은하수가 흐르는 무중력 우주 궤도 기지다냥! 반짝이는 별빛 사이로 미끄러지는 블록을 우주복 냥이의 손길로 정렬하라냥! 🚀🌌',
+      lore_en: 'An orbital space station gazing out upon the cosmic Milky Way! Catch shimmering zero-gravity blocks! 🚀🌌',
+      gimmick_ko: '🚀 무중력 미끄러짐 & 스타 블링크',
+      gimmick_en: '🚀 Zero-G Drift & Stellar Blinking'
+    },
+    {
+      name: 'Magic Academy', name_ko: '마법 학교', emoji: '🔮', hue: 285, mods: { perfectionist: true, reverse: 0.5 },
+      image: 'assets/cutscene_world_3.jpg',
+      lore_ko: '떠다니는 마법 책과 신비한 비약이 가득한 대마법사 냥이의 학교다냥! 환영 마법에 속지 말고 완벽한 타이밍에 터치하라냥! 🔮✨',
+      lore_en: 'A grand academy of arcane sorcery and floating grimoires! See through optical illusions with pure timing! 🔮✨',
+      gimmick_ko: '🔮 절대 마법 판정 & 환영 방향 전환',
+      gimmick_en: '🔮 Arcane Precision & Trick Reversals'
+    },
+    {
+      name: 'Aurora Tundra', name_ko: '오로라 툰드라', emoji: '🌌', hue: 155, mods: { ice: true, fog: true, melting: true },
+      image: 'assets/cutscene_world_4.jpg',
+      lore_ko: '극지방의 장엄한 오로라 커튼 아래 펼쳐진 극한의 설원이다냥! 미끄러짐, 안개, 융해의 3중 시련을 돌파하라냥! 🌌❄️',
+      lore_en: 'An extreme polar tundra under glowing green and violet auroras! Overcome the triple trial of ice, fog, and melt! 🌌❄️',
+      gimmick_ko: '🌌 빙판 + 안개 + 융해 복합 시련',
+      gimmick_en: '🌌 Ice + Fog + Melt Combined Trials'
+    },
+    {
+      name: 'Pirate Galleon', name_ko: '해적선 갤리온', emoji: '🏴‍☠️', hue: 25, mods: { tilt: true, sway: 28 },
+      image: 'assets/cutscene_world_2.jpg',
+      lore_ko: '거친 파도를 가르는 전설의 해적 고양이 함선이다냥! 거대한 폭풍우에 돛대가 휘청거리니 최고의 평정심을 보여줘라냥! 🏴‍☠️⚔️',
+      lore_en: 'A legendary pirate galleon braving raging ocean tempests! Violent sea swells make the mainmast pitch and roll! 🏴‍☠️⚔️',
+      gimmick_ko: '🏴‍☠️ 폭풍우 기울기 & 격심한 좌우 요동',
+      gimmick_en: '🏴‍☠️ Tempest Tilt & Violent Roll Sway'
+    },
+    {
+      name: 'Rift of Time', name_ko: '시간의 균열', emoji: '⌛', hue: 60, mods: { shrinkRush: true, anvil: true },
+      image: 'assets/cutscene_world_5.jpg',
+      lore_ko: '과거와 미래의 모래시계가 뒤엉킨 시간의 끝자락이다냥! 째깍이는 초침 소리와 함께 점점 작아지는 모루를 지배하라냥! ⌛⚡',
+      lore_en: 'The edge of eternity where past and future entangle! Command the shrinking hourglass anvils before time runs out! ⌛⚡',
+      gimmick_ko: '⌛ 시간 가속 축소 & 찰나의 모루 낙하',
+      gimmick_en: '⌛ Accelerated Shrink & Split-second Anvils'
+    },
+    {
+      name: 'Legendary Cat Tower', name_ko: '전설의 냥타워', emoji: '👑', hue: 45, mods: { ice: true, scratcher: true, tilt: true, perfectionist: true },
+      image: 'assets/cutscene_world_1.jpg',
+      lore_ko: '천공을 뚫고 솟아오른 고대 냥이 왕국의 궁극의 정상이다냥! 지금까지 갈고닦은 모든 기량을 쏟아부어 전설의 캣타워를 완성하라냥! 👑✨🐾',
+      lore_en: 'The zenith of the ancient cat empire piercing the heavens! Unleash your full mastery to crown the Legendary Cat Tower! 👑✨🐾',
+      gimmick_ko: '👑 모든 환경 기믹의 궁극적 총집결',
+      gimmick_en: '👑 The Ultimate Convergence of All Trials'
+    }
   ];
 
   function worldHint(mods) {

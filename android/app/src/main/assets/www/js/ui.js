@@ -92,7 +92,9 @@
   const companionModalEl = $('companion-modal');
   const unlockModalEl = $('unlock-modal');
   const readyModalEl = $('ready-modal');
+  const cutsceneModalEl = $('world-cutscene-modal');
   let gachaOpenedFromReady = false;
+  let pendingCutsceneProceed = null;
 
 
   const BOSS_SMUG_QUOTES = {
@@ -409,6 +411,10 @@
       sm.style.display = 'none';
       sm.classList.remove('modal-active', 'modal-closing');
     }
+    if (cutsceneModalEl) {
+      cutsceneModalEl.style.display = 'none';
+      cutsceneModalEl.classList.remove('modal-active', 'modal-closing');
+    }
   }
 
   // --- COMPANION MODAL SYSTEM ---
@@ -643,6 +649,61 @@
     });
   }
 
+  function openWorldCutsceneModal(worldIndex, onProceed) {
+    pendingCutsceneProceed = onProceed;
+    const def = WORLD_DEFS[worldIndex] || WORLD_DEFS[0];
+    const isKo = getLang() === 'ko';
+
+    if (cutsceneModalEl) {
+      const img = $('cutscene-img');
+      if (img) {
+        img.src = def.image || 'assets/cutscene_world_1.jpg';
+        img.style.animation = 'none';
+        void img.offsetWidth;
+        img.style.animation = '';
+      }
+      const pill = $('cutscene-world-pill');
+      if (pill) pill.textContent = `WORLD ${worldIndex + 1}`;
+      const emoji = $('cutscene-emoji');
+      if (emoji) emoji.textContent = def.emoji || '🐾';
+      const sub = $('cutscene-sub');
+      if (sub) sub.textContent = isKo ? `새로운 월드 ${worldIndex + 1} 발견!` : `NEW WORLD ${worldIndex + 1} DISCOVERED!`;
+      const name = $('cutscene-name');
+      if (name) name.textContent = isKo ? (def.name_ko || def.name) : def.name;
+      const lore = $('cutscene-lore');
+      if (lore) lore.textContent = isKo ? def.lore_ko : def.lore_en;
+      const gimmickLabel = $('cutscene-gimmick-label');
+      if (gimmickLabel) gimmickLabel.textContent = isKo ? '월드 특성' : 'World Gimmick';
+      const gimmickText = $('cutscene-gimmick-text');
+      if (gimmickText) gimmickText.textContent = isKo ? def.gimmick_ko : def.gimmick_en;
+
+      if (!save.seenWorlds) save.seenWorlds = [];
+      if (!save.seenWorlds.includes(worldIndex)) {
+        save.seenWorlds.push(worldIndex);
+        persist();
+      }
+
+      if (typeof playWorldFanfare === 'function') {
+        playWorldFanfare();
+      }
+
+      openModalAnim(cutsceneModalEl);
+    }
+  }
+
+  function closeWorldCutsceneModal(shouldProceed = true) {
+    if (!cutsceneModalEl) return;
+    closeModalAnim(cutsceneModalEl, () => {
+      const cb = pendingCutsceneProceed;
+      pendingCutsceneProceed = null;
+      if (shouldProceed && typeof cb === 'function') {
+        cb();
+      } else if (!shouldProceed) {
+        if (gameState === 'SELECT') renderSelect();
+      }
+    });
+  }
+
   function refreshStartScreen() {
     if (startBestScoreEl) startBestScoreEl.textContent = bestScore;
     const next = nextStageIndex();
@@ -726,9 +787,19 @@
       } else if (!worldOpen) {
         status = '🔒';
       }
+      const isKo = getLang() === 'ko';
+      const worldName = isKo ? (def.name_ko || def.name) : def.name;
+      const storyBtn = worldOpen
+        ? `<button class="btn-world-cutscene" data-world="${w}" data-ui>🎬 ${isKo ? '스토리' : 'Story'}</button>`
+        : '';
       html += `<section class="world${worldOpen ? '' : ' world-locked'}">` +
-        `<div class="world-head"><div class="world-title">${def.emoji} World ${w + 1} · ${def.name}</div>` +
-        `<div class="world-status">${status}</div></div>` +
+        `<div class="world-head">` +
+          `<div class="world-title-wrap">` +
+            `<div class="world-title">${def.emoji} World ${w + 1} · ${worldName}</div>` +
+            storyBtn +
+          `</div>` +
+          `<div class="world-status">${status}</div>` +
+        `</div>` +
         `<div class="world-desc">${worldHint(def.mods)}</div><div class="stage-grid">`;
       for (let k = 0; k < count; k++) {
         const id = first + k;
@@ -761,6 +832,13 @@
   }
 
   selectListEl.addEventListener('click', (e) => {
+    const cutsceneBtn = e.target.closest('.btn-world-cutscene');
+    if (cutsceneBtn) {
+      initAudio();
+      const worldIdx = parseInt(cutsceneBtn.dataset.world, 10);
+      openWorldCutsceneModal(worldIdx, null);
+      return;
+    }
     const btn = e.target.closest('.stage-btn');
     if (!btn) return;
     initAudio();
@@ -785,7 +863,14 @@
     btn.classList.add('btn-pressing');
     setTimeout(() => {
       btn.classList.remove('btn-pressing');
-      openReadyModal(id);
+      const info = getStageWorldInfo(id);
+      const isSeen = save.seenWorlds && save.seenWorlds.includes(info.world);
+      const proceed = () => openReadyModal(id);
+      if (!isSeen && info.idx === 0) {
+        openWorldCutsceneModal(info.world, proceed);
+      } else {
+        proceed();
+      }
     }, 85);
   });
 
@@ -824,10 +909,19 @@
     const next = nextStageIndex();
     if (clearedCount() >= TOTAL_STAGES) { openSelect(); return; }
     if (!isUnlocked(next)) { openSelect(); showToast(`⭐ Need ${gateFor(next)} stars! Collect more stars from earlier worlds!`); return; }
-    if (save.unlockedCats && save.unlockedCats.length > 1) {
-      openReadyModal(next);
+    const info = getStageWorldInfo(next);
+    const isSeen = save.seenWorlds && save.seenWorlds.includes(info.world);
+    const proceed = () => {
+      if (save.unlockedCats && save.unlockedCats.length > 1) {
+        openReadyModal(next);
+      } else {
+        startStage(next);
+      }
+    };
+    if (!isSeen && info.idx === 0) {
+      openWorldCutsceneModal(info.world, proceed);
     } else {
-      startStage(next);
+      proceed();
     }
   });
   bindBtn('btn-select', openSelect);
@@ -858,6 +952,13 @@
       if (e.target === readyModalEl) closeReadyModal();
     });
   }
+  bindBtn('btn-cutscene-start', () => closeWorldCutsceneModal(true), 0);
+  bindBtn('cutscene-close', () => closeWorldCutsceneModal(false), 0);
+  if (cutsceneModalEl) {
+    cutsceneModalEl.addEventListener('click', (e) => {
+      if (e.target === cutsceneModalEl) closeWorldCutsceneModal(false);
+    });
+  }
   bindBtn('start-settings-btn', openSettingsModal);
   bindBtn('in-game-settings-btn', openSettingsModal);
   bindBtn('select-settings-btn', openSettingsModal);
@@ -874,10 +975,22 @@
       next++;
     }
     if (next < TOTAL_STAGES && isUnlocked(next)) {
-      if (save.unlockedCats && save.unlockedCats.length > 1) {
-        openReadyModal(next);
+      const curInfo = getStageWorldInfo(cfg.id);
+      const nextInfo = getStageWorldInfo(next);
+      const isNewWorld = (nextInfo.world !== curInfo.world);
+
+      const proceed = () => {
+        if (save.unlockedCats && save.unlockedCats.length > 1) {
+          openReadyModal(next);
+        } else {
+          startStage(next);
+        }
+      };
+
+      if (isNewWorld) {
+        openWorldCutsceneModal(nextInfo.world, proceed);
       } else {
-        startStage(next);
+        proceed();
       }
     } else {
       openSelect();
@@ -1607,7 +1720,15 @@
   function animateClearStars(stars) {
     const cstars = [$('cstar-1'), $('cstar-2'), $('cstar-3')];
     cstars.forEach(el => {
-      if (el) el.classList.remove('filled');
+      if (el) {
+        el.classList.remove('filled', 'animating');
+        const filledImg = el.querySelector('.cstar-img.filled');
+        if (filledImg) {
+          filledImg.style.animation = 'none';
+          void filledImg.offsetWidth;
+          filledImg.style.animation = '';
+        }
+      }
     });
     const purrfectEl = $('clear-purrfect-banner');
     if (purrfectEl) purrfectEl.style.display = 'none';
@@ -1620,7 +1741,13 @@
         setTimeout(() => {
           if (gameState !== 'CLEAR') return;
           if (starEl) {
-            starEl.classList.add('filled');
+            const filledImg = starEl.querySelector('.cstar-img.filled');
+            if (filledImg) {
+              filledImg.style.animation = 'none';
+              void filledImg.offsetWidth;
+              filledImg.style.animation = '';
+            }
+            starEl.classList.add('filled', 'animating');
             spawnStarElementSparks(starEl);
           }
           playMarimbaNote(starFreqs[s - 1] || 523.25, true);

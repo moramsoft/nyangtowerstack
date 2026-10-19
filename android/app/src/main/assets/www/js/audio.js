@@ -836,3 +836,34 @@
       setTimeout(() => playSizeExpandChime(), 260);
     }
   }
+
+  function playWorldFanfare() {
+    initAudio();
+    if (!audioCtx || !save.settings.sound) return;
+    try {
+      const now = audioCtx.currentTime;
+      const notes = [
+        { f: 523.25, t: 0.00, d: 0.35, v: 0.28 }, // C5
+        { f: 659.25, t: 0.12, d: 0.35, v: 0.30 }, // E5
+        { f: 783.99, t: 0.24, d: 0.40, v: 0.32 }, // G5
+        { f: 1046.50, t: 0.38, d: 0.85, v: 0.38 }, // C6
+        { f: 1318.51, t: 0.48, d: 1.10, v: 0.34 }  // E6
+      ];
+      notes.forEach(({ f, t, d, v }) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(f, now + t);
+        gain.gain.setValueAtTime(0, now + t);
+        gain.gain.linearRampToValueAtTime(v, now + t + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + t + d);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + t);
+        osc.stop(now + t + d + 0.05);
+      });
+      setTimeout(() => {
+        if (typeof playRealCatSound === 'function') playRealCatSound('happy', 0.65, 1.1);
+      }, 350);
+    } catch (e) {}
+  }
