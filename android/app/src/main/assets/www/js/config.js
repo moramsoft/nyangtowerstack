@@ -1057,7 +1057,7 @@
     },
     {
       id: 'mochi',
-      image: 'assets/chara_smile.png',
+      image: 'assets/cat_mochi.png',
       roleWorld: 0,
       rarity: 1,
       name: { en: 'Mochi', ko: '모찌 (Mochi)' },
@@ -1065,12 +1065,12 @@
       emoji: '🍡',
       desc: { en: 'Squishy and sweet kitten with a heart of marshmallow fluff.', ko: '마시멜로처럼 말랑말랑하고 사랑스러운 하얀 아기 고양이.' },
       quote: { en: 'Squishy purrs make the best towers, meow! 🍡✨', ko: '말랑말랑 골골송으로 힐링하며 쌓자냥! 🍡✨' },
-      filterStyle: 'brightness(1.15) contrast(0.95)',
+      filterStyle: 'none',
       perk: { en: 'Default Companion', ko: '기본 동료' }
     },
     {
       id: 'vanilla',
-      image: 'assets/chara_smile.png',
+      image: 'assets/cat_vanilla.png',
       roleWorld: 0,
       rarity: 1,
       name: { en: 'Vanilla', ko: '바닐라 (Vanilla)' },
@@ -1078,7 +1078,7 @@
       emoji: '🍨',
       desc: { en: 'Gentle creamy kitten with frosty breath. Keeps ice cream blocks frozen longer!', ko: '향긋한 바닐라 향기처럼 온화한 크림빛 고양이. 차가운 입김으로 아이스크림 블록이 녹는 시간을 늦춰줍니다!' },
       quote: { en: 'A peaceful climb is sweeter than cream, meow! 🍨🤍', ko: '차가운 아이스크림을 지켜주겠다냥! 🍨🤍' },
-      filterStyle: 'sepia(0.25) brightness(1.12)',
+      filterStyle: 'none',
       perk: { en: '🍦 Frosty Breath: Ice Cream Melts 3s Slower', ko: '🍦 차가운 입김: 아이스크림 녹는 시간 +3초 연장' }
     },
 
@@ -1098,7 +1098,7 @@
     },
     {
       id: 'mocha',
-      image: 'assets/cat_miko.png',
+      image: 'assets/cat_mocha.png',
       roleWorld: 1,
       rarity: 2,
       name: { en: 'Mocha', ko: '모카 (Mocha)' },
@@ -1106,12 +1106,12 @@
       emoji: '☕',
       desc: { en: 'Lantern scout who clears mists and speeds ahead! Clears 60% of village fog + grants +3s time.', ko: '등불을 든 민첩한 탐험냥! 안개 마을의 안개를 60% 투명하게 걷어내고 타임어택 시간을 늘립니다.' },
       quote: { en: 'My lantern pierces through the thickest mists, meow! ☕🏮', ko: '내 등불로 짙은 안개를 꿰뚫어 보겠다냥! ☕🏮' },
-      filterStyle: 'sepia(0.65) hue-rotate(-30deg) brightness(0.85)',
+      filterStyle: 'none',
       perk: { en: '🌫️ Lantern Scout: Clears 60% Fog & Time +3s', ko: '🌫️ 등불 탐험냥: 안개 60% 투명화 & 타임어택 +3초' }
     },
     {
       id: 'maru',
-      image: 'assets/cat_miko.png',
+      image: 'assets/cat_maru.png',
       roleWorld: 1,
       rarity: 2,
       name: { en: 'Maru', ko: '마루 (Maru)' },
@@ -1119,7 +1119,7 @@
       emoji: '⚡',
       desc: { en: 'Chubby turbo cat that rolls at lightning speed! Grants +3s bonus time.', ko: '데굴데굴 굴러다니는 초고속 뚱냥이! 스피드 러시 시간 +3초 선물!' },
       quote: { en: 'Rolling fast like a lightning ball, meow! ⚡🧶', ko: '번개 털뭉치처럼 굴러서 전속력으로 쌓자냥! ⚡🧶' },
-      filterStyle: 'saturate(1.8) hue-rotate(15deg)',
+      filterStyle: 'none',
       perk: { en: '⏱️ Time Attack +3s Bonus', ko: '⏱️ 타임어택 제한 시간 +3초 보너스' }
     },
 
@@ -1139,7 +1139,7 @@
     },
     {
       id: 'kuro',
-      image: 'assets/cat_nero.png',
+      image: 'assets/cat_kuro.png',
       roleWorld: 2,
       rarity: 2,
       name: { en: 'Kuro', ko: '쿠로 (Kuro)' },
@@ -1147,12 +1147,12 @@
       emoji: '🕶️',
       desc: { en: 'Mysterious ninja cat who moves noiselessly. Widens Perfect tolerance by +10%.', ko: '소리 없이 움직이는 닌자 고양이. 퍼펙트 판정 범위를 10% 넓혀줍니다.' },
       quote: { en: 'Precision is born from absolute silence, meow. 🕶️🖤', ko: '극상의 정밀함은 깊은 어둠 속에서 피어난다냥. 🕶️🖤' },
-      filterStyle: 'grayscale(0.85) brightness(0.7) contrast(1.3)',
+      filterStyle: 'none',
       perk: { en: '🎯 Perfect Tolerance +10% Expansion', ko: '🎯 퍼펙트 판정 범위 +10% 확대' }
     },
     {
       id: 'sebastian',
-      image: 'assets/cat_nero.png',
+      image: 'assets/cat_sebastian.png',
       roleWorld: 2,
       rarity: 2,
       name: { en: 'Sebastian', ko: '세바스찬 (Sebastian)' },
@@ -1160,7 +1160,7 @@
       emoji: '🧐',
       desc: { en: 'Perfectionist butler feline. Ensures clean stacking with +10% Perfect tolerance.', ko: '완벽주의 왕실 집사 고양이. 퍼펙트 판정 범위를 10% 넓혀줍니다.' },
       quote: { en: 'Zero error is the standard of elegance, meow. 🧐✨', ko: '오차 없는 정밀함이야말로 진정한 품격입니다냥. 🧐✨' },
-      filterStyle: 'sepia(0.35) contrast(1.15) brightness(0.9)',
+      filterStyle: 'none',
       perk: { en: '🎯 Perfect Tolerance +10% Expansion', ko: '🎯 퍼펙트 판정 범위 +10% 확대' }
     },
 
@@ -1180,7 +1180,7 @@
     },
     {
       id: 'cheddar',
-      image: 'assets/cat_simba.png',
+      image: 'assets/cat_cheddar.png',
       roleWorld: 3,
       rarity: 3,
       name: { en: 'Cheddar', ko: '체다 (Cheddar)' },
@@ -1188,12 +1188,12 @@
       emoji: '🏔️',
       desc: { en: 'Steadfast mountaineer equipped with spiked ice claws! Dampens ice slip and jitter by 50%.', ko: '빙하를 누비는 스파이크 발톱 냥이! 얼음 블록의 미끄러짐과 흔들림을 50% 억제합니다.' },
       quote: { en: 'Ice cannot slip under my razor claws, meow! 🏔️❄️', ko: '어떤 얼음도 내 날카로운 발톱 앞에선 못 미끄러진다냥! 🏔️❄️' },
-      filterStyle: 'sepia(0.7) saturate(2.0) hue-rotate(25deg)',
+      filterStyle: 'none',
       perk: { en: '🧊 Spike Claws: Ice Slip & Sway -50%', ko: '🧊 스파이크 발톱: 얼음 미끄러짐/흔들림 -50%' }
     },
     {
       id: 'toram',
-      image: 'assets/cat_simba.png',
+      image: 'assets/cat_toram.png',
       roleWorld: 3,
       rarity: 3,
       name: { en: 'Toram', ko: '토람이 (Toram)' },
@@ -1201,7 +1201,7 @@
       emoji: '🐯',
       desc: { en: 'Mighty tiger cat who acts as a heavy anchor. Reduces tower tilt angle by 60% on thin foundations!', ko: '육중한 닻 역할을 해주는 용맹한 냥이! 얇은 받침대 타워의 기울어짐을 60% 억제합니다.' },
       quote: { en: 'Firm like a mountain! Stand tall through the storms, meow! 🐯⚓', ko: '산처럼 굳건하게! 타워의 중심을 단단히 잡겠다냥! 🐯⚓' },
-      filterStyle: 'saturate(1.9) hue-rotate(35deg) contrast(1.1)',
+      filterStyle: 'none',
       perk: { en: '⚖️ Center Anchor: Tower Tilt -60%', ko: '⚖️ 무게중심 닻: 타워 기울기 -60% 억제' }
     },
 
@@ -1222,7 +1222,7 @@
     },
     {
       id: 'stella',
-      image: 'assets/cat_luna.png',
+      image: 'assets/cat_stella.png',
       roleWorld: 4,
       rarity: 3,
       name: { en: 'Stella', ko: '스텔라 (Stella)' },
@@ -1230,12 +1230,12 @@
       emoji: '✨',
       desc: { en: 'Enchanting celestial kitten. Rapidly expands tower size upon 2 combos!', ko: '은하수의 별가루를 흩날리는 요정 고양이. 2연속 퍼펙트 시 타워 폭 신속 복구!' },
       quote: { en: 'Stardust heals the tower and widens our path, meow~ ✨⭐', ko: '별가루가 캣타워를 치유하여 드넓게 넓혀준다냥~ ✨⭐' },
-      filterStyle: 'hue-rotate(200deg) saturate(1.5) brightness(1.1)',
+      filterStyle: 'none',
       perk: { en: '🌙 Rapid Size Recovery (Combo 2+ Expands Tower)', ko: '🌙 신속한 타워 회복 (2연속 퍼펙트 시 타워 크기 확장)' }
     },
     {
       id: 'pearl',
-      image: 'assets/cat_luna.png',
+      image: 'assets/cat_pearl.png',
       roleWorld: 4,
       rarity: 3,
       name: { en: 'Pearl', ko: '진주 (Pearl)' },
@@ -1243,7 +1243,7 @@
       emoji: '🦪',
       desc: { en: 'Iridescent pearl kitten. Flowing ocean waves restore tower width rapidly on combos!', ko: '영롱한 진줏빛 털결을 지닌 바다의 고양이. 2연속 퍼펙트 시 타워 크기 신속 확장!' },
       quote: { en: 'Like swelling ocean tides, our tower grows, meow! 🦪🌊', ko: '밀려오는 파도처럼 타워가 시원하게 차오른다냥! 🦪🌊' },
-      filterStyle: 'hue-rotate(160deg) saturate(1.1) brightness(1.15)',
+      filterStyle: 'none',
       perk: { en: '🌙 Rapid Size Recovery (Combo 2+ Expands Tower)', ko: '🌙 신속한 타워 회복 (2연속 퍼펙트 시 타워 크기 확장)' }
     },
 
@@ -1263,7 +1263,7 @@
     },
     {
       id: 'shogun',
-      image: 'assets/cat_meowperor.png',
+      image: 'assets/cat_shogun.png',
       roleWorld: 5,
       rarity: 4,
       name: { en: 'Shogun', ko: '쇼군 (Shogun)' },
@@ -1271,12 +1271,12 @@
       emoji: '⚔️',
       desc: { en: 'Fierce samurai kitten with a blazing red spirit! Deals 3× Critical Damage to Bosses.', ko: '불타는 붉은 혼을 지닌 무신 고양이! 보스에게 퍼펙트 타격 시 3배 크리티컬!' },
       quote: { en: 'One decisive strike shall shatter the boss, meow! ⚔️🔥', ko: '일격필살의 솜방망이로 보스를 단숨에 쓰러뜨린다냥! ⚔️🔥' },
-      filterStyle: 'hue-rotate(330deg) saturate(2.0) contrast(1.2) drop-shadow(0 0 8px rgba(255, 60, 60, 0.7))',
+      filterStyle: 'none',
       perk: { en: '👑 3× Boss Critical Damage', ko: '👑 보스 크리티컬 타격 데미지 3배' }
     },
     {
       id: 'pharaoh',
-      image: 'assets/cat_meowperor.png',
+      image: 'assets/cat_pharaoh.png',
       roleWorld: 5,
       rarity: 4,
       name: { en: 'Pharaoh', ko: '파라오 (Pharaoh)' },
@@ -1284,7 +1284,7 @@
       emoji: '☀️',
       desc: { en: 'Ancient Egyptian deity cat radiating solar rays! Deals 3× Critical Damage to Bosses.', ko: '고대 이집트 태양신 바스테트의 화신! 보스전 퍼펙트 타격 시 3배 크리티컬!' },
       quote: { en: 'Behold the divine wrath of the blazing sun, meow! ☀️✨', ko: '태양신의 신성한 일격으로 악을 심판하라냥! ☀️✨' },
-      filterStyle: 'sepia(0.9) saturate(2.2) brightness(1.1) drop-shadow(0 0 10px rgba(255, 180, 0, 0.8))',
+      filterStyle: 'none',
       perk: { en: '👑 3× Boss Critical Damage', ko: '👑 보스 크리티컬 타격 데미지 3배' }
     }
   ];

@@ -25,7 +25,7 @@
     if (mascotImg) {
       const filter = (cat && cat.filterStyle) ? cat.filterStyle : 'none';
       mascotImg.style.filter = filter;
-      if (cat && cat.image && cat.id !== 'shiro' && cat.id !== 'mochi' && cat.id !== 'vanilla') {
+      if (cat && cat.image && cat.id !== 'shiro') {
         if (emotion === 'sad') {
           mascotImg.src = ASSET_PATHS.sad;
         } else if (emotion === 'celebrate') {

@@ -165,7 +165,7 @@
     }
     if (mascotImg && cat) {
       mascotImg.style.filter = cat.filterStyle || 'none';
-      if (cat && cat.image && cat.id !== 'shiro' && cat.id !== 'mochi' && cat.id !== 'vanilla') {
+      if (cat && cat.image && cat.id !== 'shiro') {
         if (emotion === 'sad') {
           mascotImg.src = ASSET_PATHS.sad;
         } else if (emotion === 'celebrate') {
