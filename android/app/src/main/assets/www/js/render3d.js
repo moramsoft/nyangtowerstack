@@ -103,6 +103,147 @@
     targetCtx.restore();
   }
 
+  // --- ICE CREAM GELATO DRIPPING WALLS & TOPPING SPRINKLES (녹아내리는 젤라또) ---
+  const ICE_CREAM_SPRINKLES = [
+    { u: -0.28, v: -0.22, color: '#ff4081', rot: 0.38 },  // Strawberry pink
+    { u:  0.22, v: -0.26, color: '#00e5ff', rot: -0.45 }, // Mint cyan
+    { u: -0.18, v:  0.24, color: '#ffd600', rot: 0.72 },  // Lemon
+    { u:  0.26, v:  0.18, color: '#00e676', rot: -0.32 }, // Mint chip
+    { u:  0.02, v: -0.28, color: '#ff9100', rot: 0.22 },  // Orange sugar
+    { u: -0.28, v:  0.06, color: '#e040fb', rot: -0.65 }, // Sweet taro
+    { u:  0.28, v: -0.04, color: '#ffffff', rot: 0.52 },  // Sugar pearl
+    { u:  0.04, v:  0.28, color: '#ff4081', rot: -0.42 }, // Berry red
+    { u: -0.10, v: -0.08, color: '#ffd600', rot: 0.58 },  // Lemon crumb
+    { u:  0.14, v:  0.08, color: '#00e5ff', rot: -0.55 }  // Blue candy
+  ];
+
+  function drawIceCreamWallDrips(pTopLeft, pTopRight, hPx, isRightWall, opts) {
+    // 4 organic melting drips across each visible wall face
+    const dripCount = 4;
+    const depths = isRightWall ? [0.42, 0.78, 0.36, 0.88] : [0.48, 0.84, 0.38, 0.74];
+    const timerProgress = (opts && typeof opts.meltTimer === 'number' && opts.meltTimer > 0)
+      ? Math.max(0, Math.min(1.0, 1.0 - (opts.meltTimer / 5.0)))
+      : 0.25;
+
+    ctx.save();
+
+    // 1. Viscous melting whipped cream / icing glaze flowing from top edge
+    ctx.beginPath();
+    ctx.moveTo(pTopLeft.x, pTopLeft.y);
+    ctx.lineTo(pTopRight.x, pTopRight.y);
+
+    // Trace wavy scallop drips from right to left across the wall
+    for (let i = dripCount - 1; i >= 0; i--) {
+      const tStart = i / dripCount;
+      const tEnd = (i + 1) / dripCount;
+      const tMid = (tStart + tEnd) / 2;
+
+      const p1 = {
+        x: pTopLeft.x + (pTopRight.x - pTopLeft.x) * tEnd,
+        y: pTopLeft.y + (pTopRight.y - pTopLeft.y) * tEnd
+      };
+      const p0 = {
+        x: pTopLeft.x + (pTopRight.x - pTopLeft.x) * tStart,
+        y: pTopLeft.y + (pTopRight.y - pTopLeft.y) * tStart
+      };
+      const pM = {
+        x: pTopLeft.x + (pTopRight.x - pTopLeft.x) * tMid,
+        y: pTopLeft.y + (pTopRight.y - pTopLeft.y) * tMid
+      };
+
+      const dripLen = Math.min(hPx * 0.95, hPx * (depths[i] + timerProgress * 0.25));
+      const bulbY = pM.y + dripLen;
+      const bulbR = (3.5 + (i % 2) * 1.8) * currentZoom;
+
+      // Smooth bezier curves down to the bulbous drip
+      ctx.quadraticCurveTo(p1.x, p1.y + dripLen * 0.38, pM.x + bulbR * 0.85, bulbY - bulbR * 0.4);
+      ctx.arc(pM.x, bulbY, bulbR, 0, Math.PI, false);
+      ctx.quadraticCurveTo(p0.x, p0.y + dripLen * 0.38, p0.x, p0.y);
+    }
+
+    ctx.closePath();
+
+    // Cream Glaze Fill: Luscious creamy vanilla glaze
+    // Left face is illuminated, right face has gentle 3D isometric shading
+    ctx.fillStyle = isRightWall ? '#fff8e8' : '#ffffff';
+    ctx.fill();
+
+    // 2. Melting Droplets detached below deep drips
+    for (let i = 0; i < dripCount; i++) {
+      if (depths[i] >= 0.70 || timerProgress > 0.35) {
+        const tMid = (i + 0.5) / dripCount;
+        const pM = {
+          x: pTopLeft.x + (pTopRight.x - pTopLeft.x) * tMid,
+          y: pTopLeft.y + (pTopRight.y - pTopLeft.y) * tMid
+        };
+        const dripLen = Math.min(hPx * 0.95, hPx * (depths[i] + timerProgress * 0.25));
+        const dropY = pM.y + dripLen + (6.0 + timerProgress * 4.5) * currentZoom;
+        const dropR = (1.9 + timerProgress * 0.8) * currentZoom;
+
+        ctx.fillStyle = isRightWall ? '#fff8e8' : '#ffffff';
+        ctx.beginPath();
+        ctx.arc(pM.x, dropY, dropR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Droplet specular shine
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.beginPath();
+        ctx.arc(pM.x - dropR * 0.3, dropY - dropR * 0.3, dropR * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // 3. Glossy Specular Highlights along the drip crests
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.lineWidth = 1.3 * currentZoom;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < dripCount; i++) {
+      const tMid = (i + 0.5) / dripCount;
+      const pM = {
+        x: pTopLeft.x + (pTopRight.x - pTopLeft.x) * tMid,
+        y: pTopLeft.y + (pTopRight.y - pTopLeft.y) * tMid
+      };
+      const dripLen = Math.min(hPx * 0.95, hPx * (depths[i] + timerProgress * 0.25));
+      const bulbY = pM.y + dripLen;
+      const bulbR = (3.5 + (i % 2) * 1.8) * currentZoom;
+
+      // Curved specular gleam on the drip bulb
+      ctx.beginPath();
+      ctx.arc(pM.x, bulbY, bulbR * 0.65, Math.PI * 0.85, Math.PI * 1.45);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  function drawIceCreamTopSprinkles(x, y, z, w, d, camY) {
+    if (w < 1.8 || d < 1.8) return;
+    ctx.save();
+    for (let sp of ICE_CREAM_SPRINKLES) {
+      if (Math.abs(sp.u) * w > (w * 0.42) || Math.abs(sp.v) * d > (d * 0.42)) continue;
+      const spPt = project3D(x + sp.u * w, y, z + sp.v * d, camY);
+      ctx.save();
+      ctx.translate(spPt.x, spPt.y);
+      ctx.rotate(sp.rot);
+      ctx.fillStyle = sp.color;
+      ctx.beginPath();
+      const sw = 4.8 * currentZoom;
+      const sh = 2.2 * currentZoom;
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(-sw / 2, -sh / 2, sw, sh, 1.1 * currentZoom);
+      } else {
+        ctx.rect(-sw / 2, -sh / 2, sw, sh);
+      }
+      ctx.fill();
+
+      // Top sugar gleam
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fillRect(-sw / 2 + 0.6, -sh / 2 + 0.3, sw * 0.35, sh * 0.35);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
   // Draw authentic 3D Isometric Tower Block
   function drawIsometricBlock(x, z, y, w, d, color, camY, isBaseFoundation = false, opts = {}) {
     const halfW = w / 2;
@@ -118,6 +259,7 @@
     if (topFront.y < -150 || topBack.y > viewH + 250) return;
 
     const blockType = opts.blockType || (opts.isIce ? 'ice' : (opts.isScratcher ? 'scratcher' : (opts.isMelting ? 'melting' : (opts.isAnvil ? 'anvil' : 'normal'))));
+    const isIceCream = (blockType === 'melting' || (cfg && cfg.melting));
 
     // Custom Face Colors for special block types
     let colLeft = color.left;
@@ -132,10 +274,11 @@
       colLeft = 'hsl(34, 48%, 52%)';
       colRight = 'hsl(34, 44%, 42%)';
       colTop = 'hsl(36, 56%, 66%)';
-    } else if (blockType === 'melting') {
-      colLeft = 'hsl(335, 75%, 68%)';
-      colRight = 'hsl(335, 70%, 58%)';
-      colTop = 'hsl(335, 90%, 82%)';
+    } else if (isIceCream) {
+      const gHue = (cfg && typeof cfg.hue === 'number') ? cfg.hue : 335;
+      colLeft = `hsl(${gHue}, 78%, 68%)`;
+      colRight = `hsl(${gHue}, 72%, 58%)`;
+      colTop = `hsl(${gHue}, 88%, 84%)`;
     } else if (blockType === 'anvil') {
       colLeft = 'hsl(220, 20%, 42%)';
       colRight = 'hsl(220, 20%, 32%)';
@@ -201,22 +344,18 @@
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
       ctx.lineWidth = 1;
       ctx.stroke();
-    } else if (blockType === 'melting') {
-      // Melting drips from front faces
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.lineWidth = 1;
+    } else if (isIceCream) {
+      // 1. Luscious melting ice cream glaze dripping down both front walls
+      drawIceCreamWallDrips(topLeft, topFront, hPx, false, opts);
+      drawIceCreamWallDrips(topFront, topRight, hPx, true, opts);
+
+      // 2. Sweet colorful rainbow sprinkles across the top diamond face
+      drawIceCreamTopSprinkles(x, y, z, w, d, camY);
+
+      // 3. Delicate top frosty cream bevel
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
+      ctx.lineWidth = 1.2 * currentZoom;
       ctx.stroke();
-      const dripCount = 3;
-      const dripLen = 7 * currentZoom;
-      ctx.fillStyle = colTop;
-      for (let di = 0; di < dripCount; di++) {
-        const frac = 0.25 + di * 0.25;
-        const dripX = topLeft.x + (topFront.x - topLeft.x) * frac;
-        const dripY = topLeft.y + (topFront.y - topLeft.y) * frac + hPx;
-        ctx.beginPath();
-        ctx.arc(dripX, dripY + dripLen, 2.2 * currentZoom, 0, Math.PI * 2);
-        ctx.fill();
-      }
     } else if (blockType === 'anvil') {
       // Iron bevel & rivet bolts at 4 corners
       ctx.strokeStyle = 'rgba(220, 230, 255, 0.75)';
@@ -240,7 +379,7 @@
     if (!isBaseFoundation && w >= 1.8 && d >= 1.8) {
       const centerPt = project3D(x, y, z, camY);
       const pawScale = Math.min(w, d) / 7.5 * 1.1 * currentZoom;
-      drawCatPaw(centerPt.x, centerPt.y, pawScale, blockType === 'ice' ? 0.55 : 0.42);
+      drawCatPaw(centerPt.x, centerPt.y, pawScale, blockType === 'ice' ? 0.55 : (isIceCream ? 0.62 : 0.42));
     }
   }
 
