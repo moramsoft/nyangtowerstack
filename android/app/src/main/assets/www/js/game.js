@@ -1066,18 +1066,20 @@
         const mb = meltingBlocks[mIdx];
         mb.meltTimer -= dt;
 
-        // Occasional melting cream drip droplets while melting
+        // Occasional melting cream drip droplets while melting (colored to match gelato flavor)
         if (Math.random() < 0.28) {
           const corner = (Math.random() < 0.5) ? -1 : 1;
           const dropX = mb.x + (Math.random() - 0.5) * mb.w * 0.9;
           const dropZ = mb.z + corner * (mb.d / 2);
           const dropPt = project3D(dropX, mb.y - 0.1, dropZ, cameraY);
+          const fIdx = Math.abs(Math.floor(mb.y)) % 5;
+          const dropColors = ['#ff80ab', '#69f0ae', '#ffd54f', '#e040fb', '#a1887f'];
           activeParticles.push({
             x: dropPt.x,
             y: dropPt.y,
             vx: (Math.random() - 0.5) * 10,
             vy: 20 + Math.random() * 30,
-            color: '#fff5f8',
+            color: dropColors[fIdx] || '#fff5f8',
             radius: (1.5 + Math.random() * 1.0) * currentZoom,
             life: 0.35,
             maxLife: 0.35,
@@ -1089,8 +1091,10 @@
           meltingBlocks.splice(mIdx, 1);
           const tIdx = tower.indexOf(mb);
           if (tIdx > 0) {
+            const fIdx = Math.abs(Math.floor(mb.y)) % 5;
+            const meltColors = ['#ff4081', '#00e676', '#ffb300', '#ba68c8', '#8d6e63'];
             spawn3DStarBurst(mb.x, mb.z, mb.y, cameraY, 18);
-            spawnFloatingText(mb.x, mb.y, mb.z, (getLang() === 'ko' ? '사르르 녹음! 🍦💦' : 'MELTED! 🍦💦'), '#ff80ab', false);
+            spawnFloatingText(mb.x, mb.y, mb.z, (getLang() === 'ko' ? '사르르 녹음! 🍦💦' : 'MELTED! 🍦💦'), meltColors[fIdx] || '#ff80ab', false);
             tower.splice(tIdx, 1);
             for (let up = tIdx; up < tower.length; up++) {
               tower[up].y -= 1;

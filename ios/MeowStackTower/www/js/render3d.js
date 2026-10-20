@@ -81,9 +81,9 @@
   }
 
   // Draw cute embossed Cat Paw Print on top face
-  function drawCatPaw(cx, cy, scale = 1, alpha = 0.35, targetCtx = ctx) {
+  function drawCatPaw(cx, cy, scale = 1, alpha = 0.35, targetCtx = ctx, fillStyleOverride = null) {
     targetCtx.save();
-    targetCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+    targetCtx.fillStyle = fillStyleOverride || `rgba(255, 255, 255, ${alpha})`;
     // Center pad
     targetCtx.beginPath();
     targetCtx.ellipse(cx, cy + 2 * scale, 5.2 * scale, 3.8 * scale, 0, 0, Math.PI * 2);
@@ -103,7 +103,55 @@
     targetCtx.restore();
   }
 
-  // --- ICE CREAM GELATO DRIPPING WALLS & TOPPING SPRINKLES (녹아내리는 젤라또) ---
+  // --- PROCEDURAL 5-FLAVOR GELATO & WAFFLE CONE SYSTEM (녹아내리는 젤라또 & 바삭 와플 콘) ---
+  const GELATO_FLAVORS = [
+    {
+      name: 'strawberry',
+      colLeft: 'hsl(340, 78%, 68%)',
+      colRight: 'hsl(340, 72%, 58%)',
+      colTop: 'hsl(340, 88%, 84%)',
+      glazeLeft: '#ffffff',
+      glazeRight: '#fff0f5',
+      topping: 'rainbow'
+    },
+    {
+      name: 'mint_choco',
+      colLeft: 'hsl(162, 75%, 65%)',
+      colRight: 'hsl(162, 70%, 52%)',
+      colTop: 'hsl(162, 85%, 82%)',
+      glazeLeft: '#3e2723',
+      glazeRight: '#2b1a17',
+      topping: 'chocochip'
+    },
+    {
+      name: 'vanilla_custard',
+      colLeft: 'hsl(44, 88%, 74%)',
+      colRight: 'hsl(44, 80%, 62%)',
+      colTop: 'hsl(46, 95%, 88%)',
+      glazeLeft: '#ff9800',
+      glazeRight: '#e65100',
+      topping: 'caramel'
+    },
+    {
+      name: 'blueberry_taro',
+      colLeft: 'hsl(278, 70%, 68%)',
+      colRight: 'hsl(278, 65%, 56%)',
+      colTop: 'hsl(278, 80%, 86%)',
+      glazeLeft: '#ffffff',
+      glazeRight: '#ede7f6',
+      topping: 'berrypearls'
+    },
+    {
+      name: 'choco_fudge',
+      colLeft: 'hsl(26, 68%, 42%)',
+      colRight: 'hsl(26, 65%, 32%)',
+      colTop: 'hsl(26, 75%, 58%)',
+      glazeLeft: '#fff9c4',
+      glazeRight: '#fff176',
+      topping: 'cocoanibs'
+    }
+  ];
+
   const ICE_CREAM_SPRINKLES = [
     { u: -0.28, v: -0.22, color: '#ff4081', rot: 0.38 },  // Strawberry pink
     { u:  0.22, v: -0.26, color: '#00e5ff', rot: -0.45 }, // Mint cyan
@@ -117,10 +165,115 @@
     { u:  0.14, v:  0.08, color: '#00e5ff', rot: -0.55 }  // Blue candy
   ];
 
-  function drawIceCreamWallDrips(pTopLeft, pTopRight, hPx, isRightWall, opts) {
-    // 4 organic melting drips across each visible wall face
-    const dripCount = 4;
-    const depths = isRightWall ? [0.42, 0.78, 0.36, 0.88] : [0.48, 0.84, 0.38, 0.74];
+  // Draw crispy baked Waffle Cone wall pattern (for rock-solid non-melting blocks)
+  function drawWaffleConeWall(pTopLeft, pTopRight, hPx, isRightWall) {
+    ctx.save();
+
+    // 1. Crosshatch baked waffle wafer grid lines
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(pTopLeft.x, pTopLeft.y);
+    ctx.lineTo(pTopRight.x, pTopRight.y);
+    ctx.lineTo(pTopRight.x, pTopRight.y + hPx);
+    ctx.lineTo(pTopLeft.x, pTopLeft.y + hPx);
+    ctx.closePath();
+    ctx.clip();
+
+    const dx = pTopRight.x - pTopLeft.x;
+    const dy = pTopRight.y - pTopLeft.y;
+    const steps = 6;
+
+    // Diagonal lines in / direction
+    for (let i = -steps; i <= steps * 2; i++) {
+      const t = i / steps;
+      const startX = pTopLeft.x + dx * t;
+      const startY = pTopLeft.y + dy * t;
+      const endX = startX + (isRightWall ? -34 : 34) * currentZoom;
+      const endY = startY + hPx;
+
+      ctx.strokeStyle = 'rgba(92, 42, 10, 0.28)';
+      ctx.lineWidth = 1.4 * currentZoom;
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255, 230, 180, 0.22)';
+      ctx.lineWidth = 0.8 * currentZoom;
+      ctx.beginPath();
+      ctx.moveTo(startX + 1, startY);
+      ctx.lineTo(endX + 1, endY);
+      ctx.stroke();
+    }
+
+    // Diagonal lines in \ direction
+    for (let i = -steps; i <= steps * 2; i++) {
+      const t = i / steps;
+      const startX = pTopLeft.x + dx * t;
+      const startY = pTopLeft.y + dy * t;
+      const endX = startX + (isRightWall ? 34 : -34) * currentZoom;
+      const endY = startY + hPx;
+
+      ctx.strokeStyle = 'rgba(92, 42, 10, 0.28)';
+      ctx.lineWidth = 1.4 * currentZoom;
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255, 230, 180, 0.22)';
+      ctx.lineWidth = 0.8 * currentZoom;
+      ctx.beginPath();
+      ctx.moveTo(startX + 1, startY);
+      ctx.lineTo(endX + 1, endY);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 2. Firm chocolate ganache dipping rim across the upper 22% of the wall (zero melting)
+    const rimH = Math.min(hPx * 0.25, 12 * currentZoom);
+    ctx.beginPath();
+    ctx.moveTo(pTopLeft.x, pTopLeft.y);
+    ctx.lineTo(pTopRight.x, pTopRight.y);
+
+    const scallopCount = 5;
+    for (let i = scallopCount - 1; i >= 0; i--) {
+      const tEnd = (i + 1) / scallopCount;
+      const tStart = i / scallopCount;
+      const tMid = (tStart + tEnd) / 2;
+      const p0 = { x: pTopLeft.x + dx * tStart, y: pTopLeft.y + dy * tStart };
+      const pM = { x: pTopLeft.x + dx * tMid, y: pTopLeft.y + dy * tMid };
+      ctx.quadraticCurveTo(pM.x, pM.y + rimH, p0.x, p0.y + rimH * 0.35);
+    }
+    ctx.closePath();
+    ctx.fillStyle = isRightWall ? '#2c1409' : '#3e2012';
+    ctx.fill();
+
+    // Delicate chocolate gloss reflection
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.lineWidth = 1.0 * currentZoom;
+    ctx.beginPath();
+    ctx.moveTo(pTopLeft.x, pTopLeft.y + 1);
+    ctx.lineTo(pTopRight.x, pTopRight.y + 1);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // Draw procedural melting cream drips (3~5 variable drips with pseudo-random seed per y)
+  function drawIceCreamWallDrips(pTopLeft, pTopRight, hPx, isRightWall, opts, yLevel, flavor) {
+    const yVal = (typeof yLevel === 'number') ? yLevel : 0;
+    // Deterministic pseudo-random seed per block height and wall side
+    const seed = Math.abs(Math.sin(yVal * 12.9898 + (isRightWall ? 78.233 : 37.719))) * 43758.5453;
+    const dripCount = 3 + (Math.floor(seed) % 3); // 3, 4, or 5 drips
+
+    const depths = [];
+    for (let i = 0; i < dripCount; i++) {
+      const pseudo = Math.abs(Math.sin(seed + i * 9.17)) * 1000;
+      const dRatio = 0.30 + ((pseudo % 100) / 100) * 0.52; // 0.30 to 0.82
+      depths.push(dRatio);
+    }
+
     const maxTimer = (opts && opts.maxMeltTimer) ? opts.maxMeltTimer : 2.8;
     const timerProgress = (opts && typeof opts.meltTimer === 'number' && opts.meltTimer > 0)
       ? Math.max(0, Math.min(1.0, 1.0 - (opts.meltTimer / maxTimer)))
@@ -154,7 +307,7 @@
 
       const dripLen = Math.min(hPx * 0.95, hPx * (depths[i] + timerProgress * 0.25));
       const bulbY = pM.y + dripLen;
-      const bulbR = (3.5 + (i % 2) * 1.8) * currentZoom;
+      const bulbR = (3.2 + (i % 2) * 1.6) * currentZoom;
 
       // Smooth bezier curves down to the bulbous drip
       ctx.quadraticCurveTo(p1.x, p1.y + dripLen * 0.38, pM.x + bulbR * 0.85, bulbY - bulbR * 0.4);
@@ -164,14 +317,14 @@
 
     ctx.closePath();
 
-    // Cream Glaze Fill: Luscious creamy vanilla glaze
-    // Left face is illuminated, right face has gentle 3D isometric shading
-    ctx.fillStyle = isRightWall ? '#fff8e8' : '#ffffff';
+    // Cream Glaze Fill from flavor
+    const glazeCol = flavor ? (isRightWall ? flavor.glazeRight : flavor.glazeLeft) : (isRightWall ? '#fff8e8' : '#ffffff');
+    ctx.fillStyle = glazeCol;
     ctx.fill();
 
     // 2. Melting Droplets detached below deep drips
     for (let i = 0; i < dripCount; i++) {
-      if (depths[i] >= 0.70 || timerProgress > 0.35) {
+      if (depths[i] >= 0.65 || timerProgress > 0.35) {
         const tMid = (i + 0.5) / dripCount;
         const pM = {
           x: pTopLeft.x + (pTopRight.x - pTopLeft.x) * tMid,
@@ -181,13 +334,13 @@
         const dropY = pM.y + dripLen + (6.0 + timerProgress * 4.5) * currentZoom;
         const dropR = (1.9 + timerProgress * 0.8) * currentZoom;
 
-        ctx.fillStyle = isRightWall ? '#fff8e8' : '#ffffff';
+        ctx.fillStyle = glazeCol;
         ctx.beginPath();
         ctx.arc(pM.x, dropY, dropR, 0, Math.PI * 2);
         ctx.fill();
 
         // Droplet specular shine
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
         ctx.beginPath();
         ctx.arc(pM.x - dropR * 0.3, dropY - dropR * 0.3, dropR * 0.4, 0, Math.PI * 2);
         ctx.fill();
@@ -195,8 +348,8 @@
     }
 
     // 3. Glossy Specular Highlights along the drip crests
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.lineWidth = 1.3 * currentZoom;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.lineWidth = 1.2 * currentZoom;
     ctx.lineCap = 'round';
     for (let i = 0; i < dripCount; i++) {
       const tMid = (i + 0.5) / dripCount;
@@ -206,9 +359,8 @@
       };
       const dripLen = Math.min(hPx * 0.95, hPx * (depths[i] + timerProgress * 0.25));
       const bulbY = pM.y + dripLen;
-      const bulbR = (3.5 + (i % 2) * 1.8) * currentZoom;
+      const bulbR = (3.2 + (i % 2) * 1.6) * currentZoom;
 
-      // Curved specular gleam on the drip bulb
       ctx.beginPath();
       ctx.arc(pM.x, bulbY, bulbR * 0.65, Math.PI * 0.85, Math.PI * 1.45);
       ctx.stroke();
@@ -217,30 +369,141 @@
     ctx.restore();
   }
 
-  function drawIceCreamTopSprinkles(x, y, z, w, d, camY) {
+  // Draw custom flavor toppings on top diamond face
+  function drawIceCreamTopTopping(x, y, z, w, d, camY, toppingType) {
     if (w < 1.8 || d < 1.8) return;
     ctx.save();
-    for (let sp of ICE_CREAM_SPRINKLES) {
-      if (Math.abs(sp.u) * w > (w * 0.42) || Math.abs(sp.v) * d > (d * 0.42)) continue;
-      const spPt = project3D(x + sp.u * w, y, z + sp.v * d, camY);
-      ctx.save();
-      ctx.translate(spPt.x, spPt.y);
-      ctx.rotate(sp.rot);
-      ctx.fillStyle = sp.color;
-      ctx.beginPath();
-      const sw = 4.8 * currentZoom;
-      const sh = 2.2 * currentZoom;
-      if (typeof ctx.roundRect === 'function') {
-        ctx.roundRect(-sw / 2, -sh / 2, sw, sh, 1.1 * currentZoom);
-      } else {
-        ctx.rect(-sw / 2, -sh / 2, sw, sh);
-      }
-      ctx.fill();
+    const type = toppingType || 'rainbow';
 
-      // Top sugar gleam
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.fillRect(-sw / 2 + 0.6, -sh / 2 + 0.3, sw * 0.35, sh * 0.35);
-      ctx.restore();
+    if (type === 'chocochip') {
+      // Dark chocolate morsels with glossy highlights
+      const chips = [
+        { u: -0.25, v: -0.22, r: 2.2 },
+        { u:  0.22, v: -0.20, r: 2.6 },
+        { u: -0.16, v:  0.22, r: 2.4 },
+        { u:  0.24, v:  0.18, r: 2.0 },
+        { u:  0.02, v: -0.26, r: 2.5 },
+        { u: -0.26, v:  0.06, r: 2.1 },
+        { u:  0.26, v: -0.04, r: 2.3 },
+        { u:  0.05, v:  0.26, r: 2.7 },
+        { u: -0.08, v: -0.06, r: 2.2 },
+        { u:  0.12, v:  0.08, r: 2.4 }
+      ];
+      for (let ch of chips) {
+        if (Math.abs(ch.u) * w > (w * 0.42) || Math.abs(ch.v) * d > (d * 0.42)) continue;
+        const pt = project3D(x + ch.u * w, y, z + ch.v * d, camY);
+        const rad = ch.r * currentZoom;
+        ctx.fillStyle = '#2a160c';
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, rad, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.beginPath();
+        ctx.arc(pt.x - rad * 0.35, pt.y - rad * 0.35, rad * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (type === 'caramel') {
+      // Golden caramel glaze drops & sugar pearls
+      const pearls = [
+        { u: -0.22, v: -0.20, color: '#ffb300', r: 2.5 },
+        { u:  0.24, v: -0.24, color: '#fff9c4', r: 2.0 },
+        { u: -0.18, v:  0.20, color: '#ff9800', r: 2.8 },
+        { u:  0.22, v:  0.22, color: '#ffe082', r: 2.2 },
+        { u:  0.00, v: -0.24, color: '#ffb300', r: 2.4 },
+        { u: -0.24, v:  0.04, color: '#fff9c4', r: 2.1 },
+        { u:  0.25, v: -0.02, color: '#ff9800', r: 2.6 },
+        { u:  0.04, v:  0.24, color: '#ffe082', r: 2.3 },
+        { u: -0.10, v: -0.05, color: '#ffb300', r: 2.2 },
+        { u:  0.14, v:  0.06, color: '#ffffff', r: 1.8 }
+      ];
+      for (let p of pearls) {
+        if (Math.abs(p.u) * w > (w * 0.42) || Math.abs(p.v) * d > (d * 0.42)) continue;
+        const pt = project3D(x + p.u * w, y, z + p.v * d, camY);
+        const rad = p.r * currentZoom;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, rad, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+        ctx.beginPath();
+        ctx.arc(pt.x - rad * 0.3, pt.y - rad * 0.3, rad * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (type === 'berrypearls') {
+      // Sweet blueberry & taro candy pearls
+      const berries = [
+        { u: -0.24, v: -0.22, color: '#4a148c', r: 2.6 },
+        { u:  0.22, v: -0.24, color: '#7b1fa2', r: 2.3 },
+        { u: -0.16, v:  0.22, color: '#ab47bc', r: 2.5 },
+        { u:  0.25, v:  0.18, color: '#4a148c', r: 2.2 },
+        { u:  0.02, v: -0.25, color: '#e1bee7', r: 1.9 },
+        { u: -0.26, v:  0.05, color: '#7b1fa2', r: 2.4 },
+        { u:  0.24, v: -0.04, color: '#ab47bc', r: 2.3 },
+        { u:  0.05, v:  0.25, color: '#4a148c', r: 2.7 },
+        { u: -0.09, v: -0.07, color: '#e1bee7', r: 2.0 },
+        { u:  0.13, v:  0.07, color: '#7b1fa2', r: 2.4 }
+      ];
+      for (let b of berries) {
+        if (Math.abs(b.u) * w > (w * 0.42) || Math.abs(b.v) * d > (d * 0.42)) continue;
+        const pt = project3D(x + b.u * w, y, z + b.v * d, camY);
+        const rad = b.r * currentZoom;
+        ctx.fillStyle = b.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, rad, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.beginPath();
+        ctx.arc(pt.x - rad * 0.35, pt.y - rad * 0.35, rad * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else if (type === 'cocoanibs') {
+      // Crunchy dark cocoa nibs and golden sugar crumbs
+      const nibs = [
+        { u: -0.24, v: -0.20, color: '#3e2723', rot: 0.4 },
+        { u:  0.22, v: -0.24, color: '#ffd54f', rot: -0.3 },
+        { u: -0.18, v:  0.22, color: '#4e342e', rot: 0.6 },
+        { u:  0.25, v:  0.20, color: '#d7ccc8', rot: -0.5 },
+        { u:  0.00, v: -0.26, color: '#3e2723', rot: 0.2 },
+        { u: -0.26, v:  0.04, color: '#ffd54f', rot: -0.7 },
+        { u:  0.24, v: -0.04, color: '#4e342e', rot: 0.5 },
+        { u:  0.04, v:  0.25, color: '#d7ccc8', rot: -0.4 },
+        { u: -0.08, v: -0.06, color: '#3e2723', rot: 0.8 },
+        { u:  0.14, v:  0.06, color: '#ffd54f', rot: -0.2 }
+      ];
+      for (let nb of nibs) {
+        if (Math.abs(nb.u) * w > (w * 0.42) || Math.abs(nb.v) * d > (d * 0.42)) continue;
+        const pt = project3D(x + nb.u * w, y, z + nb.v * d, camY);
+        ctx.save();
+        ctx.translate(pt.x, pt.y);
+        ctx.rotate(nb.rot);
+        ctx.fillStyle = nb.color;
+        const nw = 3.8 * currentZoom;
+        const nh = 2.4 * currentZoom;
+        ctx.fillRect(-nw / 2, -nh / 2, nw, nh);
+        ctx.restore();
+      }
+    } else {
+      // Rainbow sprinkles
+      for (let sp of ICE_CREAM_SPRINKLES) {
+        if (Math.abs(sp.u) * w > (w * 0.42) || Math.abs(sp.v) * d > (d * 0.42)) continue;
+        const spPt = project3D(x + sp.u * w, y, z + sp.v * d, camY);
+        ctx.save();
+        ctx.translate(spPt.x, spPt.y);
+        ctx.rotate(sp.rot);
+        ctx.fillStyle = sp.color;
+        ctx.beginPath();
+        const sw = 4.8 * currentZoom;
+        const sh = 2.2 * currentZoom;
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(-sw / 2, -sh / 2, sw, sh, 1.1 * currentZoom);
+        } else {
+          ctx.rect(-sw / 2, -sh / 2, sw, sh);
+        }
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.fillRect(-sw / 2 + 0.6, -sh / 2 + 0.3, sw * 0.35, sh * 0.35);
+        ctx.restore();
+      }
     }
     ctx.restore();
   }
@@ -248,15 +511,18 @@
   // Draw authentic 3D Isometric Tower Block
   function drawIsometricBlock(x, z, y, w, d, color, camY, isBaseFoundation = false, opts = {}) {
     const blockType = opts.blockType || (opts.isIce ? 'ice' : (opts.isScratcher ? 'scratcher' : (opts.isMelting ? 'melting' : (opts.isAnvil ? 'anvil' : 'normal'))));
-    const isIceCream = (blockType === 'melting' || (cfg && cfg.melting));
+    const isStageMelting = !!(cfg && cfg.melting);
+    const isMeltingBlock = (blockType === 'melting');
+    const isWaffleConeBlock = (isStageMelting && !isMeltingBlock && !isBaseFoundation);
+    const isGelatoBlock = (isMeltingBlock && !isBaseFoundation);
 
-    // Continuous dynamic melting deformation for ice cream blocks on the tower
+    // Continuous dynamic melting deformation for melting gelato blocks on the tower
     let renderY = y;
     let renderW = w;
     let renderD = d;
     let shiverX = 0;
 
-    if (!isBaseFoundation && isIceCream && opts.meltTimer && opts.meltTimer > 0) {
+    if (isGelatoBlock && opts.meltTimer && opts.meltTimer > 0) {
       const maxTimer = opts.maxMeltTimer || 2.8;
       const meltRatio = Math.max(0, Math.min(1.0, 1.0 - (opts.meltTimer / maxTimer)));
 
@@ -297,6 +563,8 @@
     let colRight = color.right;
     let colTop = color.top;
 
+    let currentGelatoFlavor = null;
+
     if (blockType === 'ice') {
       colLeft = 'hsl(198, 85%, 65%)';
       colRight = 'hsl(198, 80%, 54%)';
@@ -305,15 +573,27 @@
       colLeft = 'hsl(34, 48%, 52%)';
       colRight = 'hsl(34, 44%, 42%)';
       colTop = 'hsl(36, 56%, 66%)';
-    } else if (isIceCream) {
-      const gHue = (cfg && typeof cfg.hue === 'number') ? cfg.hue : 335;
-      colLeft = `hsl(${gHue}, 78%, 68%)`;
-      colRight = `hsl(${gHue}, 72%, 58%)`;
-      colTop = `hsl(${gHue}, 88%, 84%)`;
+    } else if (isWaffleConeBlock) {
+      // Golden baked crispy waffle cone (firm, rock-solid, zero melting)
+      colLeft = 'hsl(32, 68%, 56%)';
+      colRight = 'hsl(30, 64%, 46%)';
+      colTop = 'hsl(36, 82%, 72%)';
+    } else if (isGelatoBlock) {
+      // 5-flavor procedural gelato scoop
+      const fIdx = Math.abs(Math.floor(y)) % GELATO_FLAVORS.length;
+      currentGelatoFlavor = GELATO_FLAVORS[fIdx];
+      colLeft = currentGelatoFlavor.colLeft;
+      colRight = currentGelatoFlavor.colRight;
+      colTop = currentGelatoFlavor.colTop;
     } else if (blockType === 'anvil') {
       colLeft = 'hsl(220, 20%, 42%)';
       colRight = 'hsl(220, 20%, 32%)';
       colTop = 'hsl(220, 22%, 58%)';
+    } else if (isBaseFoundation && isStageMelting) {
+      // Giant dessert waffle tray foundation
+      colLeft = '#7a421b';
+      colRight = '#5b2f11';
+      colTop = '#b97a45';
     }
 
     // 1. FRONT-LEFT FACE (Facing Z)
@@ -375,13 +655,43 @@
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
       ctx.lineWidth = 1;
       ctx.stroke();
-    } else if (isIceCream) {
-      // 1. Luscious melting ice cream glaze dripping down both front walls
-      drawIceCreamWallDrips(topLeft, topFront, hPx, false, opts);
-      drawIceCreamWallDrips(topFront, topRight, hPx, true, opts);
+    } else if (isWaffleConeBlock) {
+      // 1. Crosshatch baked wafer lines & chocolate ganache rim on walls
+      drawWaffleConeWall(topLeft, topFront, hPx, false);
+      drawWaffleConeWall(topFront, topRight, hPx, true);
 
-      // 2. Sweet colorful rainbow sprinkles across the top diamond face
-      drawIceCreamTopSprinkles(x, y, z, w, d, camY);
+      // 2. Subtle top diamond wafer grid
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(topBack.x, topBack.y);
+      ctx.lineTo(topLeft.x, topLeft.y);
+      ctx.lineTo(topFront.x, topFront.y);
+      ctx.lineTo(topRight.x, topRight.y);
+      ctx.closePath();
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(110, 52, 12, 0.16)';
+      ctx.lineWidth = 1.0 * currentZoom;
+      for (let s = -0.38; s <= 0.38; s += 0.15) {
+        const pA = project3D(x - halfW * 0.85, renderY, z + halfD * s * 2, camY);
+        const pB = project3D(x + halfW * 0.85, renderY, z + halfD * s * 2, camY);
+        ctx.beginPath();
+        ctx.moveTo(pA.x, pA.y);
+        ctx.lineTo(pB.x, pB.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // 3. Crisp wafer bevel highlight
+      ctx.strokeStyle = 'rgba(255, 235, 180, 0.85)';
+      ctx.lineWidth = 1.3 * currentZoom;
+      ctx.stroke();
+    } else if (isGelatoBlock) {
+      // 1. Procedural melting gelato glaze dripping down both front walls
+      drawIceCreamWallDrips(topLeft, topFront, hPx, false, opts, y, currentGelatoFlavor);
+      drawIceCreamWallDrips(topFront, topRight, hPx, true, opts, y, currentGelatoFlavor);
+
+      // 2. Custom flavor toppings (sprinkles, chocochips, caramel, berry pearls, cocoa nibs)
+      drawIceCreamTopTopping(x, renderY, z, renderW, renderD, camY, currentGelatoFlavor.topping);
 
       // 3. Delicate top frosty cream bevel
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
@@ -408,9 +718,18 @@
 
     // Stamped Cat Paw Print on Top Face Center
     if (!isBaseFoundation && w >= 1.8 && d >= 1.8) {
-      const centerPt = project3D(x, y, z, camY);
-      const pawScale = Math.min(w, d) / 7.5 * 1.1 * currentZoom;
-      drawCatPaw(centerPt.x, centerPt.y, pawScale, blockType === 'ice' ? 0.55 : (isIceCream ? 0.62 : 0.42));
+      const centerPt = project3D(x, renderY, z, camY);
+      if (shiverX !== 0) centerPt.x += shiverX;
+      const pawScale = Math.min(renderW, renderD) / 7.5 * 1.1 * currentZoom;
+      if (isWaffleConeBlock) {
+        // Cocoa powder cat paw stamp on waffle cone
+        drawCatPaw(centerPt.x, centerPt.y, pawScale, 0.55, ctx, 'rgba(85, 38, 12, 0.48)');
+      } else if (isGelatoBlock) {
+        // Soft creamy marshmallow imprint
+        drawCatPaw(centerPt.x, centerPt.y, pawScale, 0.62);
+      } else {
+        drawCatPaw(centerPt.x, centerPt.y, pawScale, blockType === 'ice' ? 0.55 : 0.42);
+      }
     }
   }
 
