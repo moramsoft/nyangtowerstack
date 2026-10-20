@@ -121,8 +121,9 @@
     // 4 organic melting drips across each visible wall face
     const dripCount = 4;
     const depths = isRightWall ? [0.42, 0.78, 0.36, 0.88] : [0.48, 0.84, 0.38, 0.74];
+    const maxTimer = (opts && opts.maxMeltTimer) ? opts.maxMeltTimer : 2.8;
     const timerProgress = (opts && typeof opts.meltTimer === 'number' && opts.meltTimer > 0)
-      ? Math.max(0, Math.min(1.0, 1.0 - (opts.meltTimer / 5.0)))
+      ? Math.max(0, Math.min(1.0, 1.0 - (opts.meltTimer / maxTimer)))
       : 0.25;
 
     ctx.save();
@@ -246,20 +247,50 @@
 
   // Draw authentic 3D Isometric Tower Block
   function drawIsometricBlock(x, z, y, w, d, color, camY, isBaseFoundation = false, opts = {}) {
-    const halfW = w / 2;
-    const halfD = d / 2;
+    const blockType = opts.blockType || (opts.isIce ? 'ice' : (opts.isScratcher ? 'scratcher' : (opts.isMelting ? 'melting' : (opts.isAnvil ? 'anvil' : 'normal'))));
+    const isIceCream = (blockType === 'melting' || (cfg && cfg.melting));
+
+    // Continuous dynamic melting deformation for ice cream blocks on the tower
+    let renderY = y;
+    let renderW = w;
+    let renderD = d;
+    let shiverX = 0;
+
+    if (!isBaseFoundation && isIceCream && opts.meltTimer && opts.meltTimer > 0) {
+      const maxTimer = opts.maxMeltTimer || 2.8;
+      const meltRatio = Math.max(0, Math.min(1.0, 1.0 - (opts.meltTimer / maxTimer)));
+
+      // 1. Vertical sinking: Top surface visibly deflates and sinks downward
+      renderY = y - (meltRatio * 0.38);
+
+      // 2. Lateral spreading: Melted ice cream puddles slightly outward
+      renderW = w * (1.0 + meltRatio * 0.08);
+      renderD = d * (1.0 + meltRatio * 0.08);
+
+      // 3. Urgent liquid shiver during the final 0.9s before melting completely
+      if (opts.meltTimer < 0.9) {
+        shiverX = Math.sin(performance.now() * 0.035) * ((0.9 - opts.meltTimer) / 0.9) * 2.2 * currentZoom;
+      }
+    }
+
+    const halfW = renderW / 2;
+    const halfD = renderD / 2;
     const hPx = (isBaseFoundation ? 300 : BLOCK_HEIGHT_PX) * currentZoom;
 
     // 4 top corner vertices
-    const topBack = project3D(x - halfW, y, z - halfD, camY);
-    const topLeft = project3D(x - halfW, y, z + halfD, camY);
-    const topFront = project3D(x + halfW, y, z + halfD, camY);
-    const topRight = project3D(x + halfW, y, z - halfD, camY);
+    const topBack = project3D(x - halfW, renderY, z - halfD, camY);
+    const topLeft = project3D(x - halfW, renderY, z + halfD, camY);
+    const topFront = project3D(x + halfW, renderY, z + halfD, camY);
+    const topRight = project3D(x + halfW, renderY, z - halfD, camY);
+
+    if (shiverX !== 0) {
+      topBack.x += shiverX;
+      topLeft.x += shiverX;
+      topFront.x += shiverX;
+      topRight.x += shiverX;
+    }
 
     if (topFront.y < -150 || topBack.y > viewH + 250) return;
-
-    const blockType = opts.blockType || (opts.isIce ? 'ice' : (opts.isScratcher ? 'scratcher' : (opts.isMelting ? 'melting' : (opts.isAnvil ? 'anvil' : 'normal'))));
-    const isIceCream = (blockType === 'melting' || (cfg && cfg.melting));
 
     // Custom Face Colors for special block types
     let colLeft = color.left;

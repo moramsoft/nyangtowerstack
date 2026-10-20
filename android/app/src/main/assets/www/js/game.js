@@ -253,11 +253,14 @@
       blockType = 'ice';
     } else if (cfg.scratcher) {
       blockType = 'scratcher';
-    } else if (cfg.melting && Math.random() < (cfg.meltingRate || 0.45)) {
+    } else if (cfg.melting && Math.random() < Math.max(0.70, cfg.meltingRate || 0.70)) {
       blockType = 'melting';
     } else if (cfg.anvil) {
       blockType = 'anvil';
     }
+
+    const baseMeltTime = (typeof cfg.meltDuration === 'number') ? cfg.meltDuration : 2.8;
+    const initialMelt = Math.max(1.8, baseMeltTime + (cfg.meltTimerBonus || 0));
 
     activeBlock = {
       x: posX,
@@ -273,7 +276,8 @@
       age: 0,
       phase: Math.random() * Math.PI * 2,
       blockType: blockType,
-      meltTimer: (blockType === 'melting') ? (5.0 + (cfg.meltTimerBonus || 0)) : 0
+      meltTimer: (blockType === 'melting') ? initialMelt : 0,
+      maxMeltTimer: (blockType === 'melting') ? initialMelt : 0
     };
   }
 
@@ -450,7 +454,7 @@
           if (bossCurrentHp <= 0) {
             const defQ = (cfg && cfg.bossInfo && getBossQuote(cfg.bossInfo, 'defeatQuote')) || (getLang() === 'ko' ? '😾 냐아아앙~~ 항복이다냥! 🏳️💦' : '😾 Meowch~~ I surrender, meow! 🏳️💦');
             setBossState('defeat', defQ);
-            tower.push({ x: block.x, z: block.z, y: block.y, w: block.w, d: block.d, color: block.color, blockType: block.blockType, meltTimer: block.meltTimer });
+            tower.push({ x: block.x, z: block.z, y: block.y, w: block.w, d: block.d, color: block.color, blockType: block.blockType, meltTimer: block.meltTimer, maxMeltTimer: block.maxMeltTimer || block.meltTimer });
             finishPlacement(block);
             return;
           } else if (bossCurrentHp <= bossMaxHp * 0.5 && !bossFrenzy) {
@@ -514,7 +518,8 @@
         d: block.d,
         color: block.color,
         blockType: block.blockType,
-        meltTimer: block.meltTimer
+        meltTimer: block.meltTimer,
+        maxMeltTimer: block.maxMeltTimer || block.meltTimer
       };
       tower.push(placedBlock);
 
@@ -611,7 +616,8 @@
       d: newD,
       color: block.color,
       blockType: block.blockType,
-      meltTimer: block.meltTimer
+      meltTimer: block.meltTimer,
+      maxMeltTimer: block.maxMeltTimer || block.meltTimer
     };
     tower.push(placedNormalBlock);
 
@@ -1059,19 +1065,40 @@
       for (let mIdx = meltingBlocks.length - 1; mIdx >= 0; mIdx--) {
         const mb = meltingBlocks[mIdx];
         mb.meltTimer -= dt;
+
+        // Occasional melting cream drip droplets while melting
+        if (Math.random() < 0.28) {
+          const corner = (Math.random() < 0.5) ? -1 : 1;
+          const dropX = mb.x + (Math.random() - 0.5) * mb.w * 0.9;
+          const dropZ = mb.z + corner * (mb.d / 2);
+          const dropPt = project3D(dropX, mb.y - 0.1, dropZ, cameraY);
+          activeParticles.push({
+            x: dropPt.x,
+            y: dropPt.y,
+            vx: (Math.random() - 0.5) * 10,
+            vy: 20 + Math.random() * 30,
+            color: '#fff5f8',
+            radius: (1.5 + Math.random() * 1.0) * currentZoom,
+            life: 0.35,
+            maxLife: 0.35,
+            gravity: 90
+          });
+        }
+
         if (mb.meltTimer <= 0) {
           meltingBlocks.splice(mIdx, 1);
           const tIdx = tower.indexOf(mb);
           if (tIdx > 0) {
-            spawn3DStarBurst(mb.x, mb.z, mb.y, cameraY, 16);
-            spawnFloatingText(mb.x, mb.y, mb.z, (getLang() === 'ko' ? '녹아내림! 🍦💦' : 'MELTED! 🍦💦'), '#ff80ab', false);
+            spawn3DStarBurst(mb.x, mb.z, mb.y, cameraY, 18);
+            spawnFloatingText(mb.x, mb.y, mb.z, (getLang() === 'ko' ? '사르르 녹음! 🍦💦' : 'MELTED! 🍦💦'), '#ff80ab', false);
             tower.splice(tIdx, 1);
             for (let up = tIdx; up < tower.length; up++) {
               tower[up].y -= 1;
             }
             if (activeBlock) activeBlock.y -= 1;
             if (typeof climbingKitten !== 'undefined') climbingKitten.targetY = Math.max(0, climbingKitten.targetY - 1);
-            triggerShake(2.5, 0.1);
+            triggerShake(3.0, 0.12);
+            playMarimbaNote(196, false);
           }
         }
       }
