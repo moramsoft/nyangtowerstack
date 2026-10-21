@@ -259,8 +259,11 @@
       blockType = 'anvil';
     }
 
-    const baseMeltTime = (typeof cfg.meltDuration === 'number') ? cfg.meltDuration : 2.8;
-    const initialMelt = Math.max(1.8, baseMeltTime + (cfg.meltTimerBonus || 0));
+    const baseMeltTime = (typeof cfg.meltDuration === 'number') ? cfg.meltDuration : 4.6;
+    // Slightly randomized melt time per block (±1.0s variance: ~3.6s to ~5.6s range)
+    const randomVariance = (Math.random() * 2.0 - 1.0);
+    const blockMeltDuration = Math.max(3.2, baseMeltTime + randomVariance);
+    const initialMelt = Number((blockMeltDuration + (cfg.meltTimerBonus || 0)).toFixed(2));
 
     activeBlock = {
       x: posX,

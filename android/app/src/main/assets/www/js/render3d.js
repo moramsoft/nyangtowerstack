@@ -274,7 +274,7 @@
       depths.push(dRatio);
     }
 
-    const maxTimer = (opts && opts.maxMeltTimer) ? opts.maxMeltTimer : 2.8;
+    const maxTimer = (opts && opts.maxMeltTimer) ? opts.maxMeltTimer : 4.6;
     const timerProgress = (opts && typeof opts.meltTimer === 'number' && opts.meltTimer > 0)
       ? Math.max(0, Math.min(1.0, 1.0 - (opts.meltTimer / maxTimer)))
       : 0.25;
@@ -523,7 +523,7 @@
     let shiverX = 0;
 
     if (isGelatoBlock && opts.meltTimer && opts.meltTimer > 0) {
-      const maxTimer = opts.maxMeltTimer || 2.8;
+      const maxTimer = opts.maxMeltTimer || 4.6;
       const meltRatio = Math.max(0, Math.min(1.0, 1.0 - (opts.meltTimer / maxTimer)));
 
       // 1. Vertical sinking: Top surface visibly deflates and sinks downward
@@ -533,9 +533,9 @@
       renderW = w * (1.0 + meltRatio * 0.08);
       renderD = d * (1.0 + meltRatio * 0.08);
 
-      // 3. Urgent liquid shiver during the final 0.9s before melting completely
-      if (opts.meltTimer < 0.9) {
-        shiverX = Math.sin(performance.now() * 0.035) * ((0.9 - opts.meltTimer) / 0.9) * 2.2 * currentZoom;
+      // 3. Urgent liquid shiver during the final 1.0s before melting completely
+      if (opts.meltTimer < 1.0) {
+        shiverX = Math.sin(performance.now() * 0.035) * ((1.0 - opts.meltTimer) / 1.0) * 2.2 * currentZoom;
       }
     }
 
