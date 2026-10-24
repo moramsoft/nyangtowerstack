@@ -10,7 +10,13 @@
 - **Version Traceability**: When shipping major visual or gameplay overhauls, keep version tags synchronized across `game/index.html`, `package.json`, Android `build.gradle`, and iOS `Info.plist`.
 
 ## 3. Visual Asset & Art Direction Rules
-- **Static UI Icons & Characters**: Fixed UI badges, clear stars, buttons, cutscenes, companions, and boss characters must use high-quality generated 3D kawaii raster illustrations (`assets/*.png`), not makeshift vector/SVG shapes.
+- **Static UI Icons & Characters (2D Anime Cartoon Style)**:
+  - **Strict 2D Cel Anime Art Style**: All character illustrations (bosses, companions, cutscene figures) must follow a **crisp 2D anime cartoon illustration style** with clean, thick dark outlines and soft 2D cel-shading.
+  - **NO 3D CGI / Realistic 3D Renders**: Strictly prohibit 3D rendering, CGI, claymation, ambient occlusion, realistic specular reflections, or photorealistic lighting. Do NOT use "3D" keywords in character prompts.
+  - **Strict Multi-Cut Consistency Anchors**:
+    * Absolute spatial anchoring: Always specify facial marks relative to the viewer (e.g. `permanently anchored on viewer's right cheek`, `ear notch strictly on viewer's left ear`) to prevent flipping/hallucination across expressions.
+    * Invariant wardrobe: Fasten exact clothing details (e.g., number of studs, vest cut, necklace pendant shape) identically across all action cuts.
+    * Minimal background clutter: Avoid introducing transient background clutter (random fish crates, changing labels) that morphs unnaturally between sprite frames.
 - **Dynamic 3D Tower Geometry & Effects**: Real-time deforming tower blocks (e.g., waffle cones, 5-flavor melting gelato drips, rolling volumetric fog) should use lightweight procedural Canvas 2D rendering for 0 KB overhead and 60 FPS performance.
 - **Strict Role Separation**: Never reuse player-collectible Companion Cat illustrations as Enemy Bosses, and never use cheap CSS hue-rotate color swaps in place of genuinely distinct character designs.
 - **Visual Economy**: Avoid over-saturating the screen with a single motif (e.g., repeating cat paw silhouettes on adjacent badges and cards).
