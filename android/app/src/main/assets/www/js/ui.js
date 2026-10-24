@@ -142,25 +142,39 @@
   }
 
 
-  const BOSS_ACTION_IMAGES = {
-    idle: 'assets/boss_chonk_idle.png',
-    smug: 'assets/boss_chonk_smug.png',
-    hurt: 'assets/boss_chonk_hurt.png',
-    frenzy: 'assets/boss_chonk_frenzy.png',
-    defeat: 'assets/boss_chonk_defeat.png',
-    victory: 'assets/boss_chonk_victory.png'
-  };
+  function getBossActionImages(bossInfo) {
+    if (!bossInfo) {
+      return {
+        idle: 'assets/boss_chonk_idle.png',
+        smug: 'assets/boss_chonk_smug.png',
+        hurt: 'assets/boss_chonk_hurt.png',
+        frenzy: 'assets/boss_chonk_frenzy.png',
+        defeat: 'assets/boss_chonk_defeat.png',
+        victory: 'assets/boss_chonk_victory.png'
+      };
+    }
+    const prefix = bossInfo.imagePrefix || (bossInfo.type === 'bully' ? 'boss_bully' : 'boss_chonk');
+    return {
+      idle: `assets/${prefix}_idle.png`,
+      smug: `assets/${prefix}_smug.png`,
+      hurt: `assets/${prefix}_hurt.png`,
+      frenzy: `assets/${prefix}_frenzy.png`,
+      defeat: `assets/${prefix}_defeat.png`,
+      victory: `assets/${prefix}_victory.png`
+    };
+  }
 
   function renderBossCharacter(bossInfo) {
     const actor = $('boss-actor');
     if (!actor || !bossInfo) return;
+    const images = getBossActionImages(bossInfo);
     actor.innerHTML = `
-      <img id="boss-img-idle" class="boss-action-img" src="${BOSS_ACTION_IMAGES.idle}" alt="${bossInfo.name} Idle" />
-      <img id="boss-img-smug" class="boss-action-img" src="${BOSS_ACTION_IMAGES.smug}" alt="${bossInfo.name} Smug" style="display:none;" />
-      <img id="boss-img-hurt" class="boss-action-img" src="${BOSS_ACTION_IMAGES.hurt}" alt="${bossInfo.name} Hurt" style="display:none;" />
-      <img id="boss-img-frenzy" class="boss-action-img" src="${BOSS_ACTION_IMAGES.frenzy}" alt="${bossInfo.name} Frenzy" style="display:none;" />
-      <img id="boss-img-defeat" class="boss-action-img" src="${BOSS_ACTION_IMAGES.defeat}" alt="${bossInfo.name} Defeat" style="display:none;" />
-      <img id="boss-img-victory" class="boss-action-img" src="${BOSS_ACTION_IMAGES.victory}" alt="${bossInfo.name} Victory" style="display:none;" />
+      <img id="boss-img-idle" class="boss-action-img" src="${images.idle}" alt="${bossInfo.name} Idle" />
+      <img id="boss-img-smug" class="boss-action-img" src="${images.smug}" alt="${bossInfo.name} Smug" style="display:none;" />
+      <img id="boss-img-hurt" class="boss-action-img" src="${images.hurt}" alt="${bossInfo.name} Hurt" style="display:none;" />
+      <img id="boss-img-frenzy" class="boss-action-img" src="${images.frenzy}" alt="${bossInfo.name} Frenzy" style="display:none;" />
+      <img id="boss-img-defeat" class="boss-action-img" src="${images.defeat}" alt="${bossInfo.name} Defeat" style="display:none;" />
+      <img id="boss-img-victory" class="boss-action-img" src="${images.victory}" alt="${bossInfo.name} Victory" style="display:none;" />
     `;
     actor.title = `${bossInfo.name} (${typeof bossInfo.title === 'object' ? (bossInfo.title[getLang()] || bossInfo.title.en) : bossInfo.title})`;
   }
@@ -1624,8 +1638,9 @@
     if (skipBtn) skipBtn.textContent = t('bossIntroSkip');
 
     const bInfo = stageCfg.bossInfo || WORLD_BOSS_NAMES[0];
+    const bImages = getBossActionImages(bInfo);
     if (avatarEl) {
-      avatarEl.innerHTML = `<img src="assets/boss_chonk_idle.png" class="boss-intro-avatar-img" alt="${bInfo.name}" />`;
+      avatarEl.innerHTML = `<img src="${bImages.idle}" class="boss-intro-avatar-img" alt="${bInfo.name}" />`;
     }
     if (titleEl) titleEl.textContent = getBossField(bInfo, 'title');
     if (nameEl) nameEl.textContent = bInfo.name;

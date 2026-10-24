@@ -703,6 +703,7 @@
     // 2. World 2 (2-16): Bully Cat
     {
       type: 'bully',
+      imagePrefix: 'boss_bully',
       name: 'Bully Cat',
       title: { en: 'Alley Rebel 🩹', ko: '골목대장 반역냥 🩹' },
       emoji: '😼',
