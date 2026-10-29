@@ -718,6 +718,7 @@
     // 3. World 3 (3-16): Hobo Cat
     {
       type: 'hobo',
+      imagePrefix: 'boss_hobo',
       name: 'Hobo Cat',
       title: { en: 'Box Fortress Hermit 📦', ko: '상자 요새 은둔냥 📦' },
       emoji: '😿',

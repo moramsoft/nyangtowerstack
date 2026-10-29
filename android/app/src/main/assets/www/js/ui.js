@@ -153,7 +153,7 @@
         victory: 'assets/boss_chonk_victory.png'
       };
     }
-    const prefix = bossInfo.imagePrefix || (bossInfo.type === 'bully' ? 'boss_bully' : 'boss_chonk');
+    const prefix = bossInfo.imagePrefix || (bossInfo.type ? `boss_${bossInfo.type}` : 'boss_chonk');
     return {
       idle: `assets/${prefix}_idle.png`,
       smug: `assets/${prefix}_smug.png`,

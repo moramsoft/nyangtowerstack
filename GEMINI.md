@@ -17,6 +17,7 @@
     * Absolute spatial anchoring: Always specify facial marks relative to the viewer (e.g. `permanently anchored on viewer's right cheek`, `ear notch strictly on viewer's left ear`) to prevent flipping/hallucination across expressions.
     * Invariant wardrobe: Fasten exact clothing details (e.g., number of studs, vest cut, necklace pendant shape) identically across all action cuts.
     * Minimal background clutter: Avoid introducing transient background clutter (random fish crates, changing labels) that morphs unnaturally between sprite frames.
+    * Strictly No Baked-in Text (Language-Agnostic): Character illustrations and icons must NEVER contain baked-in text (Korean Hangul, Japanese Kana, or English graffiti/labels) on crates, clothes, or signs. Use clean visual iconography (cat paws, fish bones, stars) so assets remain language-independent and crisp.
 - **Dynamic 3D Tower Geometry & Effects**: Real-time deforming tower blocks (e.g., waffle cones, 5-flavor melting gelato drips, rolling volumetric fog) should use lightweight procedural Canvas 2D rendering for 0 KB overhead and 60 FPS performance.
 - **Strict Role Separation**: Never reuse player-collectible Companion Cat illustrations as Enemy Bosses, and never use cheap CSS hue-rotate color swaps in place of genuinely distinct character designs.
 - **Visual Economy**: Avoid over-saturating the screen with a single motif (e.g., repeating cat paw silhouettes on adjacent badges and cards).
