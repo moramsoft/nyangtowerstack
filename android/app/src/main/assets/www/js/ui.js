@@ -871,7 +871,27 @@
     selectListEl.innerHTML = html;
   }
 
+  let selectScrollStartY = 0;
+  let selectScrollStartX = 0;
+  let isSelectScrolling = false;
+
+  selectListEl.addEventListener('pointerdown', (e) => {
+    selectScrollStartX = e.clientX;
+    selectScrollStartY = e.clientY;
+    isSelectScrolling = false;
+  }, { passive: true });
+
+  selectListEl.addEventListener('pointermove', (e) => {
+    if (Math.abs(e.clientX - selectScrollStartX) > 10 || Math.abs(e.clientY - selectScrollStartY) > 10) {
+      isSelectScrolling = true;
+    }
+  }, { passive: true });
+
   selectListEl.addEventListener('click', (e) => {
+    if (isSelectScrolling) {
+      isSelectScrolling = false;
+      return;
+    }
     const cutsceneBtn = e.target.closest('.btn-world-cutscene');
     if (cutsceneBtn) {
       initAudio();
@@ -884,7 +904,9 @@
     initAudio();
     const id = parseInt(btn.dataset.id, 10);
     if (isBonusStageAlreadyPlayed(id)) {
-      playRewardedAdForBonus(id);
+      showToast((getLang() === 'ko')
+        ? '보너스 스테이지는 1회만 도전할 수 있습니다냥! 🔒'
+        : 'Bonus stage can only be played once, meow! 🔒');
       return;
     }
     if (!isUnlocked(id)) {
