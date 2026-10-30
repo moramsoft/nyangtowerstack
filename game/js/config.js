@@ -20,10 +20,10 @@
   }
   const TOTAL_STAGES = WORLD_STAGE_OFFSETS[WORLD_STAGE_OFFSETS.length - 1]; // 242
 
-  // Star requirements to unlock each world
-  const WORLD_STAR_GATES = [0, 8, 20, 36];
+  // Star requirements to unlock each world (calibrated for organic progression)
+  const WORLD_STAR_GATES = [0, 6, 14, 28];
   for (let w = 4; w < WORLD_STAGE_COUNTS.length; w++) {
-    WORLD_STAR_GATES.push(36 + (w - 3) * 16);
+    WORLD_STAR_GATES.push(28 + (w - 3) * 14);
   }
 
   function getStageWorldInfo(stageId) {

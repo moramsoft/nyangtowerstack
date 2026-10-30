@@ -89,6 +89,32 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
             case "log":
                 let logMsg = body["message"] as? String ?? ""
                 logger.info("[FirebaseBridge:iOS] Log: \(logMsg, privacy: .public)")
+            case "vibrate":
+                let type = body["type"] as? String ?? "light"
+                DispatchQueue.main.async {
+                    switch type.lowercased() {
+                    case "tick", "light":
+                        let gen = UIImpactFeedbackGenerator(style: .light)
+                        gen.prepare()
+                        gen.impactOccurred()
+                    case "click", "medium":
+                        let gen = UIImpactFeedbackGenerator(style: .medium)
+                        gen.prepare()
+                        gen.impactOccurred()
+                    case "heavy", "strike":
+                        let gen = UIImpactFeedbackGenerator(style: .heavy)
+                        gen.prepare()
+                        gen.impactOccurred()
+                    case "double_click", "success":
+                        let gen = UINotificationFeedbackGenerator()
+                        gen.prepare()
+                        gen.notificationOccurred(.success)
+                    default:
+                        let gen = UIImpactFeedbackGenerator(style: .medium)
+                        gen.prepare()
+                        gen.impactOccurred()
+                    }
+                }
             default:
                 logger.info("[FirebaseBridge:iOS] Action \(action, privacy: .public): \(String(describing: body), privacy: .public)")
             }

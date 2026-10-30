@@ -3,7 +3,11 @@ package com.bishoujo.stacktower
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
@@ -29,6 +33,38 @@ class MainActivity : AppCompatActivity() {
     class FirebaseBridge(private val context: Context) {
         private val analytics: FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
         private val crashlytics: FirebaseCrashlytics = FirebaseCrashlytics.getInstance()
+        private val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+            vibratorManager?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+        }
+
+        @JavascriptInterface
+        fun vibrate(durationMs: Long, effectType: String?) {
+            try {
+                val vib = vibrator ?: return
+                if (!vib.hasVibrator()) return
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val effect = when (effectType?.lowercase()) {
+                        "click", "tick", "light" -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+                        "heavy", "strike" -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK)
+                        "double_click" -> VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK)
+                        else -> {
+                            val d = if (durationMs in 1..2000) durationMs else 25L
+                            VibrationEffect.createOneShot(d, VibrationEffect.DEFAULT_AMPLITUDE)
+                        }
+                    }
+                    vib.vibrate(effect)
+                } else {
+                    @Suppress("DEPRECATION")
+                    vib.vibrate(if (durationMs in 1..2000) durationMs else 25L)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("FirebaseBridge", "Vibrate error: ${e.message}")
+            }
+        }
 
         @JavascriptInterface
         fun logEvent(name: String, paramsJson: String?) {

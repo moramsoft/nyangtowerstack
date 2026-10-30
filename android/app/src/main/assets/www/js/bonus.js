@@ -282,6 +282,7 @@
         score = bonusScore;
 
         playMarimbaNote(SCALE_FREQS[Math.min(15, 6 + (bonusStreak % 8) * 2)], true);
+        triggerHaptic(item.isGold ? [25, 30, 40] : 12, item.isGold ? 'heavy' : 'tick');
 
         floatingTexts.push({
           text: `+${pts} ${item.emoji}`,

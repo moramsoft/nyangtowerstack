@@ -450,6 +450,7 @@
       flashOverlayEl.style.opacity = isStreakCombo ? '0.65' : '0.50';
       setTimeout(() => flashOverlayEl.style.opacity = '0', isStreakCombo ? 110 : 80);
       triggerShake(streakShake, isStreakCombo ? 0.12 : 0.08);
+      triggerHaptic(isStreakCombo ? [30, 40, 50] : 22, isStreakCombo ? 'heavy' : 'click');
 
       spawn3DStarBurst(block.x, block.z, block.y, cameraY, particleCount, isStreakCombo, perfectCombo);
       playMarimbaNote(SCALE_FREQS[musicalStep], true);
@@ -464,6 +465,7 @@
           if (bh) { bh.classList.remove('boss-hit-anim'); void bh.offsetWidth; bh.classList.add('boss-hit-anim'); }
           spawnFloatingText(block.x, block.y + 1.2, block.z, `CRITICAL! -${dmg} HP 💥`, '#ffd700', true);
           if (bossCurrentHp <= 0) {
+            triggerHaptic([30, 40, 50, 60, 100], 'double_click');
             const defQ = (cfg && cfg.bossInfo && getBossQuote(cfg.bossInfo, 'defeatQuote')) || (getLang() === 'ko' ? '😾 냐아아앙~~ 항복이다냥! 🏳️💦' : '😾 Meowch~~ I surrender, meow! 🏳️💦');
             setBossState('defeat', defQ);
             tower.push({ x: block.x, z: block.z, y: block.y, w: block.w, d: block.d, color: block.color, blockType: block.blockType, meltTimer: block.meltTimer, maxMeltTimer: block.maxMeltTimer || block.meltTimer });
@@ -472,6 +474,7 @@
           } else if (bossCurrentHp <= bossMaxHp * 0.5 && !bossFrenzy) {
             bossFrenzy = true;
             triggerShake(3.5, 0.2);
+            triggerHaptic([40, 50, 60], 'heavy');
             const freQ = (cfg && cfg.bossInfo && getBossQuote(cfg.bossInfo, 'frenzyQuote')) || (getLang() === 'ko' ? '😾 감히 내 털을 뽑다니... 진심 모드다냥! 🔥' : '😾 Furious Serious Mode, meow! 🔥');
             setBossState('frenzy', freQ, 2500);
             setMascot('excited', t('bossEnragedMascot', { boss: cfg.bossInfo.name }), 1200);
@@ -482,6 +485,7 @@
               max_hp: bossMaxHp
             });
           } else {
+            triggerHaptic(30, 'heavy');
             const q = (cfg && cfg.bossInfo && getBossQuote(cfg.bossInfo, 'hurtQuote')) || getRandomBossHurtQuote();
             setBossState('hurt', q, 1300);
           }
@@ -576,6 +580,7 @@
     playNormalTap();
     playSliceWhoosh();
     playMarimbaNote(SCALE_FREQS[0], false);
+    triggerHaptic(12, 'tick');
     const praise = CAT_PRAISES[Math.floor(Math.random() * CAT_PRAISES.length)];
     setMascot('clap', praise, 700);
 
@@ -591,15 +596,18 @@
         if (bh) { bh.classList.remove('boss-hit-anim'); void bh.offsetWidth; bh.classList.add('boss-hit-anim'); }
         spawnFloatingText(block.x, block.y + 0.8, block.z, `-${dmg} HP`, '#ff8a80', false);
         if (bossCurrentHp <= 0) {
+          triggerHaptic([30, 40, 50, 60, 100], 'double_click');
           const defQ = (cfg && cfg.bossInfo && getBossQuote(cfg.bossInfo, 'defeatQuote')) || (getLang() === 'ko' ? '😾 냐아아앙~~ 항복이다냥! 🏳️💦' : '😾 Meowch~~ I surrender, meow! 🏳️💦');
           setBossState('defeat', defQ);
         } else if (bossCurrentHp <= bossMaxHp * 0.5 && !bossFrenzy) {
           bossFrenzy = true;
           triggerShake(3.5, 0.2);
+          triggerHaptic([40, 50, 60], 'heavy');
           const freQ = (cfg && cfg.bossInfo && getBossQuote(cfg.bossInfo, 'frenzyQuote')) || (getLang() === 'ko' ? '😾 감히 내 털을 뽑다니... 진심 모드다냥! 🔥' : '😾 Furious Serious Mode, meow! 🔥');
           setBossState('frenzy', freQ, 2500);
           setMascot('excited', t('bossEnragedMascot', { boss: cfg.bossInfo.name }), 1200);
         } else {
+          triggerHaptic(18, 'light');
           const q = (cfg && cfg.bossInfo && getBossQuote(cfg.bossInfo, 'smugQuote')) || getRandomBossSmugQuote();
           setBossState('smug', q, 1400);
         }
@@ -913,11 +921,14 @@
       nextBtn.style.display = 'none';
     } else if (!isUnlocked(next)) {
       note = t('needStarsNote', { gate: gateFor(next), cur: totalStars() });
-      nextBtn.style.display = 'none';
+      nextBtn.style.display = 'inline-flex';
+      nextBtn.classList.add('btn-next-locked');
+      nextBtn.setAttribute('aria-label', isKo ? '별 부족 (스테이지 선택)' : 'Need Stars (Stage Select)');
     } else {
       const nextInfo = getStageWorldInfo(next);
       if (nextInfo.idx === 0) note = t('newWorldUnlocked', { name: WORLD_DEFS[nextInfo.world].name });
       nextBtn.style.display = 'inline-flex';
+      nextBtn.classList.remove('btn-next-locked');
     }
     $('clear-note').textContent = note;
 
@@ -934,6 +945,7 @@
     gameOverTime = performance.now();
     playGameOverChord();
     triggerShake(4.5, 0.25);
+    triggerHaptic([60, 40, 80], 'heavy');
     updateHud();
 
     // Entire missed block plunges down

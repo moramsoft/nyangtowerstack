@@ -30,8 +30,32 @@
     });
   }
 
-  function triggerHaptic(pattern = 25) {
+  function triggerHaptic(pattern = 25, type = 'light') {
     if (!save || !save.settings || save.settings.haptics === false) return;
+
+    const duration = Array.isArray(pattern) ? (pattern[0] || 25) : (typeof pattern === 'number' ? pattern : 25);
+
+    // 1. Android Native Bridge via window.FirebaseBridge
+    if (typeof window !== 'undefined' && window.FirebaseBridge && typeof window.FirebaseBridge.vibrate === 'function') {
+      try {
+        window.FirebaseBridge.vibrate(duration, type);
+        return;
+      } catch (e) { /* ignore */ }
+    }
+
+    // 2. iOS Native Bridge via window.webkit.messageHandlers.FirebaseBridge
+    if (typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.FirebaseBridge) {
+      try {
+        window.webkit.messageHandlers.FirebaseBridge.postMessage({
+          action: 'vibrate',
+          duration: duration,
+          type: type
+        });
+        return;
+      } catch (e) { /* ignore */ }
+    }
+
+    // 3. Fallback to standard Web Vibration API
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
       try { navigator.vibrate(pattern); } catch (e) { /* ignore */ }
     }

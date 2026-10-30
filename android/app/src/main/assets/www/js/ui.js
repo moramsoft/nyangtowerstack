@@ -739,6 +739,7 @@
         cb();
       } else if (!shouldProceed) {
         if (gameState === 'SELECT') renderSelect();
+        else openSelect();
       }
     });
   }
@@ -1030,11 +1031,21 @@
       };
 
       if (isNewWorld) {
+        if (clearScreenEl) {
+          clearScreenEl.style.display = 'none';
+          clearScreenEl.classList.remove('modal-active', 'modal-closing');
+        }
         openWorldCutsceneModal(nextInfo.world, proceed);
       } else {
         proceed();
       }
     } else {
+      const gate = (next < TOTAL_STAGES) ? gateFor(next) : 0;
+      if (gate > totalStars()) {
+        showToast((getLang() === 'ko')
+          ? `⭐ 다음 월드는 별이 ${gate - totalStars()}개 더 필요하다냥! 이전 스테이지에서 별을 모아보자냥!`
+          : `⭐ Need ${gate - totalStars()} more stars for next world! Collect stars in earlier stages!`);
+      }
       openSelect();
     }
   });
