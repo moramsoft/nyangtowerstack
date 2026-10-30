@@ -1369,12 +1369,22 @@
     }
 
     const unlocked = save.unlockedCats || ['shiro'];
+    const isKo = (getLang() === 'ko');
+    const headerTitle = isKo ? '🎯 냥이 가챠 등장 확률:' : '🎯 Gacha Drop Rates:';
+    const rateLegendary = isKo ? '👑 4★ 전설 (W5): 7%' : '👑 4★ Legendary (W5): 7%';
+    const rateMystic = isKo ? '🌙 3★ 신비 (W4): 12%' : '🌙 3★ Mystic (W4): 12%';
+    const rateRare = isKo ? '⭐ 2★ 레어 (W1~3): 52%' : '⭐ 2★ Rare (W1~3): 52%';
+    const rateClassic = isKo ? '🐾 1★ 기본 (Base): 29%' : '🐾 1★ Classic (Base): 29%';
+    const duplicateNotice = isKo
+      ? '※ 중복 획득 시 +25 <img src="assets/churu_icon.jpg" class="churu-icon" alt="츄르"> 츄르 코인 페이백!'
+      : '※ Duplicate pulls refund +25 <img src="assets/churu_icon.jpg" class="churu-icon" alt="Churu"> Churu Coins!';
+
     let html = `
       <div class="gacha-rates-banner">
-        <div style="font-weight: 800; margin-bottom: 4px;">🎯 Gacha Rates / 등장 확률:</div>
-        <div>👑 4★ Legendary (W5): 7%  ·  🌙 3★ Mystic (W4): 12%</div>
-        <div>⭐ 2★ Rare (W1~3): 52%  ·  🐾 1★ Classic (Base): 29%</div>
-        <div style="margin-top: 4px; font-size: 11px; opacity: 0.85;">※ Duplicate pulls refund +25 <img src="assets/churu_icon.jpg" class="churu-icon" alt="츄르"> Churu Coins!</div>
+        <div style="font-weight: 800; margin-bottom: 4px;">${headerTitle}</div>
+        <div>${rateLegendary}  ·  ${rateMystic}</div>
+        <div>${rateRare}  ·  ${rateClassic}</div>
+        <div style="margin-top: 4px; font-size: 11px; opacity: 0.85;">${duplicateNotice}</div>
       </div>
       <div class="gacha-roster-grid">
     `;
