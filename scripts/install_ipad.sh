@@ -38,16 +38,68 @@ fi
 
 # 3. Build & sign .app bundle
 echo -e "${BOLD}[3/4] Compiling Swift source & code-signing app bundle...${RESET}"
-python3 - << 'EOF'
-import os, subprocess, shutil, plistlib
+TARGET_DEVICE_ID="$DEVICE_ID" python3 - << 'EOF'
+import os, sys, subprocess, shutil, plistlib, datetime
 
 project_dir = os.getcwd()
 ios_dir = os.path.join(project_dir, "ios/MeowStackTower")
 build_dir = "/tmp/MeowStackTower_build"
 app_bundle = os.path.join(build_dir, "MeowStackTower.app")
+target_device = os.environ.get("TARGET_DEVICE_ID", "").strip()
 
 shutil.rmtree(build_dir, ignore_errors=True)
 os.makedirs(app_bundle, exist_ok=True)
+
+# Find valid non-expired provisioning profile provisioned for target device
+profile_dir = os.path.expanduser("~/Library/Developer/Xcode/UserData/Provisioning Profiles")
+valid_profiles = []
+
+if os.path.exists(profile_dir):
+    now = datetime.datetime.now(datetime.timezone.utc)
+    for fname in os.listdir(profile_dir):
+        if not fname.endswith(".mobileprovision"):
+            continue
+        fpath = os.path.join(profile_dir, fname)
+        try:
+            with open(fpath, "rb") as f:
+                raw = f.read()
+            s = raw.find(b"<?xml")
+            e = raw.find(b"</plist>") + len(b"</plist>")
+            data = plistlib.loads(raw[s:e])
+            exp = data.get("ExpirationDate")
+            if exp and exp.tzinfo is None:
+                exp = exp.replace(tzinfo=datetime.timezone.utc)
+            if exp and exp > now:
+                devices = data.get("ProvisionedDevices", [])
+                if not target_device or target_device in devices:
+                    valid_profiles.append((fpath, data))
+        except Exception:
+            continue
+
+if not valid_profiles:
+    raise RuntimeError("No valid, non-expired provisioning profile found for target device!")
+
+# Prefer uitests / standalone test profile if available so existing apps are not overwritten
+preferred_profile = None
+for fpath, data in valid_profiles:
+    app_id = data.get("Entitlements", {}).get("application-identifier", "")
+    if "uitests" in app_id:
+        preferred_profile = (fpath, data)
+        break
+
+if not preferred_profile:
+    preferred_profile = valid_profiles[0]
+
+profile_src, profile_plist = preferred_profile
+app_id_full = profile_plist.get("Entitlements", {}).get("application-identifier", "")
+team_id = profile_plist.get("TeamIdentifier", [""])[0]
+bundle_id = app_id_full.replace(f"{team_id}.", "")
+
+with open("/tmp/MeowStackTower_build/bundle_id.txt", "w") as bf:
+    bf.write(bundle_id)
+
+print(f"Selected profile: {os.path.basename(profile_src)}")
+print(f"Target bundle identifier: {bundle_id}")
 
 # Compile Swift sources with iphoneos SDK
 sdk_path = subprocess.check_output(["xcrun", "--sdk", "iphoneos", "--show-sdk-path"]).decode().strip()
@@ -69,7 +121,7 @@ subprocess.run(compile_cmd, check=True)
 with open(os.path.join(ios_dir, "Info.plist"), "rb") as f:
     info_data = plistlib.load(f)
 
-info_data["CFBundleIdentifier"] = "com.moramtest.mornigporch"
+info_data["CFBundleIdentifier"] = bundle_id
 info_data["CFBundleExecutable"] = "MeowStackTower"
 info_data["CFBundleDisplayName"] = "Meow Stack Tower"
 
@@ -77,7 +129,6 @@ with open(os.path.join(app_bundle, "Info.plist"), "wb") as f:
     plistlib.dump(info_data, f)
 
 # Copy provisioning profile
-profile_src = "/Users/seunghwanson/Library/Developer/Xcode/UserData/Provisioning Profiles/a24e2476-ede6-4e68-b346-2093b1b95dc0.mobileprovision"
 shutil.copyfile(profile_src, os.path.join(app_bundle, "embedded.mobileprovision"))
 
 # Compile Assets.xcassets using actool
@@ -110,11 +161,6 @@ for f in os.listdir(ios_dir):
 shutil.copytree(os.path.join(ios_dir, "www"), os.path.join(app_bundle, "www"))
 
 # Extract entitlements
-with open(profile_src, "rb") as f:
-    raw_profile = f.read()
-start = raw_profile.find(b"<?xml")
-end = raw_profile.find(b"</plist>") + len(b"</plist>")
-profile_plist = plistlib.loads(raw_profile[start:end])
 entitlements = profile_plist.get("Entitlements", {})
 
 entitlements_file = os.path.join(build_dir, "entitlements.plist")
@@ -136,9 +182,10 @@ EOF
 echo -e "${GREEN}✓ Application bundle compiled and signed.${RESET}\n"
 
 # 4. Install & Launch on Device
-echo -e "${BOLD}[4/4] Installing & launching on iPad via devicectl...${RESET}"
+BUNDLE_ID="$(cat /tmp/MeowStackTower_build/bundle_id.txt)"
+echo -e "${BOLD}[4/4] Installing & launching on iPad via devicectl (Bundle ID: ${BUNDLE_ID})...${RESET}"
 xcrun devicectl device install app --device "$DEVICE_ID" /tmp/MeowStackTower_build/MeowStackTower.app
-xcrun devicectl device process launch --device "$DEVICE_ID" --activate com.moramtest.mornigporch || echo -e "${YELLOW}ℹ Device is locked; please unlock your iPad to open the app.${RESET}"
+xcrun devicectl device process launch --device "$DEVICE_ID" --activate "$BUNDLE_ID" || echo -e "${YELLOW}ℹ Device is locked; please unlock your iPad to open the app.${RESET}"
 
 echo -e "\n${BOLD}${GREEN}============================================================${RESET}"
 echo -e "${BOLD}${GREEN}  🎉 MEOW STACK TOWER SUCCESSFULLY INSTALLED ON IPAD!       ${RESET}"
