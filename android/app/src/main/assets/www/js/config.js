@@ -733,6 +733,7 @@
     // 4. World 4 (4-16): Yakuza Mobster
     {
       type: 'yakuza',
+      imagePrefix: 'boss_yakuza',
       name: 'Yakuza Mobster',
       title: { en: 'Noir Syndicate Don 🕶️', ko: '느와르 조직 대부냥 🕶️' },
       emoji: '🕶️',
