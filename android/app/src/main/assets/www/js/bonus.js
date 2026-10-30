@@ -47,6 +47,13 @@
     bonusItems = [];
     bonusParticles = [];
 
+    // Clear any previous tower or 3D block leftovers
+    if (typeof tower !== 'undefined') tower = [];
+    if (typeof activeBlock !== 'undefined') activeBlock = null;
+    if (typeof fallingPieces !== 'undefined') fallingPieces = [];
+    if (typeof cameraTargetY !== 'undefined') cameraTargetY = 0;
+    if (typeof cameraY !== 'undefined') cameraY = 0;
+
     // Mark as played now that bonus stage initializes
     save.bonusPlayed = save.bonusPlayed || {};
     save.bonusPlayed[cfg.id] = true;
@@ -345,6 +352,7 @@
   }
 
   function drawBonusGame(c, curTime) {
+    const timeVal = (typeof curTime === 'number') ? curTime : performance.now();
     c.save();
     bonusItems.forEach(it => {
       c.save();
@@ -513,11 +521,19 @@
     updateFloatingTexts(0);
   }
 
-  window.addEventListener('pointermove', (e) => {
-    if (bonusActive && gameState === 'PLAYING') {
-      bonusBasket.targetX = e.clientX;
+  function handleBonusPointer(e) {
+    if (!bonusActive || gameState !== 'PLAYING') return;
+    if (e.target && e.target.closest && e.target.closest('[data-ui], button')) return;
+    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    if (typeof clientX === 'number') {
+      bonusBasket.targetX = clientX;
     }
-  });
+  }
+
+  window.addEventListener('pointerdown', handleBonusPointer, { passive: true });
+  window.addEventListener('pointermove', handleBonusPointer, { passive: true });
+  window.addEventListener('touchstart', handleBonusPointer, { passive: true });
+  window.addEventListener('touchmove', handleBonusPointer, { passive: true });
 
   window.addEventListener('keydown', (e) => {
     if (!bonusActive || gameState !== 'PLAYING') return;

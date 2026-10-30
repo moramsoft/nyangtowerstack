@@ -142,6 +142,13 @@
     if (mode === 'STAGE') {
       cfg = applyCompanionPerks(cfg);
       if (cfg.stageType === 'bonus') {
+        tower = [];
+        activeBlock = null;
+        fallingPieces = [];
+        cameraTargetY = 0;
+        cameraY = 0;
+        targetZoom = 1.0;
+        currentZoom = 1.0;
         initBonusGame();
         return;
       }
@@ -751,19 +758,24 @@
       bonus_score: cfg.stageType === 'bonus' ? bonusScore : 0
     });
 
-    panOutCamera();
-    playSizeExpandChime();
-    playStageClearCat(stars);
-    const top = tower[tower.length - 1];
-    if (top) {
-      for (let k = 0; k < 5; k++) {
-        setTimeout(() => {
-          if (gameState === 'CLEAR') {
-            spawn3DStarBurst(top.x, top.z, top.y, cameraY, 22);
-            playMarimbaNote(SCALE_FREQS[Math.min(15, 6 + k * 2)], true);
-          }
-        }, k * 180);
+    if (cfg.stageType !== 'bonus') {
+      panOutCamera();
+      playSizeExpandChime();
+      playStageClearCat(stars);
+      const top = tower[tower.length - 1];
+      if (top) {
+        for (let k = 0; k < 5; k++) {
+          setTimeout(() => {
+            if (gameState === 'CLEAR') {
+              spawn3DStarBurst(top.x, top.z, top.y, cameraY, 22);
+              playMarimbaNote(SCALE_FREQS[Math.min(15, 6 + k * 2)], true);
+            }
+          }, k * 180);
+        }
       }
+    } else {
+      playSizeExpandChime();
+      playStageClearCat(stars);
     }
     setMascot('celebrate', stars === 3 ? t('purrfectCatTower') : t('stageClearMascot'), 3000);
     if (cfg.stageType === 'boss') {
@@ -1298,8 +1310,10 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.restore();
 
-    if (gameState === 'PLAYING' && mode === 'STAGE' && cfg.stageType === 'bonus') {
-      updateBonusGame(dt, time);
+    if (mode === 'STAGE' && cfg && cfg.stageType === 'bonus') {
+      if (gameState === 'PLAYING') {
+        updateBonusGame(dt, time);
+      }
       drawBonusGame(ctx, time);
       return;
     }
