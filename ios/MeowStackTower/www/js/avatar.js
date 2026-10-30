@@ -68,7 +68,10 @@
       timeLimit = 15; // 15 seconds
     } else if (stageType === 'speed') {
       target = 10 + Math.floor(w * 1.2) + Math.floor(idx * 0.3);
-      timeLimit = 18 + Math.floor(target * 1.15); // e.g. 29s
+      // Tight, exhilarating timer scaling:
+      // W0~W2: ~20-22s (comfort learning), W3~W9: ~18-21s (tight focus), W10+: ~16-19s (high tension)
+      const perFloorSec = Math.max(0.9, 1.35 - w * 0.02);
+      timeLimit = Math.round(7 + target * perFloorSec);
     } else if (stageType === 'precision') {
       target = 10 + Math.floor(w * 1.0) + Math.floor(idx * 0.3);
       streakTarget = Math.min(5, 2 + Math.floor(w * 0.25) + (idx >= 6 ? 1 : 0)); // 2 ~ 4 streak
@@ -104,7 +107,12 @@
       baseStartSize *= 0.72; // Thin foundation
     }
 
-    let speedMult = (stageType === 'speed' ? 1.12 : 1.0);
+    let speedMult = 1.0;
+    if (stageType === 'speed') {
+      // Speed multiplier ramps up dynamically with world progression:
+      // W0: 1.15x, W4: 1.35x, W10: 1.60x, W20+: 1.85x
+      speedMult = 1.15 + (w * 0.035);
+    }
     if (mods.speedBoost) speedMult *= mods.speedBoost;
     else if (mods.melting) speedMult *= 1.65; // Fast flying blocks for melting stages
 
@@ -127,9 +135,9 @@
       target: target,
       timeLimit: timeLimit,
       streakTarget: streakTarget,
-      speed0: (5.8 + w * 0.08 + idx * 0.05) * speedMult,
-      accel: 0.010 + w * 0.0003,
-      maxSpeed: (8.5 + w * 0.06 + (boss ? 0.4 : 0)) * speedMult,
+      speed0: (5.8 + w * 0.18 + idx * 0.05) * speedMult,
+      accel: 0.012 + w * 0.0006,
+      maxSpeed: (8.6 + w * 0.22 + (boss ? 0.4 : 0)) * speedMult,
       tol: Math.max(0.20, (0.34 - w * 0.006) * (stageType === 'precision' ? 0.88 : 1.0)),
       startSize: baseStartSize,
       expandAt: w < 8 ? 2 : (w < 18 ? 3 : 4),

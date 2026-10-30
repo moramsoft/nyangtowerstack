@@ -309,14 +309,21 @@
         bossHud.style.display = 'none';
       }
 
+      const urgencyVignette = $('speed-urgency-vignette');
       if (cfg.stageType === 'speed') {
         timerHud.style.display = 'flex';
         $('timer-val').textContent = `${Math.max(0, timeRemaining).toFixed(1)}s`;
         $('timer-fill').style.width = Math.min(100, Math.max(0, (timeRemaining / cfg.timeLimit) * 100)) + '%';
-        if (timeRemaining <= 5.0) timerHud.classList.add('timer-warning');
-        else timerHud.classList.remove('timer-warning');
+        if (timeRemaining <= 5.0 && timeRemaining > 0 && gameState === 'PLAYING') {
+          timerHud.classList.add('timer-warning');
+          if (urgencyVignette) urgencyVignette.classList.add('active');
+        } else {
+          timerHud.classList.remove('timer-warning');
+          if (urgencyVignette) urgencyVignette.classList.remove('active');
+        }
       } else {
         timerHud.style.display = 'none';
+        if (urgencyVignette) urgencyVignette.classList.remove('active');
       }
 
       if (cfg.stageType === 'precision') {

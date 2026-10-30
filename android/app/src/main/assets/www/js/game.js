@@ -248,7 +248,9 @@
 
     // Alternating axes: odd = X, even = Z
     const axis = (level % 2 === 1) ? 'x' : 'z';
-    const speed = Math.min(cfg.speed0 * (1 + level * cfg.accel), cfg.maxSpeed);
+    // Dynamic Speed Rush Acceleration: +2.5% per floor stacked in speed rush
+    const rushMultiplier = (cfg.stageType === 'speed') ? (1 + level * 0.025) : 1.0;
+    const speed = Math.min(cfg.speed0 * (1 + level * cfg.accel) * rushMultiplier, cfg.maxSpeed * (cfg.stageType === 'speed' ? 1.35 : 1.0));
     const direction = (level % 4 === 1 || level % 4 === 2) ? 1 : -1;
 
     const startDist = 10.5;
@@ -484,8 +486,8 @@
             setBossState('hurt', q, 1300);
           }
         } else if (cfg.stageType === 'speed') {
-          timeRemaining = Math.min(cfg.timeLimit + 6, timeRemaining + 2.0);
-          spawnFloatingText(block.x, block.y + 0.8, block.z, `+2.0s! ⏱️`, '#69f0ae', true);
+          timeRemaining = Math.min(cfg.timeLimit + 4, timeRemaining + 1.2);
+          spawnFloatingText(block.x, block.y + 0.8, block.z, `+1.2s! ⏱️`, '#69f0ae', true);
         } else if (cfg.stageType === 'precision') {
           if (perfectCombo >= cfg.streakTarget && !precisionStreakAchieved) {
             precisionStreakAchieved = true;
@@ -602,8 +604,8 @@
           setBossState('smug', q, 1400);
         }
       } else if (cfg.stageType === 'speed') {
-        timeRemaining = Math.min(cfg.timeLimit + 6, timeRemaining + 0.6);
-        spawnFloatingText(block.x, block.y + 0.8, block.z, `+0.6s! ⏱️`, '#b9f6ca', false);
+        timeRemaining = Math.min(cfg.timeLimit + 4, timeRemaining + 0.3);
+        spawnFloatingText(block.x, block.y + 0.8, block.z, `+0.3s! ⏱️`, '#b9f6ca', false);
       }
     }
 
@@ -1399,6 +1401,22 @@
         const k = Math.min(1, cfg.blink);
         ctx.globalAlpha = 1 - k * 0.85 * (0.5 + 0.5 * Math.sin(b.age * 4.2));
       }
+
+      // Speed Rush Wind Trail / Velocity Streaks Effect
+      if (cfg.stageType === 'speed') {
+        const trailCount = 3;
+        for (let t = trailCount; t >= 1; t--) {
+          const trailOffset = t * 0.28 * b.direction;
+          const trailAlpha = 0.22 / t;
+          ctx.save();
+          ctx.globalAlpha = trailAlpha;
+          const tx = (b.axis === 'x') ? (b.x - trailOffset) : b.x;
+          const tz = (b.axis === 'z') ? (b.z - trailOffset) : b.z;
+          drawIsometricBlock(tx, tz, b.y, b.w, b.d, b.color, cameraY, false, b);
+          ctx.restore();
+        }
+      }
+
       drawIsometricBlock(b.x, b.z, b.y, b.w, b.d, b.color, cameraY, false, b);
       ctx.globalAlpha = 1;
     }
