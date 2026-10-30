@@ -246,6 +246,9 @@
           <button id="btn-retry-clear" class="jelly-btn jelly-btn-replay" data-ui aria-label="Replay">
             <img src="assets/btn_clear_replay.png" class="jelly-btn-img" alt="Replay">
           </button>
+          <button id="btn-bonus-ad-replay" class="menu-btn bonus-ad-replay-btn" data-ui style="display:none;">
+            📺 <span>광고 보고 다시 도전</span>
+          </button>
           <button id="btn-menu-clear" class="jelly-btn jelly-btn-stages" data-ui aria-label="Stages">
             <img src="assets/btn_clear_stages.png" class="jelly-btn-img" alt="Stages">
           </button>
@@ -550,6 +553,23 @@
             <div class="settings-version-tag" id="setting-version-tag">Meow Stack Tower v1.3.0 · Designed with 💖</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Rewarded Ad Simulator Modal -->
+    <div id="ad-modal" class="screen-overlay" data-ui style="display:none;">
+      <div class="gameover-box ad-modal-box">
+        <div class="ad-ribbon">📺 REWARDED AD SPONSOR</div>
+        <div class="ad-tv-frame">
+          <div class="ad-cat-mascot">🐱🐟✨</div>
+          <div id="ad-title" class="ad-title">Churu Delight TV</div>
+          <div id="ad-desc" class="ad-desc">"Every cat's dream meal! High protein creamy tuna puree."</div>
+          <div class="ad-timer-pill">
+            <span id="ad-timer-text">⏱️ 3s</span>
+            <div id="ad-progress-bar"><div id="ad-progress-fill"></div></div>
+          </div>
+        </div>
+        <div class="ad-status-msg" id="ad-status-msg">광고 시청 중... 잠시만 기다려주세요냥! 🐾</div>
       </div>
     </div>
 

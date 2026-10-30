@@ -876,9 +876,7 @@
     initAudio();
     const id = parseInt(btn.dataset.id, 10);
     if (isBonusStageAlreadyPlayed(id)) {
-      showToast((getLang() === 'ko')
-        ? '보너스 스테이지는 1회만 도전할 수 있습니다냥! 🔒'
-        : 'Bonus stage can only be played once, meow! 🔒');
+      playRewardedAdForBonus(id);
       return;
     }
     if (!isUnlocked(id)) {
@@ -1000,6 +998,11 @@
   bindBtn('btn-menu-over', () => goMenu());
   bindBtn('btn-menu-clear', () => goMenu());
   bindBtn('btn-retry-clear', () => retryCurrent());
+  bindBtn('btn-bonus-ad-replay', () => {
+    if (cfg && cfg.stageType === 'bonus') {
+      playRewardedAdForBonus(cfg.id);
+    }
+  });
   bindBtn('btn-retry-over', () => retryCurrent());
   bindBtn('btn-next', () => {
     let next = cfg.id + 1;
@@ -1804,4 +1807,63 @@
         triggerHaptic([30, 40, 50]);
       }, 3 * 320 + 350);
     }
+  }
+
+  // Rewarded Ad Simulation for Bonus Replay
+  let isAdPlaying = false;
+  function playRewardedAdForBonus(stageId) {
+    if (isAdPlaying) return;
+    const adModal = $('ad-modal');
+    if (!adModal) {
+      // Fallback: direct start if modal not in DOM
+      startStage(stageId, { fromAd: true });
+      return;
+    }
+
+    isAdPlaying = true;
+    adModal.style.display = 'flex';
+    openModalAnim(adModal);
+
+    const isKo = getLang() === 'ko';
+    const timerText = $('ad-timer-text');
+    const progressFill = $('ad-progress-fill');
+    const statusMsg = $('ad-status-msg');
+
+    if (statusMsg) {
+      statusMsg.textContent = isKo
+        ? '광고 시청 중... 잠시만 기다려주세요냥! 🐾'
+        : 'Watching sponsored ad... Please wait! 🐾';
+    }
+
+    let timeLeft = 3.0;
+    const totalDuration = 3.0;
+    if (progressFill) progressFill.style.width = '0%';
+    if (timerText) timerText.textContent = `⏱️ ${timeLeft.toFixed(1)}s`;
+
+    const adInterval = setInterval(() => {
+      timeLeft -= 0.1;
+      const progress = Math.min(100, Math.max(0, ((totalDuration - timeLeft) / totalDuration) * 100));
+      if (progressFill) progressFill.style.width = `${progress}%`;
+      if (timerText) timerText.textContent = `⏱️ ${Math.max(0, timeLeft).toFixed(1)}s`;
+
+      if (timeLeft <= 0) {
+        clearInterval(adInterval);
+        if (statusMsg) {
+          statusMsg.textContent = isKo ? '🎉 보너스 스테이지 입장 준비 완료!' : '🎉 Bonus Stage Unlocked!';
+        }
+        playLifeSaveChime();
+        triggerHaptic([40, 60, 80]);
+
+        setTimeout(() => {
+          closeModalAnim(adModal, () => {
+            adModal.style.display = 'none';
+            isAdPlaying = false;
+            showToast(isKo
+              ? '📺 광고 시청 완료! 보너스 피버를 다시 즐겨보세요냥! 🐾'
+              : '📺 Ad reward verified! Enjoy Churu Fever again! 🐾');
+            startStage(stageId, { fromAd: true });
+          });
+        }, 500);
+      }
+    }, 100);
   }

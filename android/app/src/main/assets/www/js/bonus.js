@@ -28,12 +28,11 @@
   mouseHazardImg.src = 'assets/item_mouse.png';
 
   const BONUS_ITEM_TYPES = [
-    { type: 'churu', emoji: '🥢', points: 10, weight: 40, size: 28 },
-    { type: 'can', emoji: '🥫', points: 15, weight: 22, size: 28 },
-    { type: 'star', emoji: '⭐', points: 20, weight: 14, size: 26 },
-    { type: 'heart', emoji: '💖', points: 25, weight: 10, size: 28 },
-    { type: 'gold', emoji: '✨', points: 30, weight: 6, size: 30 },
-    { type: 'mouse', emoji: '🐭', points: 0, weight: 16, size: 30, isObstacle: true }
+    { type: 'churu', emoji: '🥢', points: 1, weight: 45, size: 28, speedMult: 1.0 },
+    { type: 'can', emoji: '🥫', points: 2, weight: 20, size: 28, speedMult: 1.0 },
+    { type: 'heart', emoji: '💖', points: 0, weight: 7, size: 28, speedMult: 0.9, isHeart: true },
+    { type: 'gold', emoji: '✨', points: 5, weight: 10, size: 32, speedMult: 1.65, isGold: true },
+    { type: 'mouse', emoji: '🐭', points: 0, weight: 18, size: 34, isObstacle: true, speedMult: 1.05 }
   ];
 
   function initBonusGame() {
@@ -78,8 +77,11 @@
 
     const comp = getSelectedCat();
     setMascot('excited', (getLang() === 'ko')
-      ? '츄르를 잡자냥! 🐾'
-      : 'Catch treats! 🐾', 2000);
+      ? '츄르를 잡고 쥐(🐭)를 피하라냥! 🐾'
+      : 'Catch treats & dodge mice (🐭)! 🐾', 2500);
+    showToast((getLang() === 'ko')
+      ? '🥢 츄르를 모으고 🐭 쥐를 피하세요! (✨ 골드캔은 빠름!)'
+      : '🥢 Catch treats, dodge 🐭 mice! (✨ Gold can is fast!)', 2500);
   }
 
   function spawnBonusItem() {
@@ -97,7 +99,9 @@
 
     const margin = 35;
     const x = margin + Math.random() * (viewW - margin * 2);
-    const vy = (bonusFeverTimer > 0) ? (220 + Math.random() * 120) : (160 + Math.random() * 90);
+    const speedMult = chosen.speedMult || 1.0;
+    const baseVy = (bonusFeverTimer > 0) ? (220 + Math.random() * 120) : (160 + Math.random() * 90);
+    const vy = baseVy * speedMult;
     const vx = (Math.random() - 0.5) * 40;
     const wobblePhase = Math.random() * Math.PI * 2;
 
@@ -110,8 +114,12 @@
       points: chosen.points,
       size: chosen.size,
       type: chosen.type,
+      isGold: !!chosen.isGold,
+      isHeart: !!chosen.isHeart,
+      isObstacle: !!chosen.isObstacle,
       phase: wobblePhase,
-      rot: (Math.random() - 0.5) * 0.4
+      rot: (Math.random() - 0.5) * 0.4,
+      trailTimer: 0
     });
   }
 
@@ -142,6 +150,24 @@
       const item = bonusItems[i];
       item.y += item.vy * dt;
       item.x += (item.vx + Math.sin(timeVal / 200 + item.phase) * 20) * dt;
+
+      // Particle sparkles trail for gold items
+      if (item.isGold) {
+        item.trailTimer = (item.trailTimer || 0) + dt;
+        if (item.trailTimer >= 0.05) {
+          item.trailTimer = 0;
+          bonusParticles.push({
+            x: item.x + (Math.random() - 0.5) * 16,
+            y: item.y - 10,
+            vx: (Math.random() - 0.5) * 25,
+            vy: -20 - Math.random() * 30,
+            color: '#ffd700',
+            life: 0.35,
+            maxLife: 0.35,
+            size: 2.5 + Math.random() * 2.5
+          });
+        }
+      }
 
       const basketTop = bonusBasket.y - bonusBasket.h / 2;
       const basketBot = bonusBasket.y + bonusBasket.h / 2;
@@ -208,6 +234,40 @@
           continue;
         }
 
+        // Heart restoration item 💖
+        if (item.isHeart) {
+          const recovered = (bonusHearts < 3);
+          if (recovered) bonusHearts++;
+          playLifeSaveChime();
+          floatingTexts.push({
+            text: recovered ? '+1 ❤️ RECOVER!' : 'FULL ❤️!',
+            color: '#ff4081',
+            size: 22,
+            x: item.x,
+            y: basketTop - 12,
+            vy: -65,
+            alpha: 1.0,
+            time: 0
+          });
+          for (let p = 0; p < 8; p++) {
+            const ang = Math.random() * Math.PI * 2;
+            const spd = 60 + Math.random() * 80;
+            bonusParticles.push({
+              x: item.x,
+              y: basketTop,
+              vx: Math.cos(ang) * spd,
+              vy: Math.sin(ang) * spd - 30,
+              color: '#ff4081',
+              life: 0.5,
+              maxLife: 0.5,
+              size: 3.5 + Math.random() * 3
+            });
+          }
+          bonusItems.splice(i, 1);
+          updateHud();
+          continue;
+        }
+
         bonusStreak++;
         if (bonusStreak >= 3 && bonusFeverTimer <= 0) {
           bonusFeverTimer = 4.0;
@@ -225,8 +285,8 @@
 
         floatingTexts.push({
           text: `+${pts} ${item.emoji}`,
-          color: (multi > 1) ? '#ffeb3b' : '#00e676',
-          size: (multi > 1) ? 24 : 18,
+          color: (item.isGold || multi > 1) ? '#ffeb3b' : '#00e676',
+          size: (item.isGold || multi > 1) ? 26 : 18,
           x: item.x,
           y: basketTop - 12,
           vy: -65,
@@ -234,18 +294,18 @@
           time: 0
         });
 
-        for (let p = 0; p < 6; p++) {
+        for (let p = 0; p < (item.isGold ? 12 : 6); p++) {
           const ang = Math.random() * Math.PI * 2;
-          const spd = 60 + Math.random() * 80;
+          const spd = (item.isGold ? 80 : 60) + Math.random() * 80;
           bonusParticles.push({
             x: item.x,
             y: basketTop,
             vx: Math.cos(ang) * spd,
             vy: Math.sin(ang) * spd - 30,
-            color: (multi > 1) ? '#ffeb3b' : '#80d8ff',
+            color: (item.isGold || multi > 1) ? '#ffd700' : '#80d8ff',
             life: 0.45,
             maxLife: 0.45,
-            size: 3 + Math.random() * 3
+            size: (item.isGold ? 4 : 3) + Math.random() * 3
           });
         }
 
@@ -291,7 +351,13 @@
       c.rotate(it.rot);
       if (it.type === 'mouse') {
         c.shadowColor = '#ff1744';
-        c.shadowBlur = 12;
+        c.shadowBlur = 18;
+      } else if (it.isGold) {
+        c.shadowColor = '#ffd700';
+        c.shadowBlur = 20;
+      } else if (it.isHeart) {
+        c.shadowColor = '#ff4081';
+        c.shadowBlur = 14;
       } else if (bonusFeverTimer > 0) {
         c.shadowColor = '#ffd700';
         c.shadowBlur = 14;
@@ -300,21 +366,60 @@
         c.shadowBlur = 6;
       }
 
-      if (it.type === 'mouse' && mouseHazardImg.complete && mouseHazardImg.naturalWidth > 0) {
-        const sz = it.size * 1.35;
-        c.drawImage(mouseHazardImg, -sz / 2, -sz / 2, sz, sz);
+      if (it.type === 'mouse') {
+        const sz = it.size * 1.4;
+        // Red warning danger aura circle around the mouse
+        const pulse = 0.85 + Math.sin(timeVal / 80) * 0.15;
+        c.save();
+        c.fillStyle = `rgba(255, 23, 68, ${0.28 * pulse})`;
+        c.strokeStyle = '#ff1744';
+        c.lineWidth = 2.5;
+        c.beginPath();
+        c.arc(0, 0, sz * 0.58, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+        c.restore();
+
+        if (mouseHazardImg.complete && mouseHazardImg.naturalWidth > 0) {
+          c.drawImage(mouseHazardImg, -sz / 2, -sz / 2, sz, sz);
+        } else {
+          c.font = `${it.size}px -apple-system, sans-serif`;
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          c.fillText(it.emoji, 0, 0);
+        }
+
+        // Warning badge above mouse
+        c.fillStyle = '#ff1744';
+        c.font = 'bold 12px -apple-system, sans-serif';
+        c.textAlign = 'center';
+        c.fillText('⚠️', 0, -sz * 0.6);
       } else if ((it.type === 'churu' || it.type === 'gold') && churuTreatImg.complete && churuTreatImg.naturalWidth > 0) {
-        const sz = it.size * 1.35;
+        const sz = it.size * (it.isGold ? 1.45 : 1.35);
+        if (it.isGold) {
+          // Golden aura glow ring
+          c.save();
+          c.fillStyle = 'rgba(255, 215, 0, 0.22)';
+          c.beginPath();
+          c.arc(0, 0, sz * 0.56, 0, Math.PI * 2);
+          c.fill();
+          c.restore();
+        }
+
         c.drawImage(churuTreatImg, -sz / 2, -sz / 2, sz, sz);
 
-        if (it.type === 'gold') {
+        if (it.isGold) {
           c.strokeStyle = '#ffd700';
           c.lineWidth = 2.5;
           c.beginPath();
           c.arc(0, 0, sz / 2, 0, Math.PI * 2);
           c.stroke();
-          c.font = '12px -apple-system, sans-serif';
+          c.font = '14px -apple-system, sans-serif';
           c.fillText('✨', sz * 0.35, -sz * 0.35);
+          c.fillStyle = '#ffea00';
+          c.font = 'bold 11px -apple-system, sans-serif';
+          c.textAlign = 'center';
+          c.fillText('FAST ⚡', 0, sz * 0.65);
         }
       } else {
         c.font = `${it.size}px -apple-system, sans-serif`;

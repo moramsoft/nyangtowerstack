@@ -39,11 +39,12 @@
     updateHud();
   }
 
-  function startStage(id) {
+  function startStage(id, options = {}) {
     if (typeof setBgmTrack === 'function') setBgmTrack('gameplay');
     mode = 'STAGE';
     const rawCfg = buildStageConfig(id);
-    if (rawCfg.stageType === 'bonus' && isBonusStageAlreadyPlayed(id)) {
+    const allowBonusReplay = options && options.fromAd;
+    if (rawCfg.stageType === 'bonus' && isBonusStageAlreadyPlayed(id) && !allowBonusReplay) {
       showToast((getLang() === 'ko')
         ? '보너스 스테이지는 1회만 도전할 수 있습니다냥! 🔒'
         : 'Bonus stage can only be played once, meow! 🔒');
@@ -57,7 +58,13 @@
     }
 
     if (rawCfg.stageType === 'bonus') {
-      bonusStageHadPastRecord = isBonusStageAlreadyPlayed(id);
+      // If replaying from an ad, treat it as a fresh valid run for bonus rewards
+      if (allowBonusReplay) {
+        bonusStageHadPastRecord = false;
+        if (save.bonusPlayed) delete save.bonusPlayed[id];
+      } else {
+        bonusStageHadPastRecord = isBonusStageAlreadyPlayed(id);
+      }
     }
 
     cfg = applyAssist(rawCfg, save.fails[id] || 0);
@@ -696,7 +703,7 @@
     updateHud();
     let stars;
     if (cfg.stageType === 'bonus') {
-      stars = bonusScore >= 150 ? 3 : (bonusScore >= 60 ? 2 : 1);
+      stars = bonusScore >= 45 ? 3 : (bonusScore >= 20 ? 2 : 1);
     } else if (cfg.stageType === 'boss') {
       // Boss battle star rating: Speed / Efficiency bonus!
       // Quick, high-combo victory with critical Meowfect hits earns higher stars.
@@ -883,11 +890,19 @@
     let note = '';
     const nextBtn = $('btn-next');
     const replayBtn = $('btn-retry-clear');
+    const bonusAdBtn = $('btn-bonus-ad-replay');
     const menuBtn = $('btn-menu-clear');
     if (nextBtn) nextBtn.setAttribute('aria-label', isKo ? '다음 ▶' : 'Next ▶');
     if (replayBtn) {
       replayBtn.style.display = (cfg.stageType === 'bonus') ? 'none' : 'inline-flex';
       replayBtn.setAttribute('aria-label', isKo ? '다시하기' : 'Replay');
+    }
+    if (bonusAdBtn) {
+      bonusAdBtn.style.display = (cfg.stageType === 'bonus') ? 'inline-flex' : 'none';
+      const adSpan = bonusAdBtn.querySelector('span');
+      if (adSpan) {
+        adSpan.textContent = isKo ? '광고 보고 다시 도전' : 'Watch Ad to Replay';
+      }
     }
     if (menuBtn) menuBtn.setAttribute('aria-label', isKo ? '스테이지' : 'Stages');
 
