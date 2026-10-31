@@ -12,6 +12,17 @@ class ViewController: UIViewController, WKScriptMessageHandler, WKNavigationDele
 
         setupWebView()
         loadLocalGame()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+    }
+
+    @objc private func handleAppDidBecomeActive() {
+        webView?.evaluateJavaScript("if (typeof initAudio === 'function') initAudio(); if (typeof updateBgmPlayback === 'function') updateBgmPlayback();") { _, _ in }
     }
 
     override var prefersStatusBarHidden: Bool {

@@ -280,15 +280,44 @@
     }
   }
 
+  function recreateAudioContext() {
+    try {
+      if (audioCtx && typeof audioCtx.close === 'function') {
+        audioCtx.close().catch(() => {});
+      }
+    } catch (e) {}
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass();
+      bindAudioContextStateChange();
+      audioDecodingStarted = false;
+      preloadRealCatAudio();
+      if (audioCtx.state === 'running') {
+        updateBgmPlayback();
+      }
+    }
+  }
+
+  function bindAudioContextStateChange() {
+    if (!audioCtx) return;
+    try {
+      audioCtx.onstatechange = () => {
+        if (audioCtx && audioCtx.state === 'running') {
+          updateBgmPlayback();
+        }
+      };
+    } catch (e) {}
+  }
+
   function updateBgmPlayback() {
     if (isBgmEnabled() && !(typeof document !== 'undefined' && document.hidden)) {
       if (audioCtx) {
         if (audioCtx.state === 'running') {
           startBgm();
-        } else if (audioCtx.state === 'suspended') {
+        } else if (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted') {
           try {
             audioCtx.resume().then(() => {
-              if (isBgmEnabled() && !(typeof document !== 'undefined' && document.hidden)) {
+              if (audioCtx && audioCtx.state === 'running' && isBgmEnabled() && !(typeof document !== 'undefined' && document.hidden)) {
                 startBgm();
               }
             }).catch(() => {});
@@ -303,10 +332,37 @@
   // --- TAB VISIBILITY & BACKGROUND AUDIO LIFECYCLE (Page Visibility API) ---
   let wasAudioSuspendedByVisibility = false;
 
+  function resumeAudioAndBgm() {
+    if (!audioCtx) {
+      initAudio();
+      return;
+    }
+    if (audioCtx.state === 'running') {
+      updateBgmPlayback();
+      return;
+    }
+
+    try {
+      audioCtx.resume().then(() => {
+        if (audioCtx && audioCtx.state === 'running') {
+          updateBgmPlayback();
+        } else if (audioCtx && (audioCtx.state === 'interrupted' || audioCtx.state === 'closed')) {
+          recreateAudioContext();
+        } else {
+          updateBgmPlayback();
+        }
+      }).catch(() => {
+        updateBgmPlayback();
+      });
+    } catch (e) {
+      updateBgmPlayback();
+    }
+  }
+
   function handleVisibilityChange() {
     if (typeof document === 'undefined') return;
     if (document.hidden) {
-      // User switched tabs or minimized browser -> Stop BGM & suspend AudioContext
+      // User switched tabs, locked screen or minimized browser -> Stop BGM & suspend AudioContext
       stopBgm();
       if (audioCtx && audioCtx.state === 'running') {
         wasAudioSuspendedByVisibility = true;
@@ -315,21 +371,9 @@
         } catch (e) { /* ignore */ }
       }
     } else {
-      // User returned to game tab -> Resume AudioContext & BGM
-      if (audioCtx && (audioCtx.state === 'suspended' || wasAudioSuspendedByVisibility)) {
-        wasAudioSuspendedByVisibility = false;
-        try {
-          audioCtx.resume().then(() => {
-            updateBgmPlayback();
-          }).catch(() => {
-            updateBgmPlayback();
-          });
-        } catch (e) {
-          updateBgmPlayback();
-        }
-      } else {
-        updateBgmPlayback();
-      }
+      // User returned to game tab or unlocked screen -> Resume AudioContext & BGM
+      wasAudioSuspendedByVisibility = false;
+      resumeAudioAndBgm();
     }
   }
 
@@ -344,17 +388,15 @@
       }
     });
     window.addEventListener('pageshow', () => {
-      if (audioCtx && audioCtx.state === 'suspended') {
-        try { audioCtx.resume().then(updateBgmPlayback).catch(() => {}); } catch (e) {}
-      } else {
-        updateBgmPlayback();
-      }
+      resumeAudioAndBgm();
     });
 
-    // Ensure first user interaction resumes AudioContext and starts ambient BGM
-    ['pointerdown', 'touchstart', 'keydown'].forEach((evt) => {
+    // Ensure user interaction resumes AudioContext and restarts ambient BGM if interrupted
+    ['pointerdown', 'touchstart', 'touchend', 'click', 'keydown'].forEach((evt) => {
       window.addEventListener(evt, () => {
-        initAudio();
+        if (!audioCtx || audioCtx.state !== 'running') {
+          initAudio();
+        }
       }, { capture: true, passive: true });
     });
   }
@@ -373,16 +415,27 @@
   function initAudio() {
     if (!audioCtx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass) audioCtx = new AudioContextClass();
+      if (AudioContextClass) {
+        audioCtx = new AudioContextClass();
+        bindAudioContextStateChange();
+      }
     }
     if (audioCtx) {
       preloadRealCatAudio();
-      if (audioCtx.state === 'suspended') {
+      if (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted') {
         try {
           audioCtx.resume().then(() => {
-            updateBgmPlayback();
-          }).catch(() => {});
-        } catch (e) {}
+            if (audioCtx && audioCtx.state === 'running') {
+              updateBgmPlayback();
+            } else if (audioCtx && (audioCtx.state === 'interrupted' || audioCtx.state === 'closed')) {
+              recreateAudioContext();
+            }
+          }).catch(() => {
+            recreateAudioContext();
+          });
+        } catch (e) {
+          recreateAudioContext();
+        }
       } else {
         updateBgmPlayback();
       }
