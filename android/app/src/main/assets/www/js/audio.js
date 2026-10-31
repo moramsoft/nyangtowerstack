@@ -280,6 +280,15 @@
     }
   }
 
+  function startSilenceKeeper() {
+    try {
+      const el = document.getElementById('bg-silence-keeper');
+      if (el && el.paused) {
+        el.play().catch(() => {});
+      }
+    } catch (e) {}
+  }
+
   function recreateAudioContext() {
     try {
       if (audioCtx && typeof audioCtx.close === 'function') {
@@ -330,50 +339,44 @@
   }
 
   // --- TAB VISIBILITY & BACKGROUND AUDIO LIFECYCLE (Page Visibility API) ---
-  let wasAudioSuspendedByVisibility = false;
-
   function resumeAudioAndBgm() {
+    startSilenceKeeper();
     if (!audioCtx) {
       initAudio();
       return;
     }
+
     if (audioCtx.state === 'running') {
       updateBgmPlayback();
       return;
     }
 
-    try {
-      audioCtx.resume().then(() => {
-        if (audioCtx && audioCtx.state === 'running') {
-          updateBgmPlayback();
-        } else if (audioCtx && (audioCtx.state === 'interrupted' || audioCtx.state === 'closed')) {
-          recreateAudioContext();
-        } else {
-          updateBgmPlayback();
-        }
-      }).catch(() => {
+    const resumePromise = audioCtx.resume();
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 250));
+
+    Promise.race([resumePromise, timeoutPromise]).then(() => {
+      if (audioCtx && audioCtx.state === 'running') {
         updateBgmPlayback();
-      });
-    } catch (e) {
+      } else {
+        recreateAudioContext();
+        updateBgmPlayback();
+      }
+    }).catch(() => {
+      recreateAudioContext();
       updateBgmPlayback();
-    }
+    });
   }
 
   function handleVisibilityChange() {
     if (typeof document === 'undefined') return;
     if (document.hidden) {
-      // User switched tabs, locked screen or minimized browser -> Stop BGM & suspend AudioContext
+      // User switched tabs, locked screen or minimized browser -> Stop BGM schedule timer
       stopBgm();
-      if (audioCtx && audioCtx.state === 'running') {
-        wasAudioSuspendedByVisibility = true;
-        try {
-          audioCtx.suspend();
-        } catch (e) { /* ignore */ }
-      }
+      // Do NOT call audioCtx.suspend()!
+      // In iOS WKWebView, calling audioCtx.suspend() locks out programmatic resume().
     } else {
-      // User returned to game tab or unlocked screen -> Resume AudioContext & BGM
-      wasAudioSuspendedByVisibility = false;
-      resumeAudioAndBgm();
+      // User returned to game tab or unlocked screen -> Resume with brief route-stabilization delay
+      setTimeout(resumeAudioAndBgm, 120);
     }
   }
 
@@ -383,19 +386,19 @@
   if (typeof window !== 'undefined') {
     window.addEventListener('pagehide', () => {
       stopBgm();
-      if (audioCtx && audioCtx.state === 'running') {
-        try { audioCtx.suspend(); } catch (e) {}
-      }
     });
     window.addEventListener('pageshow', () => {
-      resumeAudioAndBgm();
+      setTimeout(resumeAudioAndBgm, 120);
     });
 
-    // Ensure user interaction resumes AudioContext and restarts ambient BGM if interrupted
+    // Ensure user interaction resumes AudioContext and starts ambient BGM
     ['pointerdown', 'touchstart', 'touchend', 'click', 'keydown'].forEach((evt) => {
       window.addEventListener(evt, () => {
+        startSilenceKeeper();
         if (!audioCtx || audioCtx.state !== 'running') {
           initAudio();
+        } else if (!bgmTimer && isBgmEnabled() && !(typeof document !== 'undefined' && document.hidden)) {
+          startBgm();
         }
       }, { capture: true, passive: true });
     });
@@ -413,6 +416,7 @@
   }
 
   function initAudio() {
+    startSilenceKeeper();
     if (!audioCtx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (AudioContextClass) {
@@ -423,19 +427,19 @@
     if (audioCtx) {
       preloadRealCatAudio();
       if (audioCtx.state === 'suspended' || audioCtx.state === 'interrupted') {
-        try {
-          audioCtx.resume().then(() => {
-            if (audioCtx && audioCtx.state === 'running') {
-              updateBgmPlayback();
-            } else if (audioCtx && (audioCtx.state === 'interrupted' || audioCtx.state === 'closed')) {
-              recreateAudioContext();
-            }
-          }).catch(() => {
+        const resumePromise = audioCtx.resume();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 250));
+        Promise.race([resumePromise, timeoutPromise]).then(() => {
+          if (audioCtx && audioCtx.state === 'running') {
+            updateBgmPlayback();
+          } else {
             recreateAudioContext();
-          });
-        } catch (e) {
+            updateBgmPlayback();
+          }
+        }).catch(() => {
           recreateAudioContext();
-        }
+          updateBgmPlayback();
+        });
       } else {
         updateBgmPlayback();
       }
@@ -452,7 +456,11 @@
 
   // Play authentic resonant marimba note with wooden overtone
   function playMarimbaNote(freq, isPerfect = false) {
-    if (!isSfxEnabled() || !audioCtx) return;
+    if (!isSfxEnabled()) return;
+    if (!audioCtx || audioCtx.state !== 'running') {
+      initAudio();
+    }
+    if (!audioCtx) return;
     const now = audioCtx.currentTime;
 
     const osc1 = audioCtx.createOscillator();
@@ -493,7 +501,9 @@
 
   // Normal landing tap (low woodblock thud)
   function playNormalTap() {
-    if (!isSfxEnabled() || !audioCtx) return;
+    if (!isSfxEnabled()) return;
+    if (!audioCtx || audioCtx.state !== 'running') initAudio();
+    if (!audioCtx) return;
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -510,7 +520,9 @@
 
   // Soft dull thud sound for UI bumps and capsule drops
   function playThud(vol = 0.5) {
-    if (!isSfxEnabled() || !audioCtx) return;
+    if (!isSfxEnabled()) return;
+    if (!audioCtx || audioCtx.state !== 'running') initAudio();
+    if (!audioCtx) return;
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -527,7 +539,9 @@
 
   // Slice drop whoosh sound
   function playSliceWhoosh() {
-    if (!isSfxEnabled() || !audioCtx) return;
+    if (!isSfxEnabled()) return;
+    if (!audioCtx || audioCtx.state !== 'running') initAudio();
+    if (!audioCtx) return;
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -544,7 +558,9 @@
 
   // Juicy tactile UI tap sound
   function playUiTap(pitch = 1.0) {
-    if (!isSfxEnabled() || !audioCtx) return;
+    if (!isSfxEnabled()) return;
+    if (!audioCtx || audioCtx.state !== 'running') initAudio();
+    if (!audioCtx) return;
     try {
       const now = audioCtx.currentTime;
       const osc = audioCtx.createOscillator();
@@ -564,7 +580,9 @@
 
   // Ascending two-tone joyful chime for opening modals & menus
   function playUiOpen() {
-    if (!isSfxEnabled() || !audioCtx) return;
+    if (!isSfxEnabled()) return;
+    if (!audioCtx || audioCtx.state !== 'running') initAudio();
+    if (!audioCtx) return;
     try {
       const now = audioCtx.currentTime;
       const osc1 = audioCtx.createOscillator();
@@ -697,7 +715,9 @@
     // 1. Preferred: Web Audio Buffer (Zero-latency, polyphonic overlapping)
     if (audioCtx && catAudioBuffers[key]) {
       try {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (audioCtx.state !== 'running') {
+          audioCtx.resume().catch(() => {});
+        }
         const source = audioCtx.createBufferSource();
         source.buffer = catAudioBuffers[key];
         if (pitchRate && pitchRate !== 1.0) {
