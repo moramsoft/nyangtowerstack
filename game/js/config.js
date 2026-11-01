@@ -748,6 +748,7 @@
     // 5. World 5 (5-16): Hip-Hop Gangster
     {
       type: 'hiphop',
+      imagePrefix: 'boss_hiphop',
       name: 'Hip-Hop Gangster',
       title: { en: 'Street Beat Master 🧢', ko: '스트리트 비트 마스터 🧢' },
       emoji: '🎧',
